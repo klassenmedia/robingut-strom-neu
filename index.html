@@ -7,11 +7,14 @@
 
 <!-- ═══════════════ SICHERHEIT ═══════════════
      GitHub Pages setzt keine HTTP-Header; als Meta greift die CSP trotzdem.
-     'unsafe-inline' ist nötig, weil Stil und Skript in der Seite stehen —
-     connect-src, form-action und base-uri bleiben davon unberührt wirksam.
-     frame-ancestors fehlt bewusst: Es wirkt nur als HTTP-Header. Gegen
-     Einbettung durch Fremde braucht es ein Hosting, das Header setzen kann. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'">
+     'unsafe-inline' ist nötig, weil Stil und Skript in der Seite stehen;
+     'self' steht daneben, damit eine später ausgelagerte Datei nicht
+     blockiert wird. connect-src 'none' verhindert Datenabfluss,
+     form-action 'none' greift gegen ein eingeschleustes <form action> —
+     der mailto-Versand läuft über window.location und wird davon nicht
+     berührt. frame-ancestors fehlt bewusst: Es wirkt nur als HTTP-Header.
+     Gegen Einbettung durch Fremde braucht es ein Hosting mit Headern. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src 'self' data:; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 
 <!-- ═══════════════ SEO ═══════════════ -->
@@ -1844,7 +1847,7 @@ body > footer{
         <div class="fg-row">
           <div class="fg">
             <label for="f-verbrauch">Jahresverbrauch in kWh <span style="font-weight:400;opacity:.7">(Schätzung genügt)</span></label>
-            <input id="f-verbrauch" name="verbrauch" type="number" min="0" max="100000000" step="100" placeholder="2500" inputmode="numeric">
+            <input id="f-verbrauch" name="verbrauch" type="number" min="0" max="100000000" step="100" maxlength="9" placeholder="2500" inputmode="numeric">
           </div>
           <div class="fg">
             <label for="f-tel">Telefon (optional)</label>
@@ -2296,7 +2299,8 @@ body > footer{
 
       window.location.href = mailtoAus(form);
 
-      form.style.display = 'none';
+      /* Formular bleibt stehen: Öffnet sich kein Mailprogramm, sind die
+         Eingaben noch da und lassen sich von Hand übernehmen. */
       var danke = document.getElementById('danke');
       danke.style.display = 'block';
       danke.scrollIntoView({behavior:'smooth', block:'center'});

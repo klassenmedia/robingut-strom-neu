@@ -7,11 +7,14 @@
 
 <!-- ═══════════════ SICHERHEIT ═══════════════
      GitHub Pages setzt keine HTTP-Header; als Meta greift die CSP trotzdem.
-     'unsafe-inline' ist nötig, weil Stil und Skript in der Seite stehen —
-     connect-src, form-action und base-uri bleiben davon unberührt wirksam.
-     frame-ancestors fehlt bewusst: Es wirkt nur als HTTP-Header. Gegen
-     Einbettung durch Fremde braucht es ein Hosting, das Header setzen kann. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'">
+     'unsafe-inline' ist nötig, weil Stil und Skript in der Seite stehen;
+     'self' steht daneben, damit eine später ausgelagerte Datei nicht
+     blockiert wird. connect-src 'none' verhindert Datenabfluss,
+     form-action 'none' greift gegen ein eingeschleustes <form action> —
+     der mailto-Versand läuft über window.location und wird davon nicht
+     berührt. frame-ancestors fehlt bewusst: Es wirkt nur als HTTP-Header.
+     Gegen Einbettung durch Fremde braucht es ein Hosting mit Headern. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src 'self' data:; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 
 <!-- ═══════════════ SEO ═══════════════ -->

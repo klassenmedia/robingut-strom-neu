@@ -65,7 +65,7 @@ verantwortet die Aufforstung.
 | Postleitzahl (Rechner) | Nutzer | Prototype-Key wie `toString` liefert scheinbaren Treffer, Rechnung läuft mit `undefined` weiter und friert bei einem Fehler auf alten Werten ein | Prüfung gegen `/^[0-9]{5}$/` plus `hasOwnProperty`; Test deckt fünf geerbte Namen ab |
 | Jahresverbrauch (Rechner) | Nutzer | Beträge in Billionenhöhe, `∞ €` in der Ersparnis | Hart geklemmt auf 500–500.000 kWh; über 100.000 kWh Hinweis auf individuelles Angebot |
 | Heutiger Preis (Rechner) | Nutzer | `∞ €` Ersparnis | Hart geklemmt auf 10–80 ct/kWh |
-| Formularfelder | Nutzer | Überlange Eingaben, ungültige Adressen; Daten gehen verloren | `maxlength` auf allen Feldern, Pflichtfeld- und Formatprüfung; Versand über `mailto:`, Bestätigungstext sagt ausdrücklich, dass die Mail noch abgeschickt werden muss |
+| Formularfelder | Nutzer | Überlange Eingaben, ungültige Adressen; Daten gehen verloren; Header-Injection in die `mailto:`-URL | `maxlength` auf allen Eingabefeldern, Pflichtfeld- und Formatprüfung; alle Werte laufen durch `encodeURIComponent`, damit Zeilenumbrüche und `&` keine neuen Parameter oder Mailheader erzeugen; das Formular bleibt nach dem Absenden stehen, damit die Eingaben erhalten bleiben, falls sich kein Mailprogramm öffnet |
 | `preise.json` | Repo, künftig ggf. Import | Ausbruch aus `<script>` → beliebiges JS im Seitenkontext | `js_literal()` in `build.py` escaped `<`, `>`, `&`, U+2028/2029; Test prüft das Ergebnis |
 | FAQ-Markup | Repo | Ausbruch aus dem `ld+json`-Block | Text wird über `HTMLParser` extrahiert (Entities werden nicht nachträglich zurückverwandelt), beim Schreiben escaped; Mindestanzahl Fragen erzwungen |
 | Platzhalterwerte im Build | Repo-Dateien | Ein eingesetzter Wert enthält einen späteren Platzhalter → reihenfolgeabhängiges Ergebnis | Prüfung vor der Ersetzung, Endprüfung per Regex über den gesamten Text |
@@ -90,13 +90,27 @@ verantwortet die Aufforstung.
 ```
 python3 build/gen-faq-schema.py && python3 build.py
 node tests/rechner.test.mjs
+python3 tests/build_test.py
 gitleaks detect --no-git --source .
 ```
+
+Die JS-Suite liest Konstanten und Preisdaten aus der gebauten `index.html`,
+bildet den Kontrollfluss von `rechne()` aber nach. Eine Umstellung der
+Reihenfolge im Skript fiele dort nicht auf; die Prüfungen gegen den
+ausgelieferten Text (Header, Formular, Escaping, Platzhalter) gehen deshalb
+direkt gegen `index.html`.
 
 Security-Review durch `security-reviewer`: erster Durchlauf BLOCKIERT, die
 Findings sind eingearbeitet (Formular, Rechtstexte, Prototype-Key, Klemmung,
 Escaping in beiden Build-Skripten, Platzhalterprüfung, `innerHTML`, CSP,
-`noreferrer`, Testsuite, dieser Threat-Model-Block). Zweiter Durchlauf steht aus.
+`noreferrer`, Testsuite, dieser Threat-Model-Block).
+
+Zweiter Durchlauf: **FREIGABE**. Die dort genannten Restpunkte sind ebenfalls
+erledigt — `js_literal` wird jetzt von beiden Build-Skripten genutzt (auch für
+U+2028/2029), `script-src` und `style-src` tragen `'self'`, der CSP-Kommentar
+benennt die tatsächliche Wirkung, das Formular bleibt nach dem Absenden
+sichtbar, das Verbrauchsfeld hat `maxlength`, und Tests decken nun auch
+mailto, CSP, Rechtstexte und `js_literal` ab.
 
 ## Offen
 
@@ -112,6 +126,13 @@ Escaping in beiden Build-Skripten, Platzhalterprüfung, `innerHTML`, CSP,
 - [ ] Preisdaten über die 20 hinterlegten Postleitzahlen hinaus ausweiten.
 - [ ] Hero-Video gegen ein Strom-Motiv tauschen (stammt aus der
       Forschungszulage-Seite).
-- [ ] Zweiter Security-Review mit Urteil FREIGABE vor dem Go-Live.
+- [ ] Vor dem Go-Live unter der echten Domain die Indexierung wieder
+      freigeben: `robots.txt`, `noindex` im Head, `sitemap.xml` und die
+      auskommentierte canonical-URL in `build/01_head.html`.
+- [x] Security-Review mit Urteil FREIGABE (zweiter Durchlauf).
+
+Für den Vorschau-Stand auf GitHub Pages ist die Seite bewusst von der
+Indexierung ausgenommen — sie enthält noch ungeprüfte Tarifzahlen und ein
+unvollständiges Impressum.
 
 Angaben zu Preisen und Vergütungen: Stand September 2026.

@@ -12,13 +12,17 @@ BUILD = ROOT / "build"
 PLATZHALTER = re.compile(r"__[A-Z0-9_]+__")
 
 
-def js_literal(daten) -> str:
+def js_literal(daten, indent: int | None = None) -> str:
     """JSON für die Einbettung in einen <script>-Block.
 
     json.dumps lässt "</script>" unberührt; der HTML-Parser würde den Block
-    dort beenden und alles Folgende als Markup lesen.
+    dort beenden und alles Folgende als Markup lesen. U+2028 und U+2029
+    beenden in älteren Parsern zusätzlich das String-Literal.
     """
-    roh = json.dumps(daten, ensure_ascii=False, separators=(",", ":"))
+    if indent is None:
+        roh = json.dumps(daten, ensure_ascii=False, separators=(",", ":"))
+    else:
+        roh = json.dumps(daten, ensure_ascii=False, indent=indent)
     ersetzungen = {"<": "\\u003c", ">": "\\u003e", "&": "\\u0026",
                    " ": "\\u2028", " ": "\\u2029"}
     for zeichen, ersatz in ersetzungen.items():

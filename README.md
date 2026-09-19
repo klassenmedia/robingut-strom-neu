@@ -33,6 +33,20 @@ python3 build.py
 Der erste Lauf erzeugt das FAQ-Schema aus dem sichtbaren FAQ-Markup, damit
 strukturierte Daten und angezeigter Text nicht auseinanderlaufen.
 
+## Tests
+
+```
+node tests/rechner.test.mjs
+```
+
+```
+python3 tests/build_test.py
+```
+
+Die erste Suite prüft die Rechenlogik gegen Grenz- und Missbrauchsfälle sowie
+die ausgelieferte `index.html` (Sicherheits-Header, Formular, Escaping,
+Rechtstexte). Die zweite prüft die Schutzregeln der Build-Skripte.
+
 ## Vorschau
 
 ```
@@ -52,8 +66,12 @@ dabei, rechnet die Seite mit Viersen als Referenz und sagt das auch.
 
 ## Offene Punkte vor dem Go-Live
 
-- Impressum und Datenschutz sind Platzhalter und müssen befüllt werden
-- Formularversand anbinden (zeigt bislang nur die Bestätigung)
+Vollständig in `docs/plans/PLAN.md`, die wichtigsten:
+
+- Indexierung wieder freigeben (`robots.txt`, `noindex`, `sitemap.xml`,
+  canonical) — der Vorschau-Stand ist bewusst gesperrt
+- Impressum: Registerangaben und USt-IdNr. ergänzen
+- Formularversand anbinden; bis dahin läuft er über `mailto:`
 - Verbraucher-Tarifzahlen von WeShareEnergy gegenprüfen: Die konkreten
   Arbeits- und Grundpreise liegen nur im WSE-Rechner vor, nicht als Datensatz
 - Preisdaten auf weitere Postleitzahlen ausweiten

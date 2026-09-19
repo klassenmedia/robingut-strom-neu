@@ -5,10 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#96BE0F">
 
+<!-- ═══════════════ SICHERHEIT ═══════════════
+     GitHub Pages setzt keine HTTP-Header; als Meta greift die CSP trotzdem.
+     'unsafe-inline' ist nötig, weil Stil und Skript in der Seite stehen —
+     connect-src, form-action und base-uri bleiben davon unberührt wirksam.
+     frame-ancestors fehlt bewusst: Es wirkt nur als HTTP-Header. Gegen
+     Einbettung durch Fremde braucht es ein Hosting, das Header setzen kann. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+
 <!-- ═══════════════ SEO ═══════════════ -->
 <link rel="icon" type="image/png" href="data:image/png;base64,__FAVICON__">
 <title>Ökostrom aus der Nachbarschaft – und Wald dazu | ROBIN GUT Strom</title>
-<meta name="description" content="100 % Ökostrom aus deutscher Erzeugung, direkt von Anlagen in Ihrer Region. Günstiger als der Bundesschnitt, monatlich kündbar. Aus den Erlösen pflanzt ROBIN GUT Wald in Deutschland.">
+<meta name="description" content="100 % Ökostrom aus deutscher Erzeugung: Du wählst selbst, von wem dein Strom kommt, und vereinbarst den Preis direkt. Monatlich kündbar. Aus den Erlösen pflanzt ROBIN GUT Wald in Deutschland.">
 <link rel="canonical" href="https://robingut-strom.de/">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 
@@ -16,14 +25,14 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://robingut-strom.de/">
 <meta property="og:title" content="Ökostrom aus der Nachbarschaft – und Wald dazu">
-<meta property="og:description" content="100 % Ökostrom aus deutscher, regionaler Erzeugung. Günstiger als der Bundesschnitt, monatlich kündbar. Aus den Erlösen wächst Wald in Deutschland.">
+<meta property="og:description" content="100 % Ökostrom aus deutscher, regionaler Erzeugung. Du wählst, von wem dein Strom kommt. Monatlich kündbar. Aus den Erlösen wächst Wald in Deutschland.">
 <meta property="og:locale" content="de_DE">
 <meta property="og:site_name" content="ROBIN GUT Strom">
 
 <!-- ═══════════════ TWITTER ═══════════════ -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Ökostrom aus der Nachbarschaft – und Wald dazu">
-<meta name="twitter:description" content="100 % Ökostrom aus deutscher, regionaler Erzeugung. Günstiger als der Bundesschnitt, monatlich kündbar.">
+<meta name="twitter:description" content="100 % Ökostrom aus deutscher, regionaler Erzeugung. Du wählst, von wem dein Strom kommt. Monatlich kündbar.">
 
 <!-- ═══════════════ SCHEMA.ORG ═══════════════ -->
 <script type="application/ld+json">
@@ -32,10 +41,18 @@
   "@type": "Organization",
   "@id": "https://robingut-strom.de/#stiftung",
   "name": "ROBIN GUT Strom",
-  "legalName": "Robin Gut Stiftung gUG (haftungsbeschränkt)",
+  "legalName": "ROBIN GUT Strom GbR",
   "url": "https://robingut-strom.de",
-  "description": "Strom-Community für Energy Sharing in Deutschland. Verbraucher beziehen Ökostrom aus regionaler Erzeugung, Anlagenbetreiber erhalten mehr für ihren Überschussstrom. Aus den Erlösen forstet ROBIN GUT Waldflächen in Deutschland auf.",
-  "address": { "@type": "PostalAddress", "addressCountry": "DE" },
+  "email": "info@robingut-strom.de",
+  "telephone": "+49 221 29282931",
+  "description": "Strom-Community für Energy Sharing in Deutschland. Verbraucher beziehen Ökostrom aus regionaler Erzeugung und wählen ihre Erzeuger selbst, Anlagenbetreiber erhalten mehr für ihren Überschussstrom als über die EEG-Einspeisevergütung. Aus den Erlösen forstet die Robin Gut Stiftung Waldflächen in Deutschland auf.",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Am Schönblick 8",
+    "postalCode": "41749",
+    "addressLocality": "Viersen",
+    "addressCountry": "DE"
+  },
   "contactPoint": {
     "@type": "ContactPoint",
     "contactType": "customer service",
@@ -64,7 +81,7 @@
     "@type": "Audience",
     "name": "Privathaushalte, Unternehmen, Vereine und Genossenschaften in Deutschland"
   },
-  "description": "Stromversorgung mit 100 Prozent Ökostrom aus deutscher Erzeugung. In der Community wird Strom von Photovoltaik-, Wind-, Wasserkraft- und Biogasanlagen direkt an Verbraucher in der Region geliefert. Verbraucher zahlen weniger als den Bundesdurchschnitt, Anlagenbetreiber erhalten mehr als die EEG-Einspeisevergütung. Der Vertrag ist monatlich kündbar. Aus den Erlösen der Community forstet ROBIN GUT Waldflächen in Deutschland auf.",
+  "description": "Stromversorgung mit 100 Prozent Ökostrom aus deutscher Erzeugung. In der Community wird Strom von Photovoltaik-, Wind-, Wasserkraft- und Biogasanlagen direkt an Verbraucher in der Region geliefert. Erzeuger und Verbraucher verbinden sich über einen Energie-Link und vereinbaren den Preis direkt; empfohlen werden 7 bis 11 Cent je Kilowattstunde. Reicht der Community-Strom nicht aus, liefert WeShareEnergy 100 Prozent Ökostrom nach. Der Vertrag ist monatlich kündbar. Aus den Erlösen der Community forstet ROBIN GUT Waldflächen in Deutschland auf.",
   "offers": {
     "@type": "Offer",
     "availability": "https://schema.org/InStock",
@@ -72,7 +89,7 @@
     "priceSpecification": {
       "@type": "PriceSpecification",
       "priceCurrency": "EUR",
-      "description": "Der Arbeitspreis setzt sich aus regionalen Netzentgelten und dem Community-Strompreis zusammen und hängt von Postleitzahl, Jahresverbrauch und Community-Anteil ab. Dazu kommt ein monatlicher Grundpreis. Der Preisrechner liefert eine unverbindliche Indikation."
+      "description": "Der Arbeitspreis setzt sich aus regionalen Netzentgelten, Steuern und Abgaben sowie dem mit den Energie-Link-Partnern vereinbarten Community-Preis zusammen. Auf Community-Strom fällt eine Gebühr von 1,00 Cent je Kilowattstunde netto an. Dazu kommen ein monatlicher Grundpreis und der Lesekopf. Der Preisrechner liefert eine unverbindliche Indikation."
     }
   }
 }

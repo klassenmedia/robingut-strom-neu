@@ -153,7 +153,7 @@
     var suffix = el.dataset.suffix || '';
     var decimal = parseInt(el.dataset.decimal, 10) || 0;
     function finish(){
-      el.innerHTML = (decimal ? target.toFixed(decimal).replace('.', ',') : target) + suffix;
+      el.textContent = (decimal ? target.toFixed(decimal).replace('.', ',') : target) + suffix;
     }
     if(reduceMotion){ finish(); return; }
     var duration = 1600, start = null;
@@ -162,7 +162,7 @@
       if(!start) start = ts;
       var p = Math.min((ts - start) / duration, 1);
       var val = target * easeOut(p);
-      el.innerHTML = (decimal ? val.toFixed(decimal).replace('.', ',') : Math.round(val)) + suffix;
+      el.textContent = (decimal ? val.toFixed(decimal).replace('.', ',') : Math.round(val)) + suffix;
       if(p < 1) requestAnimationFrame(step); else finish();
     }
     requestAnimationFrame(step);
@@ -197,8 +197,11 @@
   var WSE_GEBUEHR_CT = 1.19;      /* 1,00 ct netto Transaktionsgebühr auf Community-Strom */
   var REFERENZ_PLZ = '41747';     /* Viersen als Referenz, wenn PLZ unbekannt */
   var GROSSVERBRAUCH_KWH = 100000;/* darüber gibt es nur ein individuelles Angebot */
-  var VERBRAUCH_MAX = 500000;     /* Deckel, damit keine Fantasiesummen entstehen */
-  var ISTPREIS_MAX = 80;          /* Deckel für den heutigen Preis, ct/kWh */
+  var VERBRAUCH_MIN = 500;        /* Grenzen wie in den min/max-Attributen im Markup */
+  var VERBRAUCH_MAX = 500000;
+  var ISTPREIS_MIN = 10;
+  var ISTPREIS_MAX = 80;
+  var PLZ_MUSTER = /^[0-9]{5}$/;
 
   var elPlz = document.getElementById('r-plz');
   var elVerbrauch = document.getElementById('r-verbrauch');
@@ -232,11 +235,18 @@
 
     /* Oberhalb der Grenze gibt es ohnehin nur ein individuelles Angebot */
     var grossverbrauch = verbrauch > GROSSVERBRAUCH_KWH;
-    if(verbrauch > VERBRAUCH_MAX) verbrauch = VERBRAUCH_MAX;
-    if(istpreis > ISTPREIS_MAX) istpreis = ISTPREIS_MAX;
 
-    var eintrag = PREISE[plz] || null;
-    var quelle = eintrag ? 'treffer' : (plz.length === 5 ? 'referenz' : 'leer');
+    /* Hart klemmen: novalidate schaltet die Browserprüfung ab, sonst
+       entstehen aus Tippfehlern Fantasiebeträge bis hin zu "unendlich" */
+    verbrauch = Math.min(VERBRAUCH_MAX, Math.max(VERBRAUCH_MIN, verbrauch));
+    istpreis = Math.min(ISTPREIS_MAX, Math.max(ISTPREIS_MIN, istpreis));
+
+    /* hasOwnProperty, damit "toString" und andere geerbte Namen nicht als
+       Treffer durchgehen und die Rechnung mit undefined weiterläuft */
+    var gueltigePlz = PLZ_MUSTER.test(plz);
+    var eintrag = (gueltigePlz && Object.prototype.hasOwnProperty.call(PREISE, plz))
+      ? PREISE[plz] : null;
+    var quelle = eintrag ? 'treffer' : (gueltigePlz ? 'referenz' : 'leer');
     if(!eintrag) eintrag = PREISE[REFERENZ_PLZ];
 
     return {
@@ -305,8 +315,33 @@
   }
 
   /* ── Formular ──
-     Noch ohne Versand: zeigt die Bestätigung an.
-     Anbindung an Mailversand folgt separat. */
+     Ohne Backend: Die Angaben werden in eine E-Mail an KONTAKT_MAIL
+     übertragen und im Mailprogramm geöffnet. Der Bestätigungstext
+     erscheint erst, wenn der Entwurf tatsächlich geöffnet wurde —
+     eine Empfangsbestätigung ohne Versand wäre eine Falschaussage. */
+  var KONTAKT_MAIL = 'info@robingut-strom.de';
+
+  function mailtoAus(form){
+    var feld = function(id){
+      var el = document.getElementById(id);
+      return el && el.value.trim() ? el.value.trim() : '—';
+    };
+    var zeilen = [
+      'Name: ' + feld('f-name'),
+      'E-Mail: ' + feld('f-mail'),
+      'Postleitzahl: ' + feld('f-plz'),
+      'Rolle: ' + feld('f-rolle'),
+      'Jahresverbrauch: ' + feld('f-verbrauch') + ' kWh',
+      'Telefon: ' + feld('f-tel'),
+      '',
+      'Nachricht:',
+      feld('f-beschr')
+    ];
+    return 'mailto:' + KONTAKT_MAIL +
+      '?subject=' + encodeURIComponent('Anfrage ROBIN GUT Strom-Community') +
+      '&body=' + encodeURIComponent(zeilen.join('\n'));
+  }
+
   var form = document.getElementById('anfrage');
   if(form){
     form.addEventListener('submit', function(e){
@@ -333,6 +368,8 @@
         fehlt = true;
       }
       if(fehlt) return;
+
+      window.location.href = mailtoAus(form);
 
       form.style.display = 'none';
       var danke = document.getElementById('danke');

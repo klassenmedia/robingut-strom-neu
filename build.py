@@ -3,10 +3,27 @@
 
 import datetime
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).parent
 BUILD = ROOT / "build"
+
+PLATZHALTER = re.compile(r"__[A-Z0-9_]+__")
+
+
+def js_literal(daten) -> str:
+    """JSON für die Einbettung in einen <script>-Block.
+
+    json.dumps lässt "</script>" unberührt; der HTML-Parser würde den Block
+    dort beenden und alles Folgende als Markup lesen.
+    """
+    roh = json.dumps(daten, ensure_ascii=False, separators=(",", ":"))
+    ersetzungen = {"<": "\\u003c", ">": "\\u003e", "&": "\\u0026",
+                   " ": "\\u2028", " ": "\\u2029"}
+    for zeichen, ersatz in ersetzungen.items():
+        roh = roh.replace(zeichen, ersatz)
+    return roh
 
 TEILE = [
     "01_head.html", "02_css.html", "03_css2.html", "04_css3.html",
@@ -27,13 +44,19 @@ def main() -> None:
         "__FAVICON__": (ROOT / "fav.b64").read_text().strip(),
         "__FONTS__": (BUILD / "fonts.css").read_text(encoding="utf-8"),
         "__FAQSCHEMA__": (BUILD / "faq-schema.json").read_text(encoding="utf-8"),
-        "__PREISE__": json.dumps(preise, ensure_ascii=False, separators=(",", ":")),
+        "__PREISE__": js_literal(preise),
         "__DATEMODIFIED__": datetime.date.today().isoformat(),
     }
+
+    # Ein eingesetzter Wert darf keinen späteren Platzhalter enthalten,
+    # sonst hängt das Ergebnis an der Reihenfolge der Ersetzungen
     for marke, wert in ersetzungen.items():
+        treffer = PLATZHALTER.findall(wert)
+        if treffer:
+            raise SystemExit(f"{marke} enthält selbst Platzhalter: {set(treffer)}")
         html = html.replace(marke, wert)
 
-    offen = {w for w in html.split() if w.startswith("__") and w.endswith("__")}
+    offen = set(PLATZHALTER.findall(html))
     if offen:
         raise SystemExit(f"Nicht ersetzte Platzhalter: {offen}")
 

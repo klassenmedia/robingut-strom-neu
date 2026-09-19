@@ -1,10 +1,14 @@
 // Prüft die Rechenlogik des Preisrechners gegen Grenz- und Missbrauchsfälle.
-// Die Logik wird aus der gebauten index.html extrahiert und in einer
-// Sandbox ausgeführt, damit der Test genau das prüft, was ausgeliefert wird.
+//
+// Grenze dieser Suite: Konstanten und Preisdaten werden aus der gebauten
+// index.html gelesen, der Kontrollfluss von rechne() ist hier aber
+// nachgebildet. Wer die Reihenfolge von Klemmung und Lookup im Skript
+// ändert, merkt es hier nicht. Die Prüfungen unter "Ausgelieferte Seite"
+// gehen deshalb direkt gegen den ausgelieferten Text.
 //
 //   node tests/rechner.test.mjs
 
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import assert from "node:assert/strict";
@@ -243,6 +247,71 @@ pruefe("keine externen Hosts außer den bewusst gesetzten Links", () => {
   for (const host of new Set(html.match(/https?:\/\/[a-zA-Z0-9.-]+/g) || [])) {
     assert.ok(erlaubt.has(host), `unerwarteter Host: ${host}`);
   }
+});
+
+pruefe("Sicherheits-Header sind gesetzt", () => {
+  assert.match(html, /http-equiv="Content-Security-Policy"/, "CSP fehlt");
+  assert.match(html, /connect-src 'none'/, "connect-src 'none' fehlt");
+  assert.match(html, /form-action 'none'/, "form-action 'none' fehlt");
+  assert.match(html, /base-uri 'none'/, "base-uri 'none' fehlt");
+  assert.match(html, /name="referrer"/, "Referrer-Policy fehlt");
+});
+
+pruefe("externe Links tragen noopener noreferrer", () => {
+  for (const link of html.match(/<a[^>]*target="_blank"[^>]*>/g) || []) {
+    assert.match(link, /rel="noopener noreferrer"/, `unsicherer Link: ${link}`);
+  }
+});
+
+console.log("\nFormular");
+
+pruefe("Formularwerte werden für mailto kodiert", () => {
+  assert.match(html, /encodeURIComponent/, "ohne Kodierung droht Header-Injection im mailto");
+  assert.match(html, /mailto:/, "mailto-Versand fehlt");
+});
+
+pruefe("Formular bleibt nach dem Absenden sichtbar", () => {
+  // Ohne Mailprogramm passiert nichts sichtbares — die Eingaben müssen bleiben
+  assert.equal(
+    /form\.style\.display = 'none'/.test(html),
+    false,
+    "Formular darf nicht ausgeblendet werden, sonst gehen die Eingaben verloren",
+  );
+});
+
+pruefe("Bestätigung verspricht keinen Versand", () => {
+  assert.equal(html.includes("Deine Anfrage ist angekommen"), false,
+    "ohne Backend darf kein Empfang behauptet werden");
+  assert.match(html, /E-Mail ist vorbereitet/);
+});
+
+pruefe("alle Textfelder sind längenbegrenzt", () => {
+  const felder = html.match(/<(input|textarea)[^>]*id="f-[^"]*"[^>]*>/g) || [];
+  assert.ok(felder.length >= 6, `nur ${felder.length} Formularfelder gefunden`);
+  for (const feld of felder) {
+    if (/type="(number|tel)"/.test(feld) || /textarea/.test(feld) || /type="(text|email)"/.test(feld)) {
+      assert.match(feld, /maxlength="\d+"/, `ohne maxlength: ${feld.slice(0, 60)}`);
+    }
+  }
+});
+
+console.log("\nRechtstexte und Indexierung");
+
+pruefe("Impressum und Datenschutz sind befüllt", () => {
+  for (const datei of ["impressum.html", "datenschutz.html"]) {
+    const pfad = join(ROOT, datei);
+    assert.ok(existsSync(pfad), `${datei} fehlt`);
+    const inhalt = readFileSync(pfad, "utf8");
+    assert.ok(inhalt.length > 1500, `${datei} wirkt leer (${inhalt.length} Zeichen)`);
+    assert.equal(inhalt.includes("noch nicht befüllt"), false, `${datei} ist noch Platzhalter`);
+  }
+});
+
+pruefe("Vorschau-Stand ist von der Indexierung ausgenommen", () => {
+  // Fällt absichtlich um, sobald die Seite unter der echten Domain live geht
+  assert.match(html, /name="robots" content="noindex/, "noindex fehlt");
+  const robots = readFileSync(join(ROOT, "robots.txt"), "utf8");
+  assert.match(robots, /Disallow: \//, "robots.txt gibt die Seite frei");
 });
 
 console.log(`\n${bestanden} Prüfungen bestanden${process.exitCode ? " — mit Fehlern" : ""}`);

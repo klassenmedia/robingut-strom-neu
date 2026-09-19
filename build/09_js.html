@@ -371,7 +371,8 @@
 
       window.location.href = mailtoAus(form);
 
-      form.style.display = 'none';
+      /* Formular bleibt stehen: Öffnet sich kein Mailprogramm, sind die
+         Eingaben noch da und lassen sich von Hand übernehmen. */
       var danke = document.getElementById('danke');
       danke.style.display = 'block';
       danke.scrollIntoView({behavior:'smooth', block:'center'});

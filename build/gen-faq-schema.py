@@ -4,13 +4,16 @@
 So kann das strukturierte Datenblatt nicht vom angezeigten Text abweichen.
 """
 
-import json
 import re
+import sys
 from html.parser import HTMLParser
 from pathlib import Path
 
 BUILD = Path(__file__).parent
 QUELLE = BUILD / "08_body4.html"
+
+sys.path.insert(0, str(BUILD.parent))
+from build import js_literal  # noqa: E402  — Escaping an einer Stelle halten
 
 # Weniger Fragen als hier erwartet heißt: Das Markup hat sich geändert und
 # die Extraktion greift ins Leere — dann lieber abbrechen als still liefern.
@@ -71,9 +74,9 @@ def main() -> None:
 
     # Der Block landet in einem <script type="application/ld+json">;
     # "</script>" im Text würde ihn sonst vorzeitig beenden.
-    roh = json.dumps(schema, ensure_ascii=False, indent=2)
-    for zeichen, ersatz in {"<": "\\u003c", ">": "\\u003e", "&": "\\u0026"}.items():
-        roh = roh.replace(zeichen, ersatz)
+    # Dasselbe Escaping wie für die Preisdaten, damit nicht zwei
+    # Schutzregeln nebeneinander auseinanderlaufen.
+    roh = js_literal(schema, indent=2)
 
     ziel = BUILD / "faq-schema.json"
     ziel.write_text(roh, encoding="utf-8")

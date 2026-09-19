@@ -1,4 +1,4 @@
+# Vorschau-Stand auf GitHub Pages: nicht indexieren.
+# Vor dem Go-Live unter der echten Domain wieder freigeben.
 User-agent: *
-Allow: /
-
-Sitemap: https://robingut-strom.de/sitemap.xml
+Disallow: /

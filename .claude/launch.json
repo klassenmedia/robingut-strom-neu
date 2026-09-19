@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "robingut-strom",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [".claude/serve.py"],
+      "port": 4317,
+      "autoPort": true
+    }
+  ]
+}

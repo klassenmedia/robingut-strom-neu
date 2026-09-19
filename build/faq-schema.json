@@ -1,0 +1,103 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://robingut-strom.de/#faq",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Wie funktioniert der Stromhandel in der Community?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Die Community besteht aus Verbrauchern, Einspeisern und Prosumern, also Erzeugern und Verbrauchern zugleich. Auf der Plattform siehst du die anderen Mitglieder und verbindest dich per Energie-Link mit denen, von denen du Strom beziehen oder an die du Strom abgeben möchtest. Diesen Link richtest du einmalig ein, danach läuft er automatisch: Sobald Strom eingespeist und gleichzeitig an anderer Stelle verbraucht wird, fließt er vom Einspeiser zum Verbraucher. Stromflüsse und Preise siehst du rund um die Uhr transparent in der App."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Beziehe ich ausschließlich Strom aus der Community?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Wenn in der Community genügend Strom vorhanden ist, um deinen Bedarf zu decken, beziehst du ihn direkt von dort. Reichen die gehandelten Strommengen einmal nicht aus, liefert unser Partner WeShareEnergy den verbleibenden Restbedarf als 100 % WSE-Ökostrom. Du sitzt also nie im Dunkeln."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Ist die Community örtlich begrenzt?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Nein. Innerhalb Deutschlands können die Mitglieder überall ansässig sein. Ein Energie-Link kann quer durchs Land gehen – zum Beispiel von den Eltern mit PV-Anlage in Viersen zur Tochter, die in Heidelberg studiert. Die einzige Einschränkung: Der Standort darf nicht außerhalb Deutschlands liegen."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Welche Voraussetzungen muss ich als Privatperson erfüllen?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Grundsätzlich kann jeder Teil der Community werden. Voraussetzung ist ein digitaler oder intelligenter Stromzähler mit optischer Schnittstelle. Damit wir deine Verbrauchs- oder Einspeisemengen erfassen können, erhältst du von uns einen Lesekopf. Der verbindet sich über WLAN und wird einfach auf das sogenannte Zählerauge aufgesetzt. Alte analoge Zähler sind nicht geeignet und müssen getauscht werden."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Was kostet der Lesekopf – und reicht mein Smart Meter nicht?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Den Lesekopf gibt es für 89 € zum Kauf oder 3,90 € Miete im Monat, in zwei Varianten: den WSE-Lesekopf, wenn am Zähler WLAN und eine Steckdose vorhanden sind, und das batteriebetriebene IOmeter für alle anderen Fälle. Ein vorhandenes intelligentes Messsystem ersetzt ihn nicht: Die Zuordnung in der Community braucht eine Echtzeit-Datenübertragung, die handelsübliche Smart-Meter-Gateways derzeit nicht liefern. Pro Zähler wird ein eigener Lesekopf benötigt."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Wie teuer ist die Kilowattstunde für mich als Verbraucher?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Dein Preis setzt sich aus dem Community-Strom – also den Preisen deiner Energie-Link-Partner – und dem Preis für den restlichen WSE-Ökostrom zusammen. Dazu kommen Netzentgelte, Steuern und Abgaben sowie 1,00 ct/kWh netto für die technische Abwicklung. Je nach Netzgebiet liegt dein Einkaufspreis damit 18 bis 29 ct/kWh über dem Verkaufspreis des Einspeisers. Im Regelfall ist Strom aus der Community günstiger als ein klassischer Tarif."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Ab wann lohnt sich das für mich als Erzeuger?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Das ist individuell, aber finanziell lässt sich sagen: Besonders lohnend wird es, wenn deine EEG-Einspeisevergütung unter 9 ct/kWh liegt oder deine Anlage ausgefördert ist. Als Einspeiser legst du deine Preise frei fest; wir empfehlen 7 bis 11 ct/kWh. Du kannst außerdem für jedes Mitglied einen eigenen Preis festlegen und priorisieren, in welcher Reihenfolge dein Strom verteilt wird."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Zahle ich monatliche Abschläge?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Nein, es gibt keine pauschalen Abschläge. Wir stellen dir jeden Monat nur die Strommengen in Rechnung, die du tatsächlich verbraucht hast. Die Rechnung kommt zu Beginn des Folgemonats per E-Mail; mit SEPA-Lastschriftmandat wird der Betrag automatisch eingezogen. Zum Jahresende gleichen wir die abgerechneten Mengen mit den offiziellen Zählerständen ab, daraus ergibt sich eine Nachzahlung oder eine Gutschrift."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Ich habe eine PV-Anlage, will aber nur als Verbraucher wechseln. Geht das?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ja. Wenn deine EEG-Vergütung hoch ist, kannst du auch ausschließlich als Verbraucher beitreten und deine Einspeisung lassen, wie sie ist. Umgekehrt gilt: Für die reine Einspeisung kannst du zu uns wechseln und deinen bestehenden Stromvertrag grundsätzlich behalten. Willst du beides – einspeisen und aus der Community beziehen – wechselst du als Prosumer mit Anlage und Stromtarif zu uns."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Wie komme ich aus meinem alten Stromvertrag raus?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Gerne übernehmen wir die Kündigung für dich. Im Auftragsformular gibst du einfach an, dass wir das erledigen sollen. Die Stromversorgung läuft beim Wechsel ohne Unterbrechung weiter."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Kann ich mit meinem Verein oder Unternehmen beitreten?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ja. Die Community steht privaten Haushalten mit und ohne Photovoltaikanlage ebenso offen wie Unternehmen, Bürogebäuden, Vereins- und Gemeindehäusern. Wichtig ist eine verlässliche Ansprechperson, mit der wir alles abstimmen. Ab einem Jahresverbrauch über 100.000 kWh erstellen wir ein individuelles Angebot, ebenso für Erzeugungsanlagen über 100 kWp. Für Organisationen mit mehreren Standorten gibt es Business Energy Sharing mit eigener Potenzialanalyse."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Was bedeutet der Stromverkauf steuerlich für mich?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Das hängt davon ab, ob du als Kleinunternehmer oder Gewerbetreibender auftrittst. Als Kleinunternehmer fällt in der Regel keine Umsatzsteuer an. Wir bieten keine steuerliche Beratung an und empfehlen im Zweifel, einen Steuerberater hinzuzuziehen."
+      }
+    }
+  ]
+}

@@ -1,0 +1,235 @@
+<!-- ═══════════════ PREISRECHNER ═══════════════ -->
+<section class="sec sec-alt fade-in" id="rechner" aria-labelledby="rechner-heading">
+  <div class="wrap">
+    <div class="kicker">Dein Preis</div>
+    <h2 id="rechner-heading">Was kostet Strom in der Community &ndash; <em>bei dir?</em></h2>
+    <p class="lead">
+      Drei Angaben genügen. Der Rechner nimmt die Netzentgelte deiner Region und rechnet damit,
+      dass die Hälfte deines Verbrauchs über Energie-Links aus der Community kommt und die
+      andere Hälfte als WSE-Ökostrom. Das Ergebnis ist eine unverbindliche Indikation &ndash;
+      deinen echten Preis bestimmst du selbst, wenn du deine Links einrichtest.
+    </p>
+
+    <div class="rechner-box">
+      <form class="rechner-form" id="rechner-form" novalidate>
+        <div class="fg-row">
+          <div class="fg">
+            <label for="r-plz">Postleitzahl</label>
+            <input id="r-plz" name="plz" type="text" inputmode="numeric" pattern="[0-9]{5}"
+                   maxlength="5" placeholder="41747" autocomplete="postal-code">
+          </div>
+          <div class="fg">
+            <label for="r-verbrauch">Jahresverbrauch in kWh</label>
+            <input id="r-verbrauch" name="verbrauch" type="number" min="500" max="500000"
+                   step="100" value="2500" inputmode="numeric">
+          </div>
+          <div class="fg">
+            <label for="r-istpreis">Dein heutiger Preis in ct/kWh</label>
+            <input id="r-istpreis" name="istpreis" type="number" min="10" max="80"
+                   step="0.1" value="35" inputmode="decimal">
+          </div>
+        </div>
+        <p class="rechner-status" id="r-status" role="status"></p>
+      </form>
+
+      <div class="rechner-out" id="r-out">
+        <div class="ro-haupt">
+          <div class="ro-item">
+            <div class="ro-lbl">Dein Arbeitspreis</div>
+            <div class="ro-zahl" id="r-preis">&ndash;</div>
+            <div class="ro-note">inklusive Netzentgelte, Steuern und Abgaben</div>
+          </div>
+          <div class="ro-item ro-item-akzent">
+            <div class="ro-lbl">Ersparnis gegenüber heute</div>
+            <div class="ro-zahl" id="r-ersparnis">&ndash;</div>
+            <div class="ro-note">pro Jahr, bei gleichem Verbrauch</div>
+          </div>
+          <div class="ro-item">
+            <div class="ro-lbl">Deine Kosten im Monat</div>
+            <div class="ro-zahl" id="r-monat">&ndash;</div>
+            <div class="ro-note">Arbeitspreis und Grundpreis zusammen</div>
+          </div>
+        </div>
+
+        <div class="ro-detail">
+          <div class="rod-zeile">
+            <span>Community-Strom über Energie-Links (50 %, bei 9,50 ct Verkaufspreis)</span>
+            <span class="rod-wert" id="r-anteil-community">&ndash;</span>
+          </div>
+          <div class="rod-zeile">
+            <span>WSE-Ökostrom für den Rest (50 %)</span>
+            <span class="rod-wert" id="r-anteil-rest">&ndash;</span>
+          </div>
+          <div class="rod-zeile">
+            <span>Monatlicher Grundpreis</span>
+            <span class="rod-wert" id="r-grundpreis">&ndash;</span>
+          </div>
+        </div>
+
+        <div class="ro-cta">
+          <button type="button" class="btn-lime" data-scroll="formular">Mitglied werden &rarr;</button>
+          <a class="ro-link" href="https://klassenmedia.github.io/robingut-potenzialrechner/" target="_blank" rel="noopener">
+            Detailrechner mit eigenen Parametern öffnen &nearr;
+          </a>
+        </div>
+      </div>
+
+      <p class="rechner-disc">
+        Unverbindliche Indikation auf Basis regionaler Netzentgelte und eines angenommenen
+        Community-Anteils von 50 %. Dein tatsächlicher Preis hängt davon ab, welche Preise du
+        mit deinen Energie-Link-Partnern vereinbarst, wie viel Community-Strom zu deinen
+        Verbrauchszeiten verfügbar ist und welches Netzgebiet für dich gilt. Auf
+        Community-Strom erhebt WeShareEnergy 1,00 ct/kWh netto. Hinzu kommt der Lesekopf
+        (89 € Kauf oder 3,90 € Miete im Monat). Verbindliche Preise stehen im Angebot.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ABLAUF ═══════════════ -->
+<section class="sec fade-in" id="ablauf" aria-labelledby="ablauf-heading">
+  <div class="wrap">
+    <div class="kicker">Der Wechsel</div>
+    <h2 id="ablauf-heading">In drei Schritten zum perfekten Strom-Match</h2>
+    <p class="lead">
+      <strong>Dein Aufwand: eine Anmeldung und ein Handgriff am Zähler.</strong> Die Kündigung
+      beim alten Versorger übernehmen wir auf Wunsch, die Zählerprüfung läuft im Hintergrund.
+      Dein Strom fließt durchgehend weiter &ndash; beim Wechsel entsteht keine Lücke.
+    </p>
+
+    <div class="steps" id="steps">
+      <div class="step-line" aria-hidden="true"><div class="step-line-fill" id="step-line-fill"></div></div>
+
+      <div class="step" data-step>
+        <div class="step-circle" aria-hidden="true">1</div>
+        <div class="step-body">
+          <strong>Anmelden</strong>
+          <p>Du meldest dich online an. Wir prüfen im Hintergrund, ob dein Zähler geeignet ist oder ob ein &ndash; meist kostenloser &ndash; Zählertausch nötig ist.</p>
+          <span class="step-badge">Wenige Minuten</span>
+        </div>
+      </div>
+
+      <div class="step" data-step>
+        <div class="step-circle" aria-hidden="true">2</div>
+        <div class="step-body">
+          <strong>Zurücklehnen</strong>
+          <p>Du musst dich um nichts kümmern. Auf Wunsch übernehmen wir die Kündigung deines bisherigen Stromvertrags.</p>
+          <span class="step-badge">Übernehmen wir</span>
+        </div>
+      </div>
+
+      <div class="step" data-step>
+        <div class="step-circle" aria-hidden="true">3</div>
+        <div class="step-body">
+          <strong>Lesekopf aufsetzen</strong>
+          <p>Der Lesekopf kommt per Post. Du setzt ihn mit wenigen Handgriffen auf die optische Schnittstelle deines Zählers und verbindest ihn mit dem WLAN. Ab jetzt fließen deine Daten in Echtzeit &ndash; und du kannst deine Energie-Links einrichten.</p>
+          <span class="step-badge">Ein Handgriff</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hbox">
+      <strong>Was du technisch brauchst</strong>
+      <p>
+        Einen digitalen oder intelligenten Stromzähler mit optischer Schnittstelle (SML) &ndash;
+        bei fast allen neuen Zählern vorhanden. Dazu den passenden Lesekopf: den WSE-Lesekopf,
+        wenn am Zähler WLAN und Steckdose vorhanden sind, sonst das batteriebetriebene IOmeter,
+        das auch über mehrere Stockwerke eine stabile Verbindung aufbaut. Beide gibt es für
+        89 € zum Kauf oder 3,90 € Miete im Monat. Ein alter analoger Zähler muss getauscht
+        werden; das organisieren wir, meist kostenfrei.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FÜR ERZEUGER ═══════════════ -->
+<section class="sec sec-alt fade-in" id="erzeuger" aria-labelledby="erzeuger-heading">
+  <div class="wrap">
+    <div class="kicker">Du hast eine Anlage</div>
+    <h2 id="erzeuger-heading">Du bestimmst, <em>wer deinen Strom bekommt &ndash; und was er kostet.</em></h2>
+    <p class="lead">
+      Statt deinen Überschuss anonym und zu schlechten Konditionen ins Netz zu schieben, gibst
+      du ihn an Menschen weiter, die ihn gerade brauchen &ndash; und legst den Preis selbst
+      fest. Wir empfehlen 7 bis 11 ct/kWh. Besonders lohnt sich das, wenn deine
+      EEG-Vergütung unter 9 ct/kWh liegt oder deine Anlage ausgefördert ist. Aufgenommen
+      werden Photovoltaik, Windkraft, Wasserkraft und Biogas.
+    </p>
+
+    <div class="grid-3">
+      <article class="card">
+        <div class="card-ico" aria-hidden="true">🏷️</div>
+        <h3>Preis selbst festlegen</h3>
+        <p>Du bestimmst, welches Mitglied welchen Preis zahlt, und priorisierst, in welcher Reihenfolge dein Strom verteilt wird.</p>
+      </article>
+      <article class="card">
+        <div class="card-ico" aria-hidden="true">👨‍👩‍👧</div>
+        <h3>Auch an Familie und Freunde</h3>
+        <p>Ein Energie-Link geht quer durch Deutschland: Eltern mit PV-Anlage in Viersen können ihren Strom an die Tochter schicken, die in Heidelberg studiert.</p>
+      </article>
+      <article class="card">
+        <div class="card-ico" aria-hidden="true">🧾</div>
+        <h3>Alternative zur Direktvermarktung</h3>
+        <p>Statt schwankender Börsenpreise ein stabiler Community-Preis. Für Anlagen über 100 kWp klären wir die Technik vorab und machen ein passendes Angebot.</p>
+      </article>
+    </div>
+
+    <p class="pakete-note">
+      <svg viewBox="0 0 24 24" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+      <span>Reine Einspeisung: Dein bestehender Stromvertrag kann bleiben. Willst du auch Strom aus der Community beziehen, wechselst du als Prosumer mit beidem zu uns. Pro Zähler braucht es einen eigenen Lesekopf.</span>
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════ FÜR ORGANISATIONEN ═══════════════ -->
+<section class="sec fade-in" id="organisationen" aria-labelledby="orga-heading">
+  <div class="wrap">
+    <div class="kicker">Unternehmen, Vereine, Genossenschaften</div>
+    <h2 id="orga-heading">Strom zwischen euren Standorten teilen &ndash; <em>statt teuer zukaufen.</em></h2>
+    <p class="lead">
+      <strong>Selbst erzeugter Strom entsteht selten dort, wo er gerade gebraucht wird.</strong>
+      Mit Business Energy Sharing verteilt ihr überschüssige Mengen zwischen euren Standorten,
+      gebt sie an Mitarbeitende weiter oder vernetzt euch mit anderen Organisationen in der
+      Region. Passend für Mehrstandort-Unternehmen, Vereine mit Anlage auf dem Dach,
+      Unternehmensgruppen, Genossenschaften, Gemeinden und Städte.
+    </p>
+
+    <div class="grid-fakten">
+      <article class="card">
+        <h3>76 % Autarkiegrad</h3>
+        <p>In einem Referenzfall konnte der Großteil des Strombedarfs durch die Vernetzung der Standorte gedeckt werden &ndash; statt extern zugekauft.</p>
+      </article>
+      <article class="card">
+        <h3>1,29 ct/kWh weniger</h3>
+        <p>Im selben Fall sanken die durchschnittlichen Stromkosten um 1,29 ct/kWh bei 3.100 MWh geteilter Strommenge im Jahr.</p>
+      </article>
+      <article class="card">
+        <h3>Mitarbeiterstrom</h3>
+        <p>Überschüssige Energie direkt an Beschäftigte weitergeben: günstigerer Strom für sie, bessere Auslastung eurer Erzeugung.</p>
+      </article>
+      <article class="card">
+        <h3>Alles aus einer Hand</h3>
+        <p>Vermarktung, Strombelieferung und Abrechnung laufen über WeShareEnergy &ndash; ein Ansprechpartner statt drei Verträge.</p>
+      </article>
+      <article class="card">
+        <h3>Zentrale Web-App</h3>
+        <p>Verbrauch und Einspeisung transparent dargestellt, alle Daten an einem Ort, Stromhandel selbstbestimmt gestaltet.</p>
+      </article>
+      <article class="card">
+        <h3>Unabhängig von der Börse</h3>
+        <p>Wirtschaftliche Stabilität statt Preisvolatilität &ndash; und Nachhaltigkeit als strategischer Vorteil, nicht als Einzelprojekt.</p>
+      </article>
+    </div>
+
+    <div class="hbox">
+      <strong>Wie der Einstieg läuft</strong>
+      <p>
+        Zuerst ein Discovery Call zu Ausgangslage und Zielen. Dann die Potenzialanalyse für
+        500 €: Wir prüfen anhand eurer Verbrauchs- und Erzeugungsdaten das wirtschaftliche
+        Potenzial. Danach eine Pilotphase &ndash; testweise in der offenen Community oder in
+        einer eigenen. Erst dann der Roll-out auf weitere Standorte, Anlagen und Beteiligte.
+        Voraussetzung ist, dass Erzeugungsanlagen in die Vermarktung und Verbrauchsstellen in
+        die Stromversorgung eingebunden werden und an jedem Zähler ein Lesekopf sitzt.
+      </p>
+    </div>
+  </div>
+</section>

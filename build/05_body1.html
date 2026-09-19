@@ -1,0 +1,121 @@
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ NAVIGATION ═══════════════ -->
+<nav id="nav" role="navigation" aria-label="Hauptnavigation">
+  <div class="wrap nav-inner">
+    <div class="nav-logo">
+      <a href="#top" data-scroll-top aria-label="Zum Seitenanfang">
+        <img src="data:image/png;base64,__LOGO__" alt="ROBIN GUT" width="120" height="44">
+      </a>
+    </div>
+
+    <div class="nav-menu">
+      <a href="#prinzip">So funktioniert es</a>
+      <a href="#rechner">Preis berechnen</a>
+      <a href="#erzeuger">Für Erzeuger</a>
+      <a href="#organisationen">Organisationen</a>
+      <a href="#partner">Über uns</a>
+      <a href="#faq">Fragen</a>
+    </div>
+
+    <div class="nav-actions">
+      <button class="theme-toggle" id="theme-toggle" aria-label="Zwischen hellem und dunklem Modus wechseln">
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+      <button class="nav-cta" data-scroll="rechner">Preis berechnen</button>
+      <button class="nav-hamburger" id="hamburger" aria-label="Menü öffnen" aria-expanded="false" aria-controls="mobile-menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="nav-mobile-menu" id="mobile-menu" aria-hidden="true">
+  <button class="nav-mobile-close" data-menu-close aria-label="Menü schließen">&#x2715;</button>
+  <a href="#prinzip">So funktioniert es</a>
+  <a href="#rechner">Preis berechnen</a>
+  <a href="#erzeuger">Für Erzeuger</a>
+  <a href="#organisationen">Organisationen</a>
+  <a href="#partner">Über uns</a>
+  <a href="#faq">Fragen</a>
+  <a href="#formular">Mitglied werden</a>
+</div>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero" id="top" aria-labelledby="hero-heading">
+  <div class="hero-media" aria-hidden="true">
+    <video id="hero-video" autoplay muted loop playsinline preload="metadata" poster="hero-poster.jpg">
+      <source src="hero-video-web.webm" type="video/webm">
+      <source src="hero-video-web.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="hero-veil" aria-hidden="true"></div>
+
+  <div class="wrap hero-inner">
+    <p class="eyebrow"><span class="blink-dot" aria-hidden="true"></span>Die Strom-Community von ROBIN GUT</p>
+
+    <h1 class="hero-headline" id="hero-heading">
+      <span class="zeile">Du weißt, <em>von wem dein Strom kommt.</em></span><br>
+      <span class="zeile">Du zahlst <em>weniger</em> als im klassischen Tarif.</span><br>
+      <span class="zeile">Und daraus wächst <em>Wald in Deutschland.</em></span>
+    </h1>
+
+    <p class="hero-sub">
+      100 % Ökostrom aus deutscher Erzeugung &ndash; aus Solar-, Wind-, Wasserkraft- und
+      Biogasanlagen von echten Menschen, Höfen und Betrieben. Kein anonymer Zwischenhändler,
+      keine Börsenschwankung, monatlich kündbar. Und aus jeder Kilowattstunde in der Community
+      geht ein Erlös an die ROBIN GUT Stiftung, die davon Bäume pflanzt.
+    </p>
+
+    <p class="hero-frage">Ganz normal Strom verbrauchen &ndash; und dabei aufforsten.</p>
+
+    <div class="hero-cta-row">
+      <button class="btn-lime" data-scroll="rechner">Meinen Preis berechnen &rarr;</button>
+      <button class="btn-ghost" data-scroll="prinzip">So funktioniert es</button>
+    </div>
+    <p class="hero-micro">100 % Ökostrom aus Deutschland &middot; monatlich kündbar &middot; Aufforstung ohne Mehrkosten</p>
+  </div>
+</section>
+
+<!-- ═══════════════ KENNZAHLEN ═══════════════ -->
+<div class="zahlen-wrap">
+  <div class="wrap">
+    <div class="zahlen-head fade-in">
+      <div class="kicker">Was die Community ausmacht</div>
+      <h2 class="zahlen-h2">Vier Zahlen, die den Unterschied erklären</h2>
+    </div>
+    <div class="zahlen fade-in" role="region" aria-label="Kennzahlen der Strom-Community">
+      <div class="z-item">
+        <div class="z-num" data-target="100" data-suffix="&thinsp;%">100&thinsp;%</div>
+        <div class="z-lbl">Ökostrom aus deutscher Erzeugung</div>
+        <div class="z-note">Aus Anlagen der Community, nicht aus zugekauften Zertifikaten</div>
+      </div>
+      <div class="z-item">
+        <div class="z-num" data-target="7" data-suffix="&ndash;11&thinsp;ct">7&ndash;11&thinsp;ct</div>
+        <div class="z-lbl">Community-Preis je kWh</div>
+        <div class="z-note">Den Preis legen Erzeuger selbst fest &ndash; dazu kommen Netzentgelte und Abgaben</div>
+      </div>
+      <div class="z-item">
+        <div class="z-num" data-target="1" data-suffix="&thinsp;ct">1&thinsp;ct</div>
+        <div class="z-lbl">Gebühr je kWh Community-Strom</div>
+        <div class="z-note">Netto, für die technische Abwicklung durch WeShareEnergy</div>
+      </div>
+      <div class="z-item">
+        <div class="z-num">1&nbsp;Monat</div>
+        <div class="z-lbl">Kündigungsfrist</div>
+        <div class="z-note">Keine Mindestlaufzeit, keine Preisbindung über Jahre</div>
+      </div>
+    </div>
+    <p class="zahlen-fliess">
+      In der ROBIN GUT Strom-Community wird Strom nicht anonym an der Börse gekauft, sondern
+      über einen Energie-Link direkt zwischen Erzeuger und Verbraucher weitergegeben. Du siehst
+      in der App, wer deinen Strom produziert, und zahlst den Preis, den du mit diesem Partner
+      vereinbart hast. Reicht der Community-Strom in einer Stunde nicht aus, liefert
+      WeShareEnergy den Rest als 100 % Ökostrom nach. Für Erzeuger lohnt sich das besonders,
+      wenn die EEG-Vergütung unter 9 ct/kWh liegt.
+    </p>
+  </div>
+</div>

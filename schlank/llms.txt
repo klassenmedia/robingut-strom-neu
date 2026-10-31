@@ -1,0 +1,44 @@
+# ROBIN GUT Strom
+
+> Strom-Community für ganz Deutschland. Wer eine Solar-, Wind- oder Wasserkraftanlage hat, verkauft seinen Überschussstrom direkt an andere Mitglieder zu einem selbst vereinbarten Preis. Liefervertrag, Zählerdaten und Abrechnung übernimmt der Energieversorger WeShareEnergy. Ein Teil der Erlöse finanziert Baumpflanzungen der ROBIN GUT Stiftung.
+
+Stand: Oktober 2026
+
+## Wer macht was
+
+- ROBIN GUT Strom GbR: betreibt die Community, Ansprechpartner. Gesellschafter: Dieter Könnes (TV-Moderator) und Timo Russell. Am Schönblick 8, 41749 Viersen. info@robingut-strom.de, +49 221 29282931 (Mo–Fr 9–17 Uhr).
+- WeShareEnergy GmbH, Düsseldorf: Energieversorger und Plattform. Stromliefervertrag, Lesekopf, Abrechnung, Ökostrom für den Restbedarf.
+- ROBIN GUT Stiftung: pflanzt mit den Erlösen klimaresiliente Mischwälder in Deutschland, u. a. bei der Aktion „NRW pflanzt“. Gegründet von Dieter Könnes nach der Ahrtal-Flut 2021. https://robin-gut.org
+
+## So funktioniert es
+
+1. Online bei WeShareEnergy anmelden. Auf Wunsch wird der alte Stromvertrag gekündigt.
+2. Lesekopf auf den digitalen Stromzähler setzen und mit dem WLAN verbinden.
+3. In der App Partner wählen und einen Preis vereinbaren (Energie-Link). Danach läuft alles automatisch.
+
+Reicht der Community-Strom nicht, liefert WeShareEnergy automatisch 100 % Ökostrom.
+
+## Zahlen
+
+- Plattformgebühr: 1,00 ct/kWh netto auf Strom, der zwischen Mitgliedern geteilt wird
+- Empfohlener Verkaufspreis für Erzeuger: 7–11 ct/kWh
+- Für Erzeuger besonders lohnend bei einer Einspeisevergütung unter 9 ct/kWh (z. B. nach Ende der 20-jährigen EEG-Förderung)
+- Verbraucherpreis: Partnerpreis plus Netzentgelte, Steuern, Abgaben und Gebühr (zusammen je nach Netzgebiet 18–29 ct/kWh) plus monatlicher Grundpreis
+- Monatlich kündbar, monatliche Abrechnung nach tatsächlichem Verbrauch
+- Großverbraucher ab 100.000 kWh/Jahr: individuelles Angebot
+- Anlagen über 100 kWp: nach Klärung der Messtechnik
+
+## Voraussetzungen
+
+- Standort in Deutschland
+- Digitaler Stromzähler mit optischer Schnittstelle (SML); analoge Zähler werden getauscht
+- Lesekopf von WeShareEnergy (WSE-Lesekopf mit WLAN und Steckdose oder IOmeter mit Batterie), Kauf oder Miete
+- Ein Smart-Meter-Gateway ersetzt den Lesekopf nicht, weil die Community Echtzeitdaten braucht
+
+## Seiten
+
+- [Startseite](https://www.robingut-strom.de/): Überblick für Haushalte, Erzeuger und Verbraucher
+- [Für Organisationen](https://www.robingut-strom.de/organisationen-und-vereine/): Standorte vernetzen, Mitarbeiterstrom, Vereine, Kommunen
+- [Fragen und Antworten](https://www.robingut-strom.de/fragen-und-antworten/): 25 Fragen zu Preis, Abrechnung und Technik
+- [Anmeldung und Preisrechner](https://weshareenergy.de/stromcommunitys/neukunde/robin-gut-strom)
+- [Impressum](https://www.robingut-strom.de/impressum/)

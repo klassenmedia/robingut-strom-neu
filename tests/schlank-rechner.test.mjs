@@ -2,7 +2,7 @@
 //
 //   node tests/schlank-rechner.test.mjs
 
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import assert from "node:assert/strict";
@@ -408,6 +408,42 @@ pruefe("Hinweistext nennt Schätzung, Datenstand und Lesekopf sichtbar", () => {
   assert.match(hinweis, /Unverbindliche Schätzung/);
   assert.match(hinweis, /Stand Juli 2026/);
   assert.match(hinweis, /Lesekopf für 3,90/);
+});
+
+pruefe("jeder Link führt auf einen Anker, eine eigene Datei oder https", () => {
+  const anker = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map((m) => m[1]));
+  const links = [...html.matchAll(/<a\b[^>]*\bhref=(["'])(.*?)\1/g)].map((m) => m[2]);
+  assert.equal(links.length, (html.match(/<a\b[^>]*\bhref=/g) || []).length, "Link ohne Anführungszeichen");
+  for (const ziel of links) {
+    if (ziel === "#") continue;
+    if (ziel.startsWith("#")) assert.ok(anker.has(ziel.slice(1)), `Anker fehlt: ${ziel}`);
+    else if (/^(https:\/\/|mailto:|tel:)/.test(ziel)) continue;
+    else {
+      // Pfade ab der Wurzel landen auf github.io außerhalb des Projekts.
+      assert.ok(ziel && !ziel.startsWith("/"), `Link ab der Wurzel: ${ziel}`);
+      const datei = join(ROOT, "schlank", ziel.split(/[?#]/)[0]);
+      assert.ok(existsSync(datei) && statSync(datei).isFile(), `Link führt ins Leere: ${ziel}`);
+    }
+  }
+});
+
+pruefe("Impressum und Datenschutz sind verlinkt", () => {
+  assert.match(html, /<a href="https:\/\/www\.robingut-strom\.de\/impressum\/">Impressum<\/a>/);
+  assert.match(html, /<a href="https:\/\/www\.robingut-strom\.de\/datenschutzerklaerung\/">Datenschutz<\/a>/);
+});
+
+pruefe("Entwurfshinweis steht sichtbar über der Seite", () => {
+  const hinweis = html.match(/<p class="entwurf"[^>]*>([\s\S]*?)<\/p>/);
+  assert.ok(hinweis, "Entwurfshinweis fehlt");
+  assert.ok(html.indexOf('class="entwurf"') < html.indexOf('<header class="top">'));
+  assert.doesNotMatch(hinweis[0], /\shidden\b|aria-hidden/);
+  assert.match(hinweis[1], /Entwurf/);
+  assert.match(hinweis[1], /bestätigt/);
+  const css = readFileSync(join(ROOT, "schlank", "style.css"), "utf8");
+  for (const [, regel] of css.matchAll(/\.entwurf\b[^{]*\{([^}]*)\}/g)) {
+    assert.doesNotMatch(regel, /display:\s*none|visibility:\s*hidden|opacity:\s*0[;\s]/);
+  }
+  assert.match(css, /\.entwurf strong \{ color: inherit; \}/, "fetter Teil muss dunkel bleiben (Kontrast)");
 });
 
 console.log(`\n${bestanden} Prüfungen bestanden${process.exitCode ? " – mit Fehlern" : ""}`);

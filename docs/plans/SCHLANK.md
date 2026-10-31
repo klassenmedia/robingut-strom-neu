@@ -382,13 +382,18 @@ September). Behoben, die Funde zu stillem Klemmen, ungetesteter Anzeige und
 Parser-Lücken gleich mit. 57 Prüfungen, eigene Mutationsprobe 15/15 gefangen
 (die Eingabe-Verdrahtung erst mit dem neuen Seiten-Test). (3) Re-Review voll: **FREIGABE**; MITTEL-Fund Jahres-Grundpreis danach behoben, (4) Kurzprüfung: **FREIGABE** (64 Tests, 74 Mutanten, 61 gefangen, Rest gleichwertig oder harmlos). Gilt für den Entwurf; vor Go-Live Tarifdaten neu abrufen, Go-Live-grep, Server-Header, Detailrechner fixen.
 
+(5) Kurzprüfung vor Merge nach main (GitHub Pages): **FREIGABE**. Die zwei MITTEL-Funde sind behoben: Unterseiten-, Impressum- und Datenschutz-Links zeigten mit `/…` auf github.io ins Leere und gehen jetzt auf die Live-Domain, Test prüft jeden Link. Ungeprüfte Aussagen waren nur als Tooltip markiert, jetzt steht ein sichtbarer Entwurfshinweis über der Seite. OFL-Lizenztexte liegen in `schlank/fonts/`. Für den Entwurf bewusst akzeptiert (NIEDRIG): Projekt-ID im Bildwerkzeug, Kundennamen ohne festgehaltene Einwilligung (stehen schon auf der Live-Seite), fehlende Eingabeprüfung in `vertex_bild.py` (nur lokale Kommandozeile), kein `frame-ancestors` ohne Server-Header, pip-audit für `werkzeuge/requirements.txt` nicht gelaufen (nicht installiert).
+Nachprüfung der Fixes: **FREIGABE**; die drei NIEDRIG-Funde daraus (Kontrast des fetten Hinweises, Link-Test ließ Wurzelpfade, Verzeichnisse und einfache Anführungszeichen durch, Hinweis-Test ohne Sichtbarkeitsprüfung) behoben.
+
 ### Go-Live-Prüfung
 
 Muss leer sein, bevor deployt wird:
 
 ```
-grep -rn 'mark class="check"\|\[Zahl\]\|noindex' schlank/
+grep -rn 'mark class="check"\|\[Zahl\]\|noindex\|class="entwurf"' schlank/
 ```
+
+Beim Umzug auf robingut-strom.de die Links auf `https://www.robingut-strom.de/…` wieder relativ setzen.
 
 Die Spanne 18–29 ct/kWh steht zusätzlich in FAQ, JSON-LD und `llms.txt` – nach Bestätigung überall gleich pflegen.
 
@@ -444,8 +449,8 @@ bei prefers-reduced-motion aus.
 
 Schriften liegen lokal in schlank/fonts/ (kein Abruf bei Google beim
 Seitenbesuch): Stardos Stencil 400/700 von Google Fonts, Inter 400/600/700 aus
-~/robin-gut-erklaervideo. Beide unter SIL Open Font License 1.1, Lizenztext
-vor Go-Live mitliefern.
+~/robin-gut-erklaervideo. Beide unter SIL Open Font License 1.1, Lizenztexte liegen als
+`OFL-StardosStencil.txt` und `OFL-Inter.txt` daneben.
 
 Logo: schlank/logo-strom.png aus ~/Downloads/robin_gut_strom_transparent.png
 (480 px, 32 Farben). Besser vor Go-Live: das SVG-Logo der Live-Seite.

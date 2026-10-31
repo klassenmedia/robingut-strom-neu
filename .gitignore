@@ -1,3 +1,9 @@
 .DS_Store
 *.log
 __pycache__/
+
+# Schlüssel und KI-Rohbilder gehören nicht ins Repo
+*service_account*.json
+vertex*.json
+werkzeuge/ausgabe/
+*.png.raw

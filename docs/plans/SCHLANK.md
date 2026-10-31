@@ -394,6 +394,7 @@ grep -rn 'mark class="check"\|\[Zahl\]\|noindex\|class="entwurf"' schlank/
 ```
 
 Beim Umzug auf robingut-strom.de die Links auf `https://www.robingut-strom.de/…` wieder relativ setzen.
+Vor dem Go-Live außerdem: Vorschaubild (`og-bild.jpg`) ohne KI-Personen oder mit Hinweis, „Monatlich kündbar“ in `meta description`/`og:description` erst nach Bestätigung.
 
 Die Spanne 18–29 ct/kWh steht zusätzlich in FAQ, JSON-LD und `llms.txt` – nach Bestätigung überall gleich pflegen.
 
@@ -440,8 +441,11 @@ Ohne JavaScript zeigt der Rechner einen Hinweis auf WeShareEnergy; alle
 
 ## 9. Design (31.10.2026)
 
-Richtung „Dunkel & premium“ (von Andreas gewählt): fast schwarzes Waldgrün, Limette
-als Leuchtfarbe, Glasflächen, Headlines in **Stardos Stencil** (wie das Logo),
+Erst „Dunkel & premium“, am 31.10.2026 auf Wunsch von Andreas umgestellt auf **hell und
+sonnig**: warmes Weiß (#fffdf5) als Grund, dunkles Waldgrün (#17301c) als Schrift,
+Akzentgrün #356a0c für Links und Zahlen, Limette für Buttons, Sonnengelb (#ffc83d) für
+Entwurfsleiste, Kicker-Striche und Icon-Kacheln, weiße Karten mit weichem Schatten,
+Footer dunkelgrün. Text-Kontraste auf den Vollton-Flächen ≥ 4,5:1, Akzentgrün ≥ 5:1 und Entwurfsmarkierung (#9a5200, 3 px) ≥ 4,5:1 per Test; über Foto und Verläufen nur geschätzt. Jedes Foto mit Menschen trägt direkt „Symbolbild, KI-generiert“ (Art. 50 AI Act, UWG). `og:image` zeigt bis zum Go-Live bewusst auf die Live-Domain. Security-Review helles Design (31.10.2026, kurz, zweimal): **FREIGABE**; Markierung, KI-Hinweise und Akzentgrün behoben. Akzeptiert (NIEDRIG): Vertrauensleiste im Hero am rechten Rand knapp (geschätzt ~4,1:1 Grau), zweite `mark.check`-Regel könnte die Markierung aufheben, ohne dass ein Test greift. Headlines in **Stardos Stencil** (wie das Logo),
 Fließtext **Inter**. Hero-Grafik und Familienbeispiel als SVG mit fließender
 Energie-Linie, Puls-Linie aus dem Logo als Bodenlinie, Waldsilhouette am Ende
 des Wald-Abschnitts. Scroll-Einblendung nur per CSS (animation-timeline: view()),
@@ -467,10 +471,10 @@ ca. 0,13 $ je Bild.
 
 | Datei | Motiv | Einsatz |
 |---|---|---|
-| bilder/hero-2400.webp, hero-1200.webp | Haus mit Solardach zur blauen Stunde, junger Wald | Hero-Hintergrund |
-| bilder/erzeuger.webp | Solarmodule auf Ziegeldach, goldenes Licht | Karte Erzeuger |
-| bilder/verbraucher.webp | erleuchtetes Altbaufenster, Silhouette | Karte Verbraucher |
-| bilder/wald.webp | Hände pflanzen junge Buche, Freiwillige unscharf | Wald-Abschnitt |
+| bilder/hero-familie-2400.webp, hero-familie-1200.webp | Familie vor dem Haus zeigt aufs Solardach in der Mittagssonne, Oma winkt, Blumenwiese, junger Wald | Hero-Hintergrund |
+| bilder/erzeuger-sonne.webp | Solarmodule auf Ziegeldach, Sonnenstern, blauer Himmel | Karte Erzeuger |
+| bilder/verbraucher-sonne.webp | junge Frau am sonnigen Küchenfenster einer Altbauwohnung | Karte Verbraucher |
+| bilder/wald-sonne.webp | Hände pflanzen junge Buche, Familien mit Setzlingen im sonnigen Wald | Wald-Abschnitt |
 | og-bild.jpg | Zuschnitt aus dem Hero, 1200 × 630 | Vorschau beim Teilen |
 
 Alle Fotos sind KI-generiert: Sammelhinweis im Footer („Fotos: KI-generierte

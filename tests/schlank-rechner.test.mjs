@@ -427,6 +427,62 @@ pruefe("jeder Link führt auf einen Anker, eine eigene Datei oder https", () => 
   }
 });
 
+pruefe("jedes eingebundene Bild liegt im Projekt", () => {
+  const quellen = [...html.matchAll(/<(?:img|source|link)\b[^>]*\b(?:src|srcset|href)\s*=\s*(["'])(.*?)\1/gi)]
+    .filter((m) => !/rel="(canonical|alternate)"/.test(m[0]))
+    .flatMap((m) => m[2].split(",").map((teil) => teil.trim().split(/\s+/)[0].split(/[?#]/)[0]));
+  const css = readFileSync(join(ROOT, "schlank", "style.css"), "utf8");
+  for (const [, ziel] of css.matchAll(/url\("?([^")#]+)"?\)/g)) quellen.push(ziel);
+  assert.ok(quellen.length >= 10, "zu wenige Dateien gefunden");
+  for (const ziel of quellen) {
+    if (/^https:\/\/www\.robingut-strom\.de\//.test(ziel)) continue;
+    assert.ok(!ziel.startsWith("/") && !/^https?:/.test(ziel), `Datei von außerhalb: ${ziel}`);
+    const datei = join(ROOT, "schlank", ziel);
+    assert.ok(existsSync(datei) && statSync(datei).isFile(), `Datei fehlt: ${ziel}`);
+  }
+  assert.doesNotMatch(html, /\sstyle\s*=/i, "Inline-Style im Markup");
+});
+
+const kontrast = (vorne, hinten) => {
+  const hell = (hex) => {
+    const kanal = [0, 2, 4].map((i) => parseInt(hex.slice(1 + i, 3 + i), 16) / 255)
+      .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * kanal[0] + 0.7152 * kanal[1] + 0.0722 * kanal[2];
+  };
+  const [a, b] = [hell(vorne), hell(hinten)].sort((x, y) => y - x);
+  return (a + 0.05) / (b + 0.05);
+};
+
+pruefe("Entwurfsmarkierung und Akzentgrün sind auf hellen Flächen gut sichtbar", () => {
+  const css = readFileSync(join(ROOT, "schlank", "style.css"), "utf8");
+  const farbe = (name) => css.match(new RegExp(`--${name}: (#[0-9a-f]{6});`))[1];
+  for (const flaeche of ["#ffffff", farbe("bg"), farbe("bg-2"), farbe("sonne-hell"), farbe("sky")]) {
+    assert.ok(kontrast(farbe("check"), flaeche) >= 4.5, `Markierung zu blass auf ${flaeche}`);
+    assert.ok(kontrast(farbe("akzent"), flaeche) >= 5, `Akzentgrün zu blass auf ${flaeche}`);
+  }
+  assert.match(css, /mark\.check \{[^}]*border-bottom: 3px dashed var\(--check\)/);
+});
+
+pruefe("jedes Foto mit Menschen ist direkt als KI-Symbolbild gekennzeichnet", () => {
+  const ohneKommentare = html.replace(/<!--[\s\S]*?-->/g, "");
+  for (const bild of ["hero-familie", "verbraucher-sonne", "wald-sonne"]) {
+    const stelle = ohneKommentare.indexOf(`bilder/${bild}`);
+    assert.ok(stelle > 0, `Bild fehlt: ${bild}`);
+    const hinweis = ohneKommentare.slice(stelle, stelle + 900).match(/<(span|figcaption)\b([^>]*)>Symbolbild, KI-generiert</);
+    assert.ok(hinweis, `KI-Hinweis fehlt bei ${bild}`);
+    assert.doesNotMatch(hinweis[2], /\shidden\b|aria-hidden/, `KI-Hinweis versteckt bei ${bild}`);
+  }
+  assert.match(ohneKommentare, /Fotos: KI-generierte Symbolbilder/);
+  const css = readFileSync(join(ROOT, "schlank", "style.css"), "utf8");
+  for (const [, regel] of css.matchAll(/\.(?:ki-hinweis|hero-ki|wald-bild figcaption)\b[^{]*\{([^}]*)\}/g)) {
+    assert.doesNotMatch(regel, /display:\s*none|visibility:\s*hidden|opacity:\s*0[;\s]|z-index:\s*-|font-size:\s*0[;\s]|left:\s*-|clip/);
+  }
+});
+
+pruefe("Zusage im Hero ist als ungeprüft markiert", () => {
+  assert.match(html, /<ul class="trust">[\s\S]*?<mark class="check"[^>]*>Monatlich kündbar<\/mark>/);
+});
+
 pruefe("Impressum und Datenschutz sind verlinkt", () => {
   assert.match(html, /<a href="https:\/\/www\.robingut-strom\.de\/impressum\/">Impressum<\/a>/);
   assert.match(html, /<a href="https:\/\/www\.robingut-strom\.de\/datenschutzerklaerung\/">Datenschutz<\/a>/);

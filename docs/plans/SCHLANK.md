@@ -600,3 +600,66 @@ Nachprüfung (voll, 01.11.2026): **FREIGABE** – HOCH und alle MITTEL behoben u
 
 Vor der Messe von Timo/Dieter klären: § 80 EEG (Marktprämie bei Community-Verkauf), Community-Preis 5 ct
 (Unternehmen) vs. 10 ct (Landwirte), Freigabe der Kundenfälle, Stiftungsanteil je kWh.
+
+---
+
+## 12. Startseite als Trichter nach Briefing (01.11.2026)
+
+Reihenfolge (Briefing Abschnitt 4, Preis als Vertiefung für Privathaushalte nach „Für wen“):
+Einstieg (Kernaussage, Bild, „So funktioniert's“ + „Tarif prüfen“) → So funktioniert's (Schaubild
+Erzeuger → Community → Verbraucher, Ökostrom als Reserve, drei Schritte) → Warum ROBIN GUT
+(Stiftung, Region, Partner, monatlich kündbar) → Wald → Für wen (Privathaushalte, Landwirte,
+Unternehmen; Kommunen-Hinweis) → Preis/Rechner → Fragen (Wechsel, Lesekopf, Kosten, ohne Sonne,
+Kündigung, Datenschutz) → Kontakt und Rückruf.
+
+Leitplanken: Partner ohne Namen (auch JSON-LD, `llms.txt`; die Anmelde-URL des Partners bleibt als
+Link), keine Eyebrow-/Kicker-Zeilen, „Wald pflanzen“/„mit jeder kWh wächst Wald“ raus, Stiftungsanteil
+markiert. „Monatlich kündbar“ ohne Markierung: steht so im Briefing und in der Unternehmenspräsentation.
+Entfallen: Kennzahlen-Leiste („lohnt sich besonders“), Familienbeispiel Viersen–Heidelberg (war wegen
+zwei Netzgebieten markiert), „Viele Netzbetreiber zahlen deine EEG-Vergütung weiter“ (gleiche offene
+Rechtsfrage wie § 80 EEG), Kundenzitate ohne Einwilligung, „Wer macht was“ mit Partnernamen.
+
+Rechner: Logik unverändert. **Frage an Timo:** Darf der Vergleich mit dem heutigen Tarif
+(„Ersparnis/Mehrkosten im Jahr“) bleiben? Er rechnet ehrlich in beide Richtungen, ist aber ein
+Preisvergleich.
+
+Rückruf: neue Mailvorlage `rueckruf` in `schlank/anfrage.js` (Du-Form), Aktionscode wie auf den Unterseiten.
+
+### Threat Model
+
+| Untrusted Input | Worst Case | Gegenmaßnahme | Test |
+|---|---|---|---|
+| `?code=` auf der Startseite | wie §10 (mailto-Injection, Spoofing) | gleiches Modul `schlank/anfrage.js`, Allowlist | Tests in `tests/landwirte.test.mjs` plus Vorlage `rueckruf` |
+| Rechner-Eingaben | wie §7 | unverändert | unverändert |
+| Aussagen auf der Seite | UWG (Umwelt, Preis), Partner wirkt wie ROBIN GUT als Lieferant | Leitplanken-Tests: kein Partnername, Verbotslisten inkl. Meta und JSON-LD, Stiftung markiert | `tests/startseite.test.mjs` |
+
+Security-Review voll (01.11.2026): **BLOCKIERT** – „Strom teilen, Wald stärken“ war die entfernte Wald-Aussage in neuen
+Worten. Behoben, zusammen mit den MITTEL-Funden:
+- Wald-H2 jetzt „Strom teilen, Stiftung unterstützen“; „klimaresilient“ raus.
+- „In deiner Region“ als Zusage raus: H1 „Mit Menschen, die du wählst“, Region nur als Möglichkeit;
+  „Energy Sharing“ → „Stromcommunity“ (die Unternehmensseite grenzt sich von § 42c ab).
+- „Monatlich kündbar“ wieder markiert („gegen AGB des Partners prüfen“), „nicht länger als einen Monat gebunden“ raus.
+- Datenschutz-FAQ verweist nicht mehr auf die Stiftungs-Datenschutzerklärung als Quelle; Einwilligung nennt
+  den Lieferpartner als Empfänger, den Zweck und das Widerrufsrecht (alle drei Vorlagen).
+- `llms.txt` mit Entwurfshinweis, ohne markierte Aussagen (Gebiet, 18–29 ct, Kündigung, Stiftungsanteil).
+- „Partner“ nur noch für den Lieferpartner; das Gegenüber heißt „Erzeuger“, der Preis „Community-Preis“.
+- JSON-LD-FAQ enthält nur geprüfte Antworten, Wortlaut gleich der Seite; Partnername auch aus `preise.js`.
+- `Object.hasOwn` für die Einwilligung.
+Tests: Leitplanken jetzt auch über Meta, JSON-LD, `llms.txt` und Skripte; Markierungspflicht je Aussage;
+alle 19 Mutationen aus dem Review und eigene werden erkannt.
+
+Go-Live-Punkte dazu:
+- `robots.txt` im Repo wirkt auf der Projektseite (github.io/robingut-strom-neu/) nicht; Schutz nur über `noindex`
+  im HTML. `llms.txt` hat keinen Schutz, daher Entwurfshinweis.
+- Eigene Datenschutzerklärung der GbR (die verlinkte nennt die Stiftung als Verantwortliche), Rechtsgrundlage
+  der Weitergabe (Einwilligung vs. Art. 6 Abs. 1 lit. b) einheitlich festlegen.
+- „100 % Ökostrom“ mit Stromkennzeichnung/Herkunftsnachweis des Partners belegen.
+- `/landwirte/` und `/unternehmen/` gibt es auf der Live-Domain noch nicht (Sitemap, llms.txt).
+
+Nachprüfung (voll, 01.11.2026): **FREIGABE**. Akzeptiert für den Entwurf:
+- MITTEL: Footer aller drei Seiten verlinkt die Live-Datenschutzerklärung (Stiftung als Verantwortliche, ohne
+  Weitergabe an den Lieferpartner); Einwilligung nennt den Lieferpartner ohne Namen. **Vor jeder echten Nutzung
+  (Messe, Flyer, Newsletter) beheben**, nicht erst beim Go-Live: eigene Erklärung der GbR mit Partnernennung verlinken.
+- NIEDRIG: Verbotslisten erkennen Umformulierungen nicht („wächst der Wald“, „Wald fördern“, „nachhaltig“,
+  „klimaschonend“, „200 € weniger“, „aus deiner Region“ ohne „auch“, `areaServed`) – bei der nächsten Änderung ergänzen.
+- NIEDRIG: #wald „Sie pflanzt davon Mischwälder …“ knüpft an den markierten Anteil an; „davon“ streichen oder mitmarkieren.

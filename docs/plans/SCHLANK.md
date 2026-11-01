@@ -482,3 +482,52 @@ Symbolbilder“), das Waldbild zeigt Menschen bei einer Pflanzaktion und trägt 
 direkt „Symbolbild, KI-generiert“, damit es nicht als echte ROBIN-GUT-Aktion gelesen wird.
 Offen: Kosten laufen über das Google-Cloud-Projekt eskotomic-demo – klären, ob das so bleiben soll. Vor Go-Live besser durch
 echte Fotos von Pflanzaktionen ersetzen (Freigabe der abgebildeten Personen einholen).
+
+---
+
+## 10. Landwirte-Seite `/landwirte/` (01.11.2026)
+
+Grundlage: Briefing Website vom 01.11.2026 (für den Agenturtermin am 05.11.), Zielgruppe B.
+Vorrang, weil Sonnenernte auf der Messe mit einem Flyer an rund 5.000 Landwirte wirbt.
+
+Abnahme:
+- Sie-Form, Kernaussage „Ihre EEG-Förderung läuft aus. Ihre PV-Anlage läuft weiter.“
+- nächster Schritt „Technik-Check anfragen“ oder Rückruf, per Mail oder Telefon
+- Code je Aktion über `?code=…` (Flyer, Messe, Brief), landet im Betreff der Anfrage
+- Rechenbeispiele nur mit sichtbarem „Annahme“; bis der Messeflyer v13b vorliegt, Platzhalter
+- Leitplanken aus dem Briefing: „gemeinsam mit unserem Partner“ ohne Firmennamen, kein
+  „günstiger als“, kein „klimaneutral“, Umweltaussagen konkret oder markiert
+- keine Eyebrow-Zeilen über Überschriften
+
+Fakten zum Förderende: Ausgeförderte Anlagen erhalten bis 31.12.2032 eine Anschlussvergütung
+in Höhe des Jahresmarktwerts Solar abzüglich Vermarktungskosten (§ 23b EEG 2023,
+gesetze-im-internet.de/eeg_2014/__23b.html). Konkrete Cent-Werte stehen nur markiert auf der Seite.
+
+### Threat Model
+
+| Untrusted Input | Worst Case | Gegenmaßnahme | Test |
+|---|---|---|---|
+| `?code=` in der Adresse | Header-Injection in den Mail-Link (`%0D%0ABcc:`), HTML/Skript im Text, Code fremder Kampagnen vorgetäuscht | nur `[A-Za-z0-9-]`, 2–24 Zeichen, sonst verworfen; Ausgabe per `encodeURIComponent` in `href` und `textContent`; Code ist nur Statistik, gibt keine Rechte | Negativ-Tests mit CRLF, `<script>`, Überlänge, Umlauten, mehrfachem Parameter |
+| Inhalt der Anfrage | Personendaten ohne Einwilligung beim Partner | Seite verarbeitet nichts: Anfrage geht als Mail aus dem eigenen Postfach. Weitergabe an den Partner fragt der Mailtext ausdrücklich ab | Test auf Einwilligungssatz im Mailtext |
+
+Worst Case insgesamt: gefälschter Link mit Schadcode im Parameter. Gegenmaßnahme oben plus
+Meta-CSP wie auf der Startseite (`script-src 'self'`, `form-action 'none'`).
+
+Aktionscodes (nur Statistik, nie Abrechnungsgrundlage, weil jeder sie an Links hängen kann):
+`MESSE`, `FLYER`, `BRIEF`, `NEWSLETTER`, `PARTNER`, z. B. `/landwirte/?code=messe`. Neue Codes in
+`BEKANNTE_CODES` (schlank/landwirte/anfrage.js) eintragen; unbekannte werden verworfen.
+
+Stand 01.11.2026: Seite gebaut, 27 Tests (Code-Prüfung, Seitenanbindung, Sie-Form, Leitplanken,
+Links, KI-Hinweis), Desktop und Handy im Browser geprüft. Titelbild `bilder/hof-sonne-*.webp`
+aus `werkzeuge/prompts/landwirte.txt`. Security-Review kurz am 01.11.2026: **FREIGABE**, Nachprüfung der Fixes ebenfalls **FREIGABE**; die MITTEL-Funde
+(beliebiger Text als „Aktionscode“, mehrdeutige Einwilligung) und die NIEDRIG-Funde Testlücke
+`verbindeSeite`, Rechtszitat und unmarkierte Zusagen sind behoben.
+
+Offen:
+- Rechenbeispiele aus dem Messeflyer v13b einsetzen (liegt nicht vor), von Timo freigeben lassen
+- Jahresmarktwert Solar 2025 gegen netztransparenz.de prüfen
+- Go-Live: Partner in der Datenschutzerklärung nennen, Widerruf erklären; Anfragen ohne klares
+  „ja“ gelten als „nein“ (Weitergabe nur mit klarer Zustimmung)
+- Go-Live: canonical/og:url erst setzen, wenn `/landwirte/` auf der Domain existiert
+- Auf dem Handy ist die Landwirte-Seite von der Startseite aus nur über die Kacheln erreichbar,
+  die mit dem Umbau der Startseite kommen (Navigation ist dort ausgeblendet)

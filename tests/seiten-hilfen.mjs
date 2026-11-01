@@ -127,7 +127,7 @@ export function gemeinsamePruefungen(seite, { art, titelbild }) {
     const csp = (quelle) => quelle.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)[1];
     assert.equal(csp(html), csp(startseite));
     const skripte = [...html.matchAll(/<script\b[^>]*>/g)].map((m) => m[0]);
-    assert.deepEqual(skripte, ['<script type="module" src="../anfrage.js?v=4">']);
+    assert.deepEqual(skripte, ['<script type="module" src="../anfrage.js?v=7">']);
     assert.doesNotMatch(html, /\son[a-z]+\s*=/i, "Inline-Handler");
     assert.doesNotMatch(html, /\sstyle\s*=/i, "Inline-Style");
   });

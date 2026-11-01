@@ -359,11 +359,12 @@ pruefe("Eingabefelder sind vorhanden und begrenzt", () => {
   assert.match(html, /id="r-istgrundpreis"[^>]*maxlength="\d+"/);
 });
 
-pruefe("genau ein Skript, vom eigenen Server", () => {
+pruefe("nur eigene Skripte: Rechner und Anfrage-Link", () => {
   const skripte = html.match(/<script\b[^>]*>/g) || [];
   const ausfuehrbar = skripte.filter((tag) => !/type="application\/ld\+json"/.test(tag));
-  assert.equal(ausfuehrbar.length, 1, ausfuehrbar.join(" "));
+  assert.equal(ausfuehrbar.length, 2, ausfuehrbar.join(" "));
   assert.match(ausfuehrbar[0], /^<script type="module" src="rechner\.js\?v=\d+">$/);
+  assert.match(ausfuehrbar[1], /^<script type="module" src="anfrage\.js\?v=\d+">$/);
 });
 
 pruefe("Markup und Stylesheet laden nichts Fremdes und tragen keine Handler", () => {
@@ -466,7 +467,7 @@ pruefe("Entwurfsmarkierung und Akzentgrün sind auf hellen Flächen gut sichtbar
 
 pruefe("jedes Foto mit Menschen ist direkt als KI-Symbolbild gekennzeichnet", () => {
   const ohneKommentare = html.replace(/<!--[\s\S]*?-->/g, "");
-  for (const bild of ["hero-familie", "verbraucher-sonne", "wald-sonne"]) {
+  for (const bild of ["hero-community", "verbraucher-sonne", "hof-sonne", "wald-sonne"]) {
     const stelle = ohneKommentare.indexOf(`bilder/${bild}`);
     assert.ok(stelle > 0, `Bild fehlt: ${bild}`);
     const hinweis = ohneKommentare.slice(stelle, stelle + 900).match(/<(span|figcaption)\b([^>]*)>Symbolbild, KI-generiert</);
@@ -474,14 +475,15 @@ pruefe("jedes Foto mit Menschen ist direkt als KI-Symbolbild gekennzeichnet", ()
     assert.doesNotMatch(hinweis[2], /\shidden\b|aria-hidden/, `KI-Hinweis versteckt bei ${bild}`);
   }
   assert.match(ohneKommentare, /Fotos: KI-generierte Symbolbilder/);
+  assert.match(ohneKommentare, /Foto Dieter Könnes: KlassenMedia/, "echtes Foto mit Bildnachweis, nicht als KI");
   const css = readFileSync(join(ROOT, "schlank", "style.css"), "utf8");
   for (const [, regel] of css.matchAll(/\.(?:ki-hinweis|hero-ki|wald-bild figcaption)\b[^{]*\{([^}]*)\}/g)) {
     assert.doesNotMatch(regel, /display:\s*none|visibility:\s*hidden|opacity:\s*0[;\s]|z-index:\s*-|font-size:\s*0[;\s]|left:\s*-|clip/);
   }
 });
 
-pruefe("Zusage im Hero ist als ungeprüft markiert", () => {
-  assert.match(html, /<ul class="trust">[\s\S]*?<mark class="check"[^>]*>Monatlich kündbar<\/mark>/);
+pruefe("Kündigungsfrist im Hero bleibt bis zur AGB-Prüfung markiert", () => {
+  assert.match(html, /<ul class="trust">[\s\S]*?<li><mark class="check"[^>]*AGB[^>]*>Monatlich kündbar<\/mark><\/li>/);
 });
 
 pruefe("Impressum und Datenschutz sind verlinkt", () => {

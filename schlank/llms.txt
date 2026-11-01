@@ -1,44 +1,42 @@
 # ROBIN GUT Strom
 
-> Strom-Community für ganz Deutschland. Wer eine Solar-, Wind- oder Wasserkraftanlage hat, verkauft seinen Überschussstrom direkt an andere Mitglieder zu einem selbst vereinbarten Preis. Liefervertrag, Zählerdaten und Abrechnung übernimmt der Energieversorger WeShareEnergy. Ein Teil der Erlöse finanziert Baumpflanzungen der ROBIN GUT Stiftung.
+> Stromcommunity: Wer eine Solar-, Wind- oder Wasserkraftanlage hat, teilt seinen Überschussstrom mit anderen Mitgliedern zu einem selbst vereinbarten Preis. Lieferung, Bilanzkreis und Abrechnung übernimmt ein Lieferpartner aus der Energiewirtschaft; er liefert auch Ökostrom, wenn die Community gerade nichts liefert.
 
-Stand: Oktober 2026
+Entwurf, Stand November 2026: Preise, Bedingungen, Gebiet und der Anteil für die ROBIN GUT Stiftung sind noch nicht bestätigt.
 
 ## Wer macht was
 
-- ROBIN GUT Strom GbR: betreibt die Community, Ansprechpartner. Gesellschafter: Dieter Könnes (TV-Moderator) und Timo Russell. Am Schönblick 8, 41749 Viersen. info@robingut-strom.de, +49 221 29282931 (Mo–Fr 9–17 Uhr).
-- WeShareEnergy GmbH, Düsseldorf: Energieversorger und Plattform. Stromliefervertrag, Lesekopf, Abrechnung, Ökostrom für den Restbedarf.
-- ROBIN GUT Stiftung: pflanzt mit den Erlösen klimaresiliente Mischwälder in Deutschland, u. a. bei der Aktion „NRW pflanzt“. Gegründet von Dieter Könnes nach der Ahrtal-Flut 2021. https://robin-gut.org
+- ROBIN GUT Strom GbR: betreibt die Community und bringt Erzeuger und Verbraucher zusammen, Ansprechpartner. Gesellschafter: Dieter Könnes (TV-Moderator) und Timo Russell. Am Schönblick 8, 41749 Viersen. info@robingut-strom.de, +49 221 29282931 (Mo–Fr 9–17 Uhr).
+- Lieferpartner aus der Energiewirtschaft: Stromliefervertrag, Bilanzkreis, Lesekopf, Abrechnung, Ökostrom für den Restbedarf.
+- ROBIN GUT Stiftung: pflanzt Bäume in Deutschland, u. a. bei der Aktion „NRW pflanzt“. Gegründet von Dieter Könnes nach der Ahrtal-Flut 2021. https://robin-gut.org
 
 ## So funktioniert es
 
-1. Online bei WeShareEnergy anmelden. Auf Wunsch wird der alte Stromvertrag gekündigt.
+1. Online über den Lieferpartner anmelden. Er prüft den Zähler und kündigt auf Wunsch den alten Stromvertrag.
 2. Lesekopf auf den digitalen Stromzähler setzen und mit dem WLAN verbinden.
-3. In der App Partner wählen und einen Preis vereinbaren (Energie-Link). Danach läuft alles automatisch.
+3. In der App einen Erzeuger wählen und einen Preis vereinbaren (Energie-Link). Danach läuft alles automatisch.
 
-Reicht der Community-Strom nicht, liefert WeShareEnergy automatisch 100 % Ökostrom.
+Reicht der Community-Strom nicht, liefert der Lieferpartner automatisch Ökostrom.
 
 ## Zahlen
 
 - Plattformgebühr: 1,00 ct/kWh netto auf Strom, der zwischen Mitgliedern geteilt wird
 - Empfohlener Verkaufspreis für Erzeuger: 7–11 ct/kWh
-- Für Erzeuger besonders lohnend bei einer Einspeisevergütung unter 9 ct/kWh (z. B. nach Ende der 20-jährigen EEG-Förderung)
-- Verbraucherpreis: Partnerpreis plus Netzentgelte, Steuern, Abgaben und Gebühr (zusammen je nach Netzgebiet 18–29 ct/kWh) plus monatlicher Grundpreis
-- Monatlich kündbar, monatliche Abrechnung nach tatsächlichem Verbrauch
+- Verbraucherpreis: Community-Preis plus Netzentgelte, Steuern, Abgaben und Gebühr plus monatlicher Grundpreis
+- Monatliche Abrechnung nach tatsächlichem Verbrauch
 - Großverbraucher ab 100.000 kWh/Jahr: individuelles Angebot
 - Anlagen über 100 kWp: nach Klärung der Messtechnik
 
 ## Voraussetzungen
 
-- Standort in Deutschland
 - Digitaler Stromzähler mit optischer Schnittstelle (SML); analoge Zähler werden getauscht
-- Lesekopf von WeShareEnergy (WSE-Lesekopf mit WLAN und Steckdose oder IOmeter mit Batterie), Kauf oder Miete
+- Lesekopf des Lieferpartners (mit WLAN), Kauf oder Miete
 - Ein Smart-Meter-Gateway ersetzt den Lesekopf nicht, weil die Community Echtzeitdaten braucht
 
 ## Seiten
 
-- [Startseite](https://www.robingut-strom.de/): Überblick für Haushalte, Erzeuger und Verbraucher
-- [Für Organisationen](https://www.robingut-strom.de/organisationen-und-vereine/): Standorte vernetzen, Mitarbeiterstrom, Vereine, Kommunen
-- [Fragen und Antworten](https://www.robingut-strom.de/fragen-und-antworten/): 25 Fragen zu Preis, Abrechnung und Technik
-- [Anmeldung und Preisrechner](https://weshareenergy.de/stromcommunitys/neukunde/robin-gut-strom)
+- [Startseite](https://www.robingut-strom.de/): Überblick für Privathaushalte, mit und ohne Solaranlage
+- [Für Landwirte](https://www.robingut-strom.de/landwirte/): PV-Anlagen nach dem Ende der EEG-Förderung, Betriebsstätten vernetzen
+- [Für Unternehmen](https://www.robingut-strom.de/unternehmen/): Standorte vernetzen, extern erzeugen, Community-Strom; Kontakt für Kommunen und Stadtwerke
+- [Fragen und Antworten](https://www.robingut-strom.de/fragen-und-antworten/): Preis, Abrechnung und Technik
 - [Impressum](https://www.robingut-strom.de/impressum/)

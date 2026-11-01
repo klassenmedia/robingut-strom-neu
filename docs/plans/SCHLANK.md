@@ -600,3 +600,109 @@ Nachprüfung (voll, 01.11.2026): **FREIGABE** – HOCH und alle MITTEL behoben u
 
 Vor der Messe von Timo/Dieter klären: § 80 EEG (Marktprämie bei Community-Verkauf), Community-Preis 5 ct
 (Unternehmen) vs. 10 ct (Landwirte), Freigabe der Kundenfälle, Stiftungsanteil je kWh.
+
+---
+
+## 12. Startseite als Trichter nach Briefing (01.11.2026)
+
+Reihenfolge (Briefing Abschnitt 4, Preis als Vertiefung für Privathaushalte nach „Für wen“):
+Einstieg (Kernaussage, Bild, „So funktioniert's“ + „Tarif prüfen“) → So funktioniert's (Schaubild
+Erzeuger → Community → Verbraucher, Ökostrom als Reserve, drei Schritte) → Warum ROBIN GUT
+(Stiftung, Region, Partner, monatlich kündbar) → Wald → Für wen (Privathaushalte, Landwirte,
+Unternehmen; Kommunen-Hinweis) → Preis/Rechner → Fragen (Wechsel, Lesekopf, Kosten, ohne Sonne,
+Kündigung, Datenschutz) → Kontakt und Rückruf.
+
+Leitplanken: Partner ohne Namen (auch JSON-LD, `llms.txt`; die Anmelde-URL des Partners bleibt als
+Link), keine Eyebrow-/Kicker-Zeilen, „Wald pflanzen“/„mit jeder kWh wächst Wald“ raus, Stiftungsanteil
+markiert. „Monatlich kündbar“ ohne Markierung: steht so im Briefing und in der Unternehmenspräsentation.
+Entfallen: Kennzahlen-Leiste („lohnt sich besonders“), Familienbeispiel Viersen–Heidelberg (war wegen
+zwei Netzgebieten markiert), „Viele Netzbetreiber zahlen deine EEG-Vergütung weiter“ (gleiche offene
+Rechtsfrage wie § 80 EEG), Kundenzitate ohne Einwilligung, „Wer macht was“ mit Partnernamen.
+
+Rechner: Logik unverändert. **Frage an Timo:** Darf der Vergleich mit dem heutigen Tarif
+(„Ersparnis/Mehrkosten im Jahr“) bleiben? Er rechnet ehrlich in beide Richtungen, ist aber ein
+Preisvergleich.
+
+Rückruf: neue Mailvorlage `rueckruf` in `schlank/anfrage.js` (Du-Form), Aktionscode wie auf den Unterseiten.
+
+### Threat Model
+
+| Untrusted Input | Worst Case | Gegenmaßnahme | Test |
+|---|---|---|---|
+| `?code=` auf der Startseite | wie §10 (mailto-Injection, Spoofing) | gleiches Modul `schlank/anfrage.js`, Allowlist | Tests in `tests/landwirte.test.mjs` plus Vorlage `rueckruf` |
+| Rechner-Eingaben | wie §7 | unverändert | unverändert |
+| Aussagen auf der Seite | UWG (Umwelt, Preis), Partner wirkt wie ROBIN GUT als Lieferant | Leitplanken-Tests: kein Partnername, Verbotslisten inkl. Meta und JSON-LD, Stiftung markiert | `tests/startseite.test.mjs` |
+
+Security-Review voll (01.11.2026): **BLOCKIERT** – „Strom teilen, Wald stärken“ war die entfernte Wald-Aussage in neuen
+Worten. Behoben, zusammen mit den MITTEL-Funden:
+- Wald-H2 jetzt „Strom teilen, Stiftung unterstützen“; „klimaresilient“ raus.
+- „In deiner Region“ als Zusage raus: H1 „Mit Menschen, die du wählst“, Region nur als Möglichkeit;
+  „Energy Sharing“ → „Stromcommunity“ (die Unternehmensseite grenzt sich von § 42c ab).
+- „Monatlich kündbar“ wieder markiert („gegen AGB des Partners prüfen“), „nicht länger als einen Monat gebunden“ raus.
+- Datenschutz-FAQ verweist nicht mehr auf die Stiftungs-Datenschutzerklärung als Quelle; Einwilligung nennt
+  den Lieferpartner als Empfänger, den Zweck und das Widerrufsrecht (alle drei Vorlagen).
+- `llms.txt` mit Entwurfshinweis, ohne markierte Aussagen (Gebiet, 18–29 ct, Kündigung, Stiftungsanteil).
+- „Partner“ nur noch für den Lieferpartner; das Gegenüber heißt „Erzeuger“, der Preis „Community-Preis“.
+- JSON-LD-FAQ enthält nur geprüfte Antworten, Wortlaut gleich der Seite; Partnername auch aus `preise.js`.
+- `Object.hasOwn` für die Einwilligung.
+Tests: Leitplanken jetzt auch über Meta, JSON-LD, `llms.txt` und Skripte; Markierungspflicht je Aussage;
+alle 19 Mutationen aus dem Review und eigene werden erkannt.
+
+Go-Live-Punkte dazu:
+- `robots.txt` im Repo wirkt auf der Projektseite (github.io/robingut-strom-neu/) nicht; Schutz nur über `noindex`
+  im HTML. `llms.txt` hat keinen Schutz, daher Entwurfshinweis.
+- Eigene Datenschutzerklärung der GbR (die verlinkte nennt die Stiftung als Verantwortliche), Rechtsgrundlage
+  der Weitergabe (Einwilligung vs. Art. 6 Abs. 1 lit. b) einheitlich festlegen.
+- „100 % Ökostrom“ mit Stromkennzeichnung/Herkunftsnachweis des Partners belegen.
+- `/landwirte/` und `/unternehmen/` gibt es auf der Live-Domain noch nicht (Sitemap, llms.txt).
+
+Nachprüfung (voll, 01.11.2026): **FREIGABE**. Akzeptiert für den Entwurf:
+- MITTEL: Footer aller drei Seiten verlinkt die Live-Datenschutzerklärung (Stiftung als Verantwortliche, ohne
+  Weitergabe an den Lieferpartner); Einwilligung nennt den Lieferpartner ohne Namen. **Vor jeder echten Nutzung
+  (Messe, Flyer, Newsletter) beheben**, nicht erst beim Go-Live: eigene Erklärung der GbR mit Partnernennung verlinken.
+- NIEDRIG: Verbotslisten erkennen Umformulierungen nicht („wächst der Wald“, „Wald fördern“, „nachhaltig“,
+  „klimaschonend“, „200 € weniger“, „aus deiner Region“ ohne „auch“, `areaServed`) – bei der nächsten Änderung ergänzen.
+- NIEDRIG: #wald „Sie pflanzt davon Mischwälder …“ knüpft an den markierten Anteil an; „davon“ streichen oder mitmarkieren.
+
+## 13. Startseite nach dem Meeting „Wirtschaftsplan ROBIN GUT Strom“ (01.11.2026)
+
+Quelle: Teams-Transkript (Timo, Dieter, Guido, Andreas). Umgesetzt:
+- Titelbild = Flyer-Motiv (Häuser, Halle, Windräder, Lichtbögen), `bilder/hero-community-*.webp`, aus dem
+  Flyer-PDF extrahiert (CMYK invertiert, `-negate`). Familienfoto raus (Guido: zu sehr Privatkunde; Dateien
+  `hero-familie-*` bleiben für eine spätere Privatkunden-Unterseite).
+- Dieter im Einstieg: Porträt (`bilder/dieter-koennes-*.webp`, Standbild aus eigenem Talk-Dreh, KlassenMedia), Zitat aus dem
+  Meeting markiert („freigeben lassen“), Bildnachweis „Foto Dieter Könnes: KlassenMedia“ im Footer.
+- „Sonne, Wind und Wasser“ statt „Solarstrom“ in Titel, Meta und Einstieg (Dieter: sonst irreführend).
+- `#fuer-wen` direkt unter den Einstieg (Guido/Dieter: Kopfbild, darunter die Zielgruppen); je Kachel markierter
+  Platzhalter für ein Statement. Echte Namen (Landwirt, Privatkunde, Solarteur) erst mit schriftlicher Einwilligung.
+- Platzhalter für das 30-s-Erklärvideo mit Dieter unter den drei Schritten.
+- Preis in Dieters Reihenfolge: Netz/Steuern/Abgaben → Erzeugerpreis → 1 ct Vermittlung (Leiste, FAQ, JSON-LD).
+
+Bewusst nicht übernommen:
+- „Verbraucher zahlen weniger“, „Bäume ohne Mehrkosten“ (Preis-/Umweltversprechen, Briefing verbietet das) –
+  jetzt auch in der Verbotsliste der Tests.
+- Timos „17 ct Netz, Steuern, Abgaben im Schnitt 2025“: BDEW 05/2025 nennt brutto 10,95 ct Netzentgelte +
+  12,71 ct Steuern/Abgaben/Umlagen = 23,66 ct; 17 ct passt nur ohne Mehrwertsteuer. Seite behält die markierte
+  regionale Spanne 18–29 ct, bis Timo die Zahl bestätigt.
+- Potenzialrechner bleibt von der Seite weg (Go-to-Market-Gutschein, nur im Vertriebsgespräch).
+
+Offen aus dem Meeting:
+- Erklärvideo drehen (8–10 s Dieter im Bild, dann Off über Schaubild); Statements mit Einwilligung einholen.
+- Decks Landwirte/Unternehmen im neuen Look als PDF-Download auf den Unterseiten (Timo liefert).
+- Blog für Sichtbarkeit (später); Energiemakler/Partner als Zielgruppe nachgelagert.
+- Zeitplan: Zwischenlösung Ende nächster Woche wegen Wechselwelle im November.
+- Spenderadressen der Stiftung (~2.000–2.400) nur mit passender Einwilligung für Strom-Werbung nutzen.
+- Herkunft des Flyer-Motivs (KI?) und Nutzungsrecht des Porträts bestätigen.
+
+Review (voll, 01.11.2026): **FREIGABE**, behoben danach:
+- M2: KI-Etikett des Titelbilds oben rechts, weit weg vom echten Porträt; Test, dass der Dieter-Block kein KI-Etikett trägt.
+- M3: Gebühr heißt überall „Plattformgebühr“ (Dieter sagte „Vermittlungsgebühr“, Partner und Live-Seite „Plattformgebühr“).
+- M4: Test gleicht Erzeugerspanne und Gebühr über Leiste, FAQ, JSON-LD, Tabelle, Rechner-Hinweis und llms.txt
+  sowie mit `E_COMMUNITY_CT` / `WSE_GEBUEHR_CT` ab.
+- N1/N2: Statement-Platzhalter fest formuliert, `object`/`embed` verboten, Solarstrom auch im JSON-LD,
+  Preisversprechen-Test inkl. `<title>`; `figure.dieter` mit `figcaption` als direktem Kind.
+Akzeptiert: N3 (Titelbild nur 1749 px breit, Play-Symbol ohne Funktion), N4 (Wind/Wasser im Titel, mit Partner
+bestätigen), überlebende Mutation „falsche Bildmaße“ (nur Layout-Sprung).
+M1 erledigt: Das Studioporträt (ohne Metadaten, Herkunft unklar; früheres Shooting 2019 ist ein anderes)
+ist ersetzt durch ein Standbild aus einem eigenen Talk-Dreh (`~/Downloads/Dieter Können Pod 17.png`, ROBIN GUT Shirt),
+Footer „Foto Dieter Könnes: KlassenMedia“. Offen: Herkunft/Lizenz des Flyer-Motivs (Guido).

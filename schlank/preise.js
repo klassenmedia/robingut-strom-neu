@@ -1,5 +1,5 @@
 // Regionale Netzentgelte und Grundpreis-Staffeln, übernommen aus build/preise.json
-// (Quelle: WeShareEnergy-Preis-API über robingut-potenzialrechner, abgerufen Juli 2026).
+// (Quelle: Preis-API des Lieferpartners über robingut-potenzialrechner, abgerufen Juli 2026).
 export const PREISE = Object.freeze({
   "13629": {
     "stadt": "Berlin",

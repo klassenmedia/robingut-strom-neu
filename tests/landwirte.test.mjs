@@ -67,6 +67,16 @@ pruefe("Firmen-Link fragt Standorte und Verbrauch ab", () => {
   assert.match(p.get("body"), /Jahresverbrauch/);
 });
 
+pruefe("Einwilligung kommt nie über die Prototypkette", () => {
+  Object.prototype.einwilligung = ["fremd"];
+  try {
+    assert.doesNotMatch(anfrageLink(null, "hof"), /fremd/);
+    assert.doesNotMatch(anfrageLink(null, "firma"), /fremd/);
+  } finally {
+    delete Object.prototype.einwilligung;
+  }
+});
+
 pruefe("ohne oder mit unbekannter Vorlage gilt die Hof-Vorlage", () => {
   assert.equal(anfrageLink(null), anfrageLink(null, "hof"));
   for (const art of ["toString", "__proto__", "constructor", "", undefined]) {
@@ -85,8 +95,9 @@ pruefe("Code steht in Betreff und Mailtext", () => {
 pruefe("Mailtext fragt die Weitergabe an den Partner ausdrücklich ab", () => {
   for (const art of ["hof", "firma"]) {
     const body = parameterAus(anfrageLink(null, art)).get("body");
-    assert.match(body, /an den Partner weitergeben/);
+    assert.match(body, /an den Lieferpartner weitergeben/);
     assert.match(body, /Bitte streichen Sie, was nicht zutrifft: ja \/ nein/);
+    assert.match(body, /jederzeit per Mail an info@robingut-strom\.de widerrufen/);
   }
 });
 
@@ -126,6 +137,13 @@ pruefe("Seite: vergebener Code setzt jeden Link mit seiner Vorlage und den Hinwe
   assert.equal(attrappe.links[1].href, anfrageLink("MESSE", "firma"));
   assert.equal(attrappe.hinweis.hidden, false);
   assert.equal(attrappe.hinweis.textContent, "Ihre Anfrage-Kennung: MESSE. Nennen Sie sie gern auch am Telefon.");
+});
+
+pruefe("Seite: Hinweis in Du-Form, wenn die Seite duzt", () => {
+  const attrappe = seitenAttrappe();
+  attrappe.hinweis.dataset = { ansprache: "du" };
+  verbindeSeite(attrappe, "?code=newsletter");
+  assert.equal(attrappe.hinweis.textContent, "Deine Anfrage-Kennung: NEWSLETTER. Nenn sie gern auch am Telefon.");
 });
 
 pruefe("Seite: fremder oder böswilliger Code ändert nichts", () => {

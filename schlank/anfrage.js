@@ -1,4 +1,4 @@
-// Anfrage-Links für Technik-Check (Landwirte) und Lastgang-Analyse (Unternehmen).
+// Anfrage-Links für Technik-Check (Landwirte), Lastgang-Analyse (Unternehmen) und Rückruf (Startseite).
 // Ein Aktionscode aus der Adresse (Flyer, Messe, Brief) wandert in Betreff und
 // Mailtext, damit sich jede Anfrage ihrem Kanal zuordnen lässt. Die Seite
 // selbst speichert nichts.
@@ -8,10 +8,11 @@ const CODE_MUSTER = /^(?=.*[A-Za-z0-9])[A-Za-z0-9-]{2,24}$/;
 // Nur vergebene Codes gelten, sonst ließe sich z. B. „500-EURO-BONUS“ als Code auf die Seite schreiben.
 export const BEKANNTE_CODES = Object.freeze(["MESSE", "FLYER", "BRIEF", "NEWSLETTER", "PARTNER"]);
 
-const EINWILLIGUNG = [
-  "ROBIN GUT darf meine Anfrage für die Prüfung an den Partner weitergeben.",
+const EINWILLIGUNG = Object.freeze([
+  "ROBIN GUT darf meine Anfrage für die Prüfung an den Lieferpartner weitergeben.",
   "Bitte streichen Sie, was nicht zutrifft: ja / nein",
-];
+  "Das können Sie jederzeit per Mail an info@robingut-strom.de widerrufen.",
+]);
 
 export const VORLAGEN = Object.freeze({
   hof: Object.freeze({
@@ -43,6 +44,24 @@ export const VORLAGEN = Object.freeze({
       "Telefon für den Rückruf:",
     ]),
   }),
+  rueckruf: Object.freeze({
+    betreff: "Rückruf ROBIN GUT Strom",
+    zeilen: Object.freeze([
+      "Hallo ROBIN GUT Team,",
+      "",
+      "ruft mich bitte zurück, ich habe eine Frage zu ROBIN GUT Strom.",
+      "",
+      "Name:",
+      "Telefon:",
+      "Am besten erreichbar:",
+      "Ich habe eine Solaranlage: ja / nein",
+    ]),
+    einwilligung: Object.freeze([
+      "ROBIN GUT darf meine Anfrage an den Lieferpartner weitergeben, damit er Fragen zu Tarif oder Vertrag beantwortet.",
+      "Bitte streich, was nicht zutrifft: ja / nein",
+      "Das kann ich jederzeit per Mail an info@robingut-strom.de widerrufen.",
+    ]),
+  }),
 });
 
 export function codeAusAdresse(suche) {
@@ -56,7 +75,8 @@ export function anfrageLink(code, art = "hof") {
   const vorlage = Object.hasOwn(VORLAGEN, art) ? VORLAGEN[art] : VORLAGEN.hof;
   const gueltig = typeof code === "string" && BEKANNTE_CODES.includes(code) ? code : null;
   const betreff = gueltig ? `${vorlage.betreff} · Code ${gueltig}` : vorlage.betreff;
-  const text = [...vorlage.zeilen, "", ...EINWILLIGUNG, ...(gueltig ? ["", `Code: ${gueltig}`] : [])].join("\r\n");
+  const einwilligung = Object.hasOwn(vorlage, "einwilligung") ? vorlage.einwilligung : EINWILLIGUNG;
+  const text = [...vorlage.zeilen, "", ...einwilligung, ...(gueltig ? ["", `Code: ${gueltig}`] : [])].join("\r\n");
   return `mailto:${ANFRAGE_MAIL}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(text)}`;
 }
 
@@ -68,7 +88,9 @@ export function verbindeSeite(dokument, suche) {
   }
   const hinweis = dokument.getElementById("code-hinweis");
   if (hinweis) {
-    hinweis.textContent = `Ihre Anfrage-Kennung: ${code}. Nennen Sie sie gern auch am Telefon.`;
+    hinweis.textContent = hinweis.dataset?.ansprache === "du"
+      ? `Deine Anfrage-Kennung: ${code}. Nenn sie gern auch am Telefon.`
+      : `Ihre Anfrage-Kennung: ${code}. Nennen Sie sie gern auch am Telefon.`;
     hinweis.hidden = false;
   }
 }

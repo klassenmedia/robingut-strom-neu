@@ -421,7 +421,8 @@ pruefe("jeder Link führt auf einen Anker, eine eigene Datei oder https", () => 
     else {
       // Pfade ab der Wurzel landen auf github.io außerhalb des Projekts.
       assert.ok(ziel && !ziel.startsWith("/"), `Link ab der Wurzel: ${ziel}`);
-      const datei = join(ROOT, "schlank", ziel.split(/[?#]/)[0]);
+      const pfad = ziel.split(/[?#]/)[0];
+      const datei = join(ROOT, "schlank", pfad.endsWith("/") ? `${pfad}index.html` : pfad);
       assert.ok(existsSync(datei) && statSync(datei).isFile(), `Link führt ins Leere: ${ziel}`);
     }
   }

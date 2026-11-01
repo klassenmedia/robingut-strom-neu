@@ -445,16 +445,15 @@ Erst „Dunkel & premium“, am 31.10.2026 auf Wunsch von Andreas umgestellt auf
 sonnig**: warmes Weiß (#fffdf5) als Grund, dunkles Waldgrün (#17301c) als Schrift,
 Akzentgrün #356a0c für Links und Zahlen, Limette für Buttons, Sonnengelb (#ffc83d) für
 Entwurfsleiste, Kicker-Striche und Icon-Kacheln, weiße Karten mit weichem Schatten,
-Footer dunkelgrün. Text-Kontraste auf den Vollton-Flächen ≥ 4,5:1, Akzentgrün ≥ 5:1 und Entwurfsmarkierung (#9a5200, 3 px) ≥ 4,5:1 per Test; über Foto und Verläufen nur geschätzt. Jedes Foto mit Menschen trägt direkt „Symbolbild, KI-generiert“ (Art. 50 AI Act, UWG). `og:image` zeigt bis zum Go-Live bewusst auf die Live-Domain. Security-Review helles Design (31.10.2026, kurz, zweimal): **FREIGABE**; Markierung, KI-Hinweise und Akzentgrün behoben. Akzeptiert (NIEDRIG): Vertrauensleiste im Hero am rechten Rand knapp (geschätzt ~4,1:1 Grau), zweite `mark.check`-Regel könnte die Markierung aufheben, ohne dass ein Test greift. Headlines in **Stardos Stencil** (wie das Logo),
-Fließtext **Inter**. Hero-Grafik und Familienbeispiel als SVG mit fließender
+Footer dunkelgrün. Text-Kontraste auf den Vollton-Flächen ≥ 4,5:1, Akzentgrün ≥ 5:1 und Entwurfsmarkierung (#9a5200, 3 px) ≥ 4,5:1 per Test; über Foto und Verläufen nur geschätzt. Jedes Foto mit Menschen trägt direkt „Symbolbild, KI-generiert“ (Art. 50 AI Act, UWG). `og:image` zeigt bis zum Go-Live bewusst auf die Live-Domain. Security-Review helles Design (31.10.2026, kurz, zweimal): **FREIGABE**; Markierung, KI-Hinweise und Akzentgrün behoben. Akzeptiert (NIEDRIG): Vertrauensleiste im Hero am rechten Rand knapp (geschätzt ~4,1:1 Grau), zweite `mark.check`-Regel könnte die Markierung aufheben, ohne dass ein Test greift. Schrift seit 01.11.2026 **Miriam Libre** wie im Flyer (Headlines fett in Versalien, Fließtext regulär). Hero-Grafik und Familienbeispiel als SVG mit fließender
 Energie-Linie, Puls-Linie aus dem Logo als Bodenlinie, Waldsilhouette am Ende
 des Wald-Abschnitts. Scroll-Einblendung nur per CSS (animation-timeline: view()),
 bei prefers-reduced-motion aus.
 
 Schriften liegen lokal in schlank/fonts/ (kein Abruf bei Google beim
-Seitenbesuch): Stardos Stencil 400/700 von Google Fonts, Inter 400/600/700 aus
-~/robin-gut-erklaervideo. Beide unter SIL Open Font License 1.1, Lizenztexte liegen als
-`OFL-StardosStencil.txt` und `OFL-Inter.txt` daneben.
+Seitenbesuch): Miriam Libre 400/600/700, Latin-Subset aus @fontsource/miriam-libre 5.3.0
+(Schrift laut pdffonts im Flyer RG-Flyer-15-09-2026). SIL Open Font License 1.1, Lizenztext
+`OFL-MiriamLibre.txt` daneben (aus google/fonts).
 
 Logo: schlank/logo-strom.png aus ~/Downloads/robin_gut_strom_transparent.png
 (480 px, 32 Farben). Besser vor Go-Live: das SVG-Logo der Live-Seite.
@@ -507,7 +506,7 @@ gesetze-im-internet.de/eeg_2014/__23b.html). Konkrete Cent-Werte stehen nur mark
 
 | Untrusted Input | Worst Case | Gegenmaßnahme | Test |
 |---|---|---|---|
-| `?code=` in der Adresse | Header-Injection in den Mail-Link (`%0D%0ABcc:`), HTML/Skript im Text, Code fremder Kampagnen vorgetäuscht | nur `[A-Za-z0-9-]`, 2–24 Zeichen, sonst verworfen; Ausgabe per `encodeURIComponent` in `href` und `textContent`; Code ist nur Statistik, gibt keine Rechte | Negativ-Tests mit CRLF, `<script>`, Überlänge, Umlauten, mehrfachem Parameter |
+| `?code=` in der Adresse (`schlank/anfrage.js`) | Header-Injection in den Mail-Link (`%0D%0ABcc:`), HTML/Skript im Text, Code fremder Kampagnen vorgetäuscht | nur `[A-Za-z0-9-]`, 2–24 Zeichen, sonst verworfen; Ausgabe per `encodeURIComponent` in `href` und `textContent`; Code ist nur Statistik, gibt keine Rechte | Negativ-Tests mit CRLF, `<script>`, Überlänge, Umlauten, mehrfachem Parameter |
 | Inhalt der Anfrage | Personendaten ohne Einwilligung beim Partner | Seite verarbeitet nichts: Anfrage geht als Mail aus dem eigenen Postfach. Weitergabe an den Partner fragt der Mailtext ausdrücklich ab | Test auf Einwilligungssatz im Mailtext |
 
 Worst Case insgesamt: gefälschter Link mit Schadcode im Parameter. Gegenmaßnahme oben plus
@@ -515,7 +514,7 @@ Meta-CSP wie auf der Startseite (`script-src 'self'`, `form-action 'none'`).
 
 Aktionscodes (nur Statistik, nie Abrechnungsgrundlage, weil jeder sie an Links hängen kann):
 `MESSE`, `FLYER`, `BRIEF`, `NEWSLETTER`, `PARTNER`, z. B. `/landwirte/?code=messe`. Neue Codes in
-`BEKANNTE_CODES` (schlank/landwirte/anfrage.js) eintragen; unbekannte werden verworfen.
+`BEKANNTE_CODES` (schlank/anfrage.js) eintragen; unbekannte werden verworfen.
 
 Stand 01.11.2026: Seite gebaut, 27 Tests (Code-Prüfung, Seitenanbindung, Sie-Form, Leitplanken,
 Links, KI-Hinweis), Desktop und Handy im Browser geprüft. Titelbild `bilder/hof-sonne-*.webp`
@@ -531,3 +530,73 @@ Offen:
 - Go-Live: canonical/og:url erst setzen, wenn `/landwirte/` auf der Domain existiert
 - Auf dem Handy ist die Landwirte-Seite von der Startseite aus nur über die Kacheln erreichbar,
   die mit dem Umbau der Startseite kommen (Navigation ist dort ausgeblendet)
+
+---
+
+## 11. Unternehmen-Seite `/unternehmen/` und Quellen für Landwirte (01.11.2026)
+
+Quellen: Unternehmenspräsentation „ROBIN GUT Stromcommunity für Unternehmen“ (17 Folien) und
+Flyer „RG-Flyer-15-09-2026_Korrekturen2“. Der Flyer ist **nicht** der Messeflyer v13b: Er
+enthält keine Rechenbeispiele für Landwirte, die Platzhalter bleiben. „Günstiger Ökostrom“ und
+„Mehr Erlös“ aus dem Flyer stehen bewusst nicht auf der Seite (Briefing: keine Preisversprechen).
+
+Übernommen auf `/landwirte/` (ROBIN GUTs eigenes Material, daher ohne Markierung): Preis selbst
+vereinbaren (Folie 9), Betriebsstätten nutzen oder deutschlandweit teilen (Flyer), Technik:
+viertelstündliche Messung, Fernwirktechnik ab 25 kW, Lesekopf für den Bezug, Anschluss bleibt
+(Folie 10), Erzeugung aus PV, Wind, Wasserkraft, Biogas (Folie 9). Neuer dritter Weg „An Unternehmen“.
+
+`/unternehmen/` nach Briefing C: Botschaft „gespart wird beim Energiepreis, Netzentgelte, Umlagen
+und Stromsteuer fallen je Entnahmestelle an“, drei Säulen, Bilanzkreis, Technik, beide
+Rechnungen aus der Präsentation (Kundenfall Bauunternehmen, Modellrechnung Logistik; jede Zahl per Test abgeglichen), Absatz für Kommunen und
+Stadtwerke ohne Pilot-Stadtwerk, nächster Schritt „Lastgang-Analyse anfragen“. Sie-Form, obwohl
+die Präsentation duzt. Überschrift „Kosten senken“ aus der Präsentation bewusst nicht übernommen.
+
+| Risiko | Worst Case | Gegenmaßnahme | Test |
+|---|---|---|---|
+| Zahlen, Ersparnis, Erlös | Abmahnung (UWG, irreführende Werbung), Kunde fordert versprochene Ersparnis ein | Kundenfall vs. „Modellrechnung (Annahme)“ getrennt; Annahmen und Netzentgelte unter jeder Rechnung; Ergebnisse der Modellrechnung markiert; kein „günstiger“, „sparen X“, „% weniger“ außerhalb der Rechnungen | exakter Zahlenabgleich je Beispiel (Reihenfolge und Einheit), Verbotslisten inkl. Meta-Angaben |
+| `data-anfrage` | Prototype-Schlüssel wählen eine fremde Vorlage | `Object.hasOwn`, sonst `hof` | „unbekannte Vorlage gilt die Hof-Vorlage“ |
+
+Security-Review voll (01.11.2026): **BLOCKIERT** – Logistik-Beispiel war eine Modellrechnung (PV erst zu bauen, 5 ct angenommen) als „Praxisbeispiel“ mit 44 %; Zahlentests fingen Tippfehler kaum (18/20 Mutanten überlebt); Stromsteuer als befreit lesbar; „Autarkie“; „übernehmen wir“ beim Bilanzkreis. Alles behoben: Modellrechnung gekennzeichnet und Ergebnis markiert, Zahlen werden jetzt vollständig in Reihenfolge abgeglichen, Netzentgelt- und Partnerregeln als Test.
+
+Markiert, bis bestätigt: Veröffentlichung der Kundenfälle, „bundesweit, anders als § 42c EnWG“
+(offene § 42c-Frage), Stiftungsanteil (UWG).
+
+Anfrage-Link liegt jetzt gemeinsam in `schlank/anfrage.js` mit Vorlagen `hof` und `firma`
+(`data-anfrage="…"`); unbekannte Vorlagen fallen auf `hof` zurück. Gemeinsame Seitenprüfungen in
+`tests/seiten-hilfen.mjs`; Tests `tests/landwirte.test.mjs`, `tests/unternehmen.test.mjs`.
+Startseite: „Für Organisationen“ zeigt jetzt auf `/unternehmen/`. Vereine haben dort noch keinen
+eigenen Abschnitt – beim Umbau der Startseite klären.
+
+### Nachtrag 01.11.2026: Präsentation für Landwirte und Schrift
+
+Quelle: „Die ROBIN GUT Stromcommunity für Landwirte“ (17 Folien, April 2026). Daraus auf `/landwirte/`:
+die drei Säulen (Betriebsvernetzung, erst selbst nutzen, Überschuss vermarkten) und beide
+Praxisbeispiele als „(Annahme)“, Zahlen per Test nachgerechnet:
+1. 100 kWp, 95.000 kWh, 30 % Eigenverbrauch, 66.500 kWh × 5 ct → 10 ct: 3.325 € → 6.650 €.
+2. 200 kWp Bestandsanlage, 190.000 kWh: 5 ct + 25 ct Marktprämie = 57.000 € → 10 ct + 25 ct = 66.500 €;
+   nach dem Förderende 19.000 € statt 9.500 €.
+
+Bewusst nicht übernommen oder entschärft:
+- „Netzentgelte & Umlagen werden reduziert“ / „Energiekosten sinken auf null“ (Folie 5) widerspricht der
+  Unternehmenspräsentation („fallen je Entnahmestelle wie gewohnt an“) – auf der Seite steht die vorsichtige Fassung.
+- „ohne Investition“ / „ohne zusätzliche Investition“ – ab 25 kW ist Fernwirktechnik nötig; auf der Seite
+  steht „Kosten für Messung, Fernwirktechnik und Vermarktung sind nicht eingerechnet“.
+- Annahme, dass die Community die ganze Menge abnimmt, steht sichtbar unter jedem Beispiel.
+- Beispiel 2 (Marktprämie bleibt beim Verkauf in die Community) ist mit `mark.check` markiert:
+  **rechtlich prüfen**, u. a. Doppelvermarktungsverbot § 80 EEG. Vor der Messe von Timo klären lassen.
+- Die Folie zu Beispiel 2 bucht 50.000 kWh „Lieferung an eigene Betriebsbereiche“ als Erlös. Das ist eher
+  eingesparter Zukauf als Erlös; auf der Seite nicht aufgeschlüsselt.
+
+Schrift: Miriam Libre wie im Flyer (siehe Abschnitt 9), ersetzt Stardos Stencil und Inter.
+
+Nachprüfung (voll, 01.11.2026): **FREIGABE** – HOCH und alle MITTEL behoben und per Mutation bestätigt
+(Reviewer 16/23, eigene Runde 34/35; Rest gleichwertig oder unten). Akzeptiert (NIEDRIG), vor Go-Live erledigen:
+- Verbotslisten erweitern (`halbier`, `doppelt so viel`, `liefern wir`, `bilanzieren wir`), Netzentgelt-Sätze je Kachel/FAQ einzeln prüfen
+- `/landwirte/` „Aus der Region … Menschen in Ihrer Nähe“ passt nicht zu „deutschlandweit“ → „Sie entscheiden, ob Ihr Strom in der Region bleibt“
+- `/landwirte/` Beispiel 2 „am Spotmarkt“ → „angenommene Anschlussvergütung“ wie in Beispiel 1
+- `/unternehmen/` „Vergleichsbasis laut Präsentation“ → „Vergleichsbasis (zu bestätigen)“
+- Threat Model: Worst Case „Landwirt verliert die Marktprämie“ ergänzen
+- „bundesweit/deutschlandweit“ unmarkiert (Kernaussage; § 42c-Frage bei Timo)
+
+Vor der Messe von Timo/Dieter klären: § 80 EEG (Marktprämie bei Community-Verkauf), Community-Preis 5 ct
+(Unternehmen) vs. 10 ct (Landwirte), Freigabe der Kundenfälle, Stiftungsanteil je kWh.

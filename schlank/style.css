@@ -1,8 +1,6 @@
-@font-face { font-family: "Inter"; src: url("fonts/inter-regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
-@font-face { font-family: "Inter"; src: url("fonts/inter-semibold.woff2") format("woff2"); font-weight: 600; font-display: swap; }
-@font-face { font-family: "Inter"; src: url("fonts/inter-bold.woff2") format("woff2"); font-weight: 700; font-display: swap; }
-@font-face { font-family: "Stardos Stencil"; src: url("fonts/stardos-stencil-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
-@font-face { font-family: "Stardos Stencil"; src: url("fonts/stardos-stencil-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Miriam Libre"; src: url("fonts/miriam-libre-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Miriam Libre"; src: url("fonts/miriam-libre-600.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Miriam Libre"; src: url("fonts/miriam-libre-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
 
 :root {
   --bg: #fffdf5;
@@ -24,8 +22,8 @@
   --check: #9a5200;
   --radius: 18px;
   --schatten: 0 1px 2px rgba(23, 48, 28, .06), 0 12px 32px rgba(23, 48, 28, .08);
-  --sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --stencil: "Stardos Stencil", "Rockwell", Georgia, serif;
+  --sans: "Miriam Libre", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --stencil: "Miriam Libre", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -115,10 +113,10 @@ mark.check { background: transparent; color: inherit; border-bottom: 3px dashed 
 .hero-text > div { max-width: 600px; }
 .hero h1 { text-shadow: 0 0 28px rgba(255, 253, 245, .9), 0 0 8px rgba(255, 253, 245, .7); }
 .hero h1 .hl { color: var(--akzent); }
-.hero-hof h1 { font-size: clamp(34px, 4.6vw, 64px); max-width: 12em; }
-.hero-hof .hero-text > div { max-width: 500px; }
+.hero-unter h1 { font-size: clamp(34px, 4.6vw, 64px); max-width: 12em; }
+.hero-unter .hero-text > div { max-width: 500px; }
 @media (min-width: 761px) {
-  .hero-hof .hero-glow { background: linear-gradient(0deg, var(--bg) 0%, rgba(255, 253, 245, 0) 26%), linear-gradient(90deg, rgba(255, 253, 245, .95) 0%, rgba(255, 253, 245, .86) 40%, rgba(255, 253, 245, .1) 62%, rgba(255, 253, 245, 0) 100%); }
+  .hero-unter .hero-glow { background: linear-gradient(0deg, var(--bg) 0%, rgba(255, 253, 245, 0) 26%), linear-gradient(90deg, rgba(255, 253, 245, .95) 0%, rgba(255, 253, 245, .86) 40%, rgba(255, 253, 245, .1) 62%, rgba(255, 253, 245, 0) 100%); }
 }
 .lead { font-size: 19px; color: var(--text-2); max-width: 34em; }
 
@@ -180,6 +178,14 @@ mark.check { background: transparent; color: inherit; border-bottom: 3px dashed 
 .steps p { color: var(--muted); margin: 0; }
 
 .paths { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 40px; }
+.paths-3 { grid-template-columns: repeat(3, 1fr); }
+.praxis { display: grid; gap: 18px; padding: 32px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--schatten); margin-top: 24px; }
+.praxis h3 { font-size: 24px; margin: 0; }
+.praxis-zahlen { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.praxis-zahlen li { padding: 18px; border-radius: 14px; background: var(--bg-2); color: var(--text-2); font-size: 15px; line-height: 1.35; }
+.praxis-zahlen strong { display: block; font-family: var(--stencil); font-size: 30px; line-height: 1.05; color: var(--akzent); margin-bottom: 6px; }
+.praxis p { margin: 0; color: var(--text-2); }
+.praxis .small { color: var(--muted); }
 .card { position: relative; overflow: hidden; display: flex; flex-direction: column; padding: 36px; }
 .card::before {
   content: ""; position: absolute; inset: -40% -40% auto auto; width: 320px; height: 320px; pointer-events: none;
@@ -189,7 +195,10 @@ mark.check { background: transparent; color: inherit; border-bottom: 3px dashed 
 .card-bild { width: calc(100% + 72px); max-width: none; margin: -36px -36px 28px; aspect-ratio: 16 / 9; object-fit: cover; border-bottom: 1px solid var(--line); }
 .tag { align-self: flex-start; margin-bottom: 14px; padding: 4px 12px; border-radius: 999px; background: var(--lime-dim); color: var(--green); font-size: 13px; font-weight: 600; letter-spacing: .04em; }
 .card h3 { font-size: 27px; }
-.beispiel { padding: 32px; border-style: dashed; border-color: var(--line-lime); }
+.beispiel { display: grid; gap: 18px; padding: 32px; margin-top: 24px; border-style: dashed; border-color: var(--line-lime); }
+.beispiel h3 { font-size: 24px; margin: 0; }
+.beispiel p { margin: 0; color: var(--text-2); }
+.beispiel .small { color: var(--muted); }
 .card-lead { color: var(--text-2); }
 .ticks { list-style: none; padding: 0; margin: 0 0 30px; }
 .ticks li { position: relative; padding-left: 30px; margin-bottom: 11px; color: var(--text-2); }
@@ -330,7 +339,7 @@ mark.check { background: transparent; color: inherit; border-bottom: 3px dashed 
 }
 @media (max-width: 900px) {
   .example, .forest { grid-template-columns: 1fr; gap: 36px; }
-  .steps, .roles, .voices, .paths { grid-template-columns: 1fr; }
+  .steps, .roles, .voices, .paths, .paths-3, .praxis-zahlen { grid-template-columns: 1fr; }
   .stats-row { grid-template-columns: repeat(2, 1fr); }
   .stats-row > div:nth-child(3) { border-left: 0; padding-left: 0; }
   .stats-row > div:nth-child(n+3) { border-top: 1px solid var(--line); }

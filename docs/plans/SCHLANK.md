@@ -663,3 +663,45 @@ Nachprüfung (voll, 01.11.2026): **FREIGABE**. Akzeptiert für den Entwurf:
 - NIEDRIG: Verbotslisten erkennen Umformulierungen nicht („wächst der Wald“, „Wald fördern“, „nachhaltig“,
   „klimaschonend“, „200 € weniger“, „aus deiner Region“ ohne „auch“, `areaServed`) – bei der nächsten Änderung ergänzen.
 - NIEDRIG: #wald „Sie pflanzt davon Mischwälder …“ knüpft an den markierten Anteil an; „davon“ streichen oder mitmarkieren.
+
+## 13. Startseite nach dem Meeting „Wirtschaftsplan ROBIN GUT Strom“ (01.11.2026)
+
+Quelle: Teams-Transkript (Timo, Dieter, Guido, Andreas). Umgesetzt:
+- Titelbild = Flyer-Motiv (Häuser, Halle, Windräder, Lichtbögen), `bilder/hero-community-*.webp`, aus dem
+  Flyer-PDF extrahiert (CMYK invertiert, `-negate`). Familienfoto raus (Guido: zu sehr Privatkunde; Dateien
+  `hero-familie-*` bleiben für eine spätere Privatkunden-Unterseite).
+- Dieter im Einstieg: Porträt (`bilder/dieter-koennes-*.webp`, aus `~/dieterkoennes-website`), Zitat aus dem
+  Meeting markiert („freigeben lassen“), Bildnachweis im Footer markiert.
+- „Sonne, Wind und Wasser“ statt „Solarstrom“ in Titel, Meta und Einstieg (Dieter: sonst irreführend).
+- `#fuer-wen` direkt unter den Einstieg (Guido/Dieter: Kopfbild, darunter die Zielgruppen); je Kachel markierter
+  Platzhalter für ein Statement. Echte Namen (Landwirt, Privatkunde, Solarteur) erst mit schriftlicher Einwilligung.
+- Platzhalter für das 30-s-Erklärvideo mit Dieter unter den drei Schritten.
+- Preis in Dieters Reihenfolge: Netz/Steuern/Abgaben → Erzeugerpreis → 1 ct Vermittlung (Leiste, FAQ, JSON-LD).
+
+Bewusst nicht übernommen:
+- „Verbraucher zahlen weniger“, „Bäume ohne Mehrkosten“ (Preis-/Umweltversprechen, Briefing verbietet das) –
+  jetzt auch in der Verbotsliste der Tests.
+- Timos „17 ct Netz, Steuern, Abgaben im Schnitt 2025“: BDEW 05/2025 nennt brutto 10,95 ct Netzentgelte +
+  12,71 ct Steuern/Abgaben/Umlagen = 23,66 ct; 17 ct passt nur ohne Mehrwertsteuer. Seite behält die markierte
+  regionale Spanne 18–29 ct, bis Timo die Zahl bestätigt.
+- Potenzialrechner bleibt von der Seite weg (Go-to-Market-Gutschein, nur im Vertriebsgespräch).
+
+Offen aus dem Meeting:
+- Erklärvideo drehen (8–10 s Dieter im Bild, dann Off über Schaubild); Statements mit Einwilligung einholen.
+- Decks Landwirte/Unternehmen im neuen Look als PDF-Download auf den Unterseiten (Timo liefert).
+- Blog für Sichtbarkeit (später); Energiemakler/Partner als Zielgruppe nachgelagert.
+- Zeitplan: Zwischenlösung Ende nächster Woche wegen Wechselwelle im November.
+- Spenderadressen der Stiftung (~2.000–2.400) nur mit passender Einwilligung für Strom-Werbung nutzen.
+- Herkunft des Flyer-Motivs (KI?) und Nutzungsrecht des Porträts bestätigen.
+
+Review (voll, 01.11.2026): **FREIGABE**, behoben danach:
+- M2: KI-Etikett des Titelbilds oben rechts, weit weg vom echten Porträt; Test, dass der Dieter-Block kein KI-Etikett trägt.
+- M3: Gebühr heißt überall „Plattformgebühr“ (Dieter sagte „Vermittlungsgebühr“, Partner und Live-Seite „Plattformgebühr“).
+- M4: Test gleicht Erzeugerspanne und Gebühr über Leiste, FAQ, JSON-LD, Tabelle, Rechner-Hinweis und llms.txt
+  sowie mit `E_COMMUNITY_CT` / `WSE_GEBUEHR_CT` ab.
+- N1/N2: Statement-Platzhalter fest formuliert, `object`/`embed` verboten, Solarstrom auch im JSON-LD,
+  Preisversprechen-Test inkl. `<title>`; `figure.dieter` mit `figcaption` als direktem Kind.
+Akzeptiert: N3 (Titelbild nur 1749 px breit, Play-Symbol ohne Funktion), N4 (Wind/Wasser im Titel, mit Partner
+bestätigen), überlebende Mutation „falsche Bildmaße“ (nur Layout-Sprung).
+**Bedingung vor dem Veröffentlichen (M1):** Fotograf und Nutzungsrecht des Dieter-Porträts für ROBIN GUT Strom
+schriftlich klären, Namen in den Footer; bis dahin nur lokal. Ebenso Herkunft/Lizenz des Flyer-Motivs.

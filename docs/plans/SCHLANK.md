@@ -670,8 +670,8 @@ Quelle: Teams-Transkript (Timo, Dieter, Guido, Andreas). Umgesetzt:
 - Titelbild = Flyer-Motiv (Häuser, Halle, Windräder, Lichtbögen), `bilder/hero-community-*.webp`, aus dem
   Flyer-PDF extrahiert (CMYK invertiert, `-negate`). Familienfoto raus (Guido: zu sehr Privatkunde; Dateien
   `hero-familie-*` bleiben für eine spätere Privatkunden-Unterseite).
-- Dieter im Einstieg: Porträt (`bilder/dieter-koennes-*.webp`, aus `~/dieterkoennes-website`), Zitat aus dem
-  Meeting markiert („freigeben lassen“), Bildnachweis im Footer markiert.
+- Dieter im Einstieg: Porträt (`bilder/dieter-koennes-*.webp`, Standbild aus eigenem Talk-Dreh, KlassenMedia), Zitat aus dem
+  Meeting markiert („freigeben lassen“), Bildnachweis „Foto Dieter Könnes: KlassenMedia“ im Footer.
 - „Sonne, Wind und Wasser“ statt „Solarstrom“ in Titel, Meta und Einstieg (Dieter: sonst irreführend).
 - `#fuer-wen` direkt unter den Einstieg (Guido/Dieter: Kopfbild, darunter die Zielgruppen); je Kachel markierter
   Platzhalter für ein Statement. Echte Namen (Landwirt, Privatkunde, Solarteur) erst mit schriftlicher Einwilligung.
@@ -703,5 +703,6 @@ Review (voll, 01.11.2026): **FREIGABE**, behoben danach:
   Preisversprechen-Test inkl. `<title>`; `figure.dieter` mit `figcaption` als direktem Kind.
 Akzeptiert: N3 (Titelbild nur 1749 px breit, Play-Symbol ohne Funktion), N4 (Wind/Wasser im Titel, mit Partner
 bestätigen), überlebende Mutation „falsche Bildmaße“ (nur Layout-Sprung).
-**Bedingung vor dem Veröffentlichen (M1):** Fotograf und Nutzungsrecht des Dieter-Porträts für ROBIN GUT Strom
-schriftlich klären, Namen in den Footer; bis dahin nur lokal. Ebenso Herkunft/Lizenz des Flyer-Motivs.
+M1 erledigt: Das Studioporträt (ohne Metadaten, Herkunft unklar; früheres Shooting 2019 ist ein anderes)
+ist ersetzt durch ein Standbild aus einem eigenen Talk-Dreh (`~/Downloads/Dieter Können Pod 17.png`, ROBIN GUT Shirt),
+Footer „Foto Dieter Könnes: KlassenMedia“. Offen: Herkunft/Lizenz des Flyer-Motivs (Guido).

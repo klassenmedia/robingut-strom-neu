@@ -475,7 +475,7 @@ pruefe("jedes Foto mit Menschen ist direkt als KI-Symbolbild gekennzeichnet", ()
     assert.doesNotMatch(hinweis[2], /\shidden\b|aria-hidden/, `KI-Hinweis versteckt bei ${bild}`);
   }
   assert.match(ohneKommentare, /Fotos: KI-generierte Symbolbilder/);
-  assert.match(ohneKommentare, /Porträt Dieter Könnes: <mark class="check"[^>]*>[^<]+<\/mark>/, "echtes Foto mit Bildnachweis, nicht als KI");
+  assert.match(ohneKommentare, /Foto Dieter Könnes: KlassenMedia/, "echtes Foto mit Bildnachweis, nicht als KI");
   const css = readFileSync(join(ROOT, "schlank", "style.css"), "utf8");
   for (const [, regel] of css.matchAll(/\.(?:ki-hinweis|hero-ki|wald-bild figcaption)\b[^{]*\{([^}]*)\}/g)) {
     assert.doesNotMatch(regel, /display:\s*none|visibility:\s*hidden|opacity:\s*0[;\s]|z-index:\s*-|font-size:\s*0[;\s]|left:\s*-|clip/);

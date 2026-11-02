@@ -2,7 +2,7 @@
 // Verbrauch und heutigen Tarif. Arbeitspreis und Grundpreis wie im geprüften
 // Entwurf vom September (build/09_js.html); der Vergleich mit dem heutigen
 // Tarif rechnet hier aber Grundpreis und Lesekopf mit ein.
-import { PREISE } from "./preise.js?v=3";
+import { PREISE } from "./preise.js?v=4";
 
 export const COMMUNITY_ANTEIL = 50;        // Prozent des Verbrauchs über Energie-Links
 export const E_COMMUNITY_CT = 9.5;         // Verkaufspreis Einspeiser, Mitte der Empfehlung 7–11 ct
@@ -195,16 +195,31 @@ function verbindeSeite() {
   const form = feld("r-form");
   if (!form) return;
 
+  const verbrauchsKnoepfe = form.querySelectorAll("[data-verbrauch]");
+  const knopfLeiste = feld("r-verbrauch-knoepfe");
+  if (knopfLeiste) knopfLeiste.hidden = false;
+
   const ausgeben = () => {
-    const r = berechne(feld("r-plz").value, feld("r-verbrauch").value,
+    const verbrauch = feld("r-verbrauch").value;
+    const r = berechne(feld("r-plz").value, verbrauch,
       feld("r-istpreis").value, feld("r-istgrundpreis").value);
     for (const [id, text] of Object.entries(anzeige(r))) {
       const ziel = feld(id);
       if (ziel) ziel.textContent = text;
     }
+    const kwh = kwhAusEingabe(verbrauch);
+    for (const knopf of verbrauchsKnoepfe) {
+      knopf.setAttribute("aria-pressed", String(Number(knopf.dataset.verbrauch) === kwh));
+    }
   };
 
   form.addEventListener("input", ausgeben);
+  form.addEventListener("click", (ereignis) => {
+    const knopf = ereignis.target.closest("[data-verbrauch]");
+    if (!knopf) return;
+    feld("r-verbrauch").value = knopf.dataset.verbrauch;
+    ausgeben();
+  });
   form.addEventListener("submit", (ereignis) => {
     ereignis.preventDefault();
     ausgeben();

@@ -143,6 +143,26 @@ pruefe("Für wen: drei Kacheln, Landwirte und Unternehmen auf eigenen Seiten, Ko
   assert.match(unternehmen, /<section id="kommunen"/);
 });
 
+pruefe("Für wen: Überschrift und Knöpfe nennen die Zielgruppe, Landwirte mit Suchbegriff Ü20", () => {
+  const teil = abschnitt("fuer-wen");
+  assert.match(teil, /<h2>Für Haushalte, Landwirte und Unternehmen<\/h2>/);
+  const knoepfe = [...teil.matchAll(/<article class="card"[\s\S]*?<a class="btn btn-green" href="[^"]+">([^<]+)<\/a>/g)].map((m) => m[1]);
+  assert.deepEqual(knoepfe, ["Tarif für deinen Haushalt prüfen", "Mehr für Landwirte mit Ü20-Anlage", "Mehr für Unternehmen und Gewerbe"]);
+  assert.match(teil, /EEG-Förderung läuft nach gut 20 Jahren aus \(Ü20-Anlage\)/);
+  const landwirte = readFileSync(join(ROOT, "schlank", "landwirte", "index.html"), "utf8");
+  assert.match(landwirte, /Nach gut 20 Jahren endet die feste Vergütung \(Ü20-Anlage\)/, "Zielseite des Knopfs nennt Ü20");
+});
+
+pruefe("Jeder Link zum Partner kündigt den Seitenwechsel an", () => {
+  const links = [...ohneKommentare.matchAll(/<a [^>]*href="https:\/\/weshareenergy\.de[^"]*"[^>]*>([\s\S]*?)<\/a>/g)];
+  assert.equal(links.length, 2);
+  for (const link of links) {
+    assert.match(link[1], /^[^<]+ <span aria-hidden="true">↗<\/span>$/);
+    const danach = ohneKommentare.slice(link.index, ohneKommentare.indexOf("</section>", link.index));
+    assert.match(danach, /<p class="partner-hinweis">Preis und Anmeldung findest du auf der Seite unseres Partners\.<\/p>/);
+  }
+});
+
 pruefe("Fragen decken die Themen aus dem Briefing ab", () => {
   const fragen = [...abschnitt("fragen").matchAll(/<summary>([^<]+)<\/summary>/g)].map((m) => m[1]);
   for (const thema of [/Wechsel|wechsle/, /Lesekopf/, /kostet/, /Sonne/, /kündig/, /Daten/]) {
@@ -179,7 +199,7 @@ pruefe("Rückruf-Vorlage in Du-Form mit Einwilligungsfrage", () => {
 
 pruefe("Skripte: Rechner und Anfrage-Link, beide vom eigenen Server", () => {
   const skripte = [...html.matchAll(/<script\b[^>]*>/g)].map((m) => m[0]).filter((t) => !/ld\+json/.test(t));
-  assert.deepEqual(skripte, ['<script type="module" src="rechner.js?v=3">', '<script type="module" src="anfrage.js?v=7">']);
+  assert.deepEqual(skripte, ['<script type="module" src="rechner.js?v=4">', '<script type="module" src="anfrage.js?v=7">']);
 });
 
 console.log("Leitplanken");

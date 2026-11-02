@@ -191,6 +191,16 @@ mark.check { background: transparent; color: inherit; border-bottom: 3px dashed 
 }
 .calc-field input::placeholder { color: #8a9a8b; }
 .calc-field input:focus { outline: none; border-color: var(--akzent); background: #fff; box-shadow: 0 0 0 3px rgba(164, 210, 53, .3); }
+.verbrauch-knoepfe { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.verbrauch-knoepfe[hidden] { display: none; }
+.verbrauch-knopf {
+  min-height: 38px; padding: 7px 12px; font: inherit; font-size: 13px; font-weight: 600; color: var(--text-2); cursor: pointer;
+  background: #fff; border: 1px solid rgba(23, 48, 28, .22); border-radius: 999px;
+  transition: background .15s ease, border-color .15s ease;
+}
+.verbrauch-knopf:hover { border-color: var(--line-lime); background: #fbfff0; }
+.verbrauch-knopf:active { transform: scale(.97); }
+.verbrauch-knopf[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: #fff; }
 .calc-hint { margin: 10px 0 0; font-size: 14px; color: var(--muted); }
 .calc-status { min-height: 1.4em; margin: 12px 0 0; font-size: 15px; color: var(--text-2); }
 
@@ -212,6 +222,8 @@ mark.check { background: transparent; color: inherit; border-bottom: 3px dashed 
 .calc-detail dd { margin: 0; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .calc-disc { margin: 18px 0 0; font-size: 14px; line-height: 1.6; color: var(--muted); }
 .calc-cta { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 28px; margin-top: 24px; }
+.partner-hinweis { margin: 0; font-size: 14px; color: var(--muted); }
+.kontakt-knoepfe + .partner-hinweis { margin-top: 12px; }
 
 .facts-title { margin-top: 56px; }
 .facts { width: 100%; border-collapse: collapse; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); font-size: 16px; }

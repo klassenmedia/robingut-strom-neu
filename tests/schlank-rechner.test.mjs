@@ -318,8 +318,14 @@ function bauSeite() {
     addEventListener(typ, fn) { this.handler[typ] = fn; },
   });
   ["r-form", "r-plz", "r-verbrauch", "r-istpreis", "r-istgrundpreis"].forEach(element);
-  return { elemente, document: { getElementById: (id) => element(id) } };
+  const knoepfe = [...html.matchAll(/data-verbrauch="(\d+)"/g)].map((m) => ({
+    dataset: { verbrauch: m[1] }, attribute: {},
+    setAttribute(name, wert) { this.attribute[name] = wert; },
+  }));
+  elemente["r-form"].querySelectorAll = (auswahl) => (auswahl === "[data-verbrauch]" ? knoepfe : []);
+  return { elemente, knoepfe, document: { getElementById: (id) => element(id) } };
 }
+const klickAuf = (ziel) => ({ target: { closest: (auswahl) => (auswahl === "[data-verbrauch]" ? ziel : null) } });
 
 const seite = bauSeite();
 seite.elemente["r-verbrauch"].value = "2500";
@@ -337,6 +343,55 @@ pruefe("Rechner reagiert auf Eingaben", () => {
   seite.elemente["r-form"].handler.input();
   assert.equal(seite.elemente["r-ersparnis"].textContent, "20 €");
   assert.equal(seite.elemente["r-monat"].textContent, "83,28 €");
+});
+
+pruefe("Verbrauchs-Knöpfe: sichtbare Typwerte, Voreinstellung ist einer davon", () => {
+  const form = html.match(/<form id="r-form"[\s\S]*?<\/form>/)[0];
+  const knoepfe = [...form.matchAll(/<button type="button" class="verbrauch-knopf" data-verbrauch="(\d+)" aria-pressed="(true|false)" aria-label="([^"]+)">([^<]+)<\/button>/g)]
+    .map((m) => [m[4], Number(m[1]), m[2], m[3]]);
+  assert.deepEqual(knoepfe, [
+    ["2 Personen", 2500, "true", "2 Personen, 2.500 kWh"],
+    ["3 Personen", 3500, "false", "3 Personen, 3.500 kWh"],
+    ["4 Personen", 4000, "false", "4 Personen, 4.000 kWh"],
+  ]);
+  assert.equal(form.match(/<button\b/g).length, 3, "jeder Knopf braucht type=button, sonst sendet er das Formular");
+  assert.match(form, /id="r-verbrauch"[^>]*value="2500"/);
+  // Unter der kleinsten abgerufenen Staffel wäre der Grundpreis nur hochgerechnet
+  const kleinsteStaffel = Math.min(...Object.values(PREISE).flatMap((p) => p.grundpreisStaffel.map(([kwh]) => kwh)));
+  for (const [, kwh] of knoepfe) assert.ok(kwh >= kleinsteStaffel && kwh < GROSSVERBRAUCH_KWH, `${kwh} kWh außerhalb der Staffel`);
+  assert.match(form, /<div id="r-verbrauch-knoepfe" class="verbrauch-knoepfe" role="group" aria-label="Typischer Verbrauch" hidden>/,
+    "ohne JavaScript tun die Knöpfe nichts, also erst das Skript zeigt sie");
+  const css = readFileSync(join(ROOT, "schlank", "style.css"), "utf8");
+  assert.match(css, /\.verbrauch-knoepfe\[hidden\] \{ display: none; \}/, "display:flex der Leiste überstimmt sonst hidden");
+});
+
+pruefe("Verbrauchs-Knöpfe erscheinen mit dem Skript, Voreinstellung markiert", () => {
+  assert.equal(seite.elemente["r-verbrauch-knoepfe"].hidden, false);
+  assert.deepEqual(seite.knoepfe.map((k) => k.attribute["aria-pressed"]), ["true", "false", "false"]);
+});
+
+pruefe("Klick auf Verbrauchs-Knopf setzt den Wert, rechnet neu und markiert den Knopf", () => {
+  const gedrueckt = () => seite.knoepfe.map((k) => k.attribute["aria-pressed"]);
+  const [zwei, , vier] = seite.knoepfe;
+  seite.elemente["r-form"].handler.click(klickAuf(vier));
+  assert.equal(seite.elemente["r-verbrauch"].value, "4000");
+  assert.notEqual(seite.elemente["r-monat"].textContent, "83,28 €");
+  assert.deepEqual(gedrueckt(), ["false", "false", "true"]);
+  const tippe = (wert) => { seite.elemente["r-verbrauch"].value = wert; seite.elemente["r-form"].handler.input(); };
+  tippe("3000");
+  assert.deepEqual(gedrueckt(), ["false", "false", "false"]);
+  tippe("3500");
+  assert.deepEqual(gedrueckt(), ["false", "true", "false"], "getippter Typwert markiert seinen Knopf");
+  for (const schreibweise of ["2.500", " 2500 ", "2 500"]) {
+    tippe(schreibweise);
+    assert.deepEqual(gedrueckt(), ["true", "false", "false"], `„${schreibweise}“ rechnet mit 2500 kWh`);
+  }
+  tippe("3000");
+  seite.elemente["r-form"].handler.click(klickAuf(null));
+  assert.equal(seite.elemente["r-verbrauch"].value, "3000", "Klick neben die Knöpfe ändert nichts");
+  seite.elemente["r-form"].handler.click(klickAuf(zwei));
+  assert.equal(seite.elemente["r-monat"].textContent, "83,28 €");
+  assert.deepEqual(gedrueckt(), ["true", "false", "false"]);
 });
 
 pruefe("Absenden lädt die Seite nicht neu", () => {

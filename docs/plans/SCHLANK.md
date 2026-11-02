@@ -706,3 +706,30 @@ bestätigen), überlebende Mutation „falsche Bildmaße“ (nur Layout-Sprung).
 M1 erledigt: Das Studioporträt (ohne Metadaten, Herkunft unklar; früheres Shooting 2019 ist ein anderes)
 ist ersetzt durch ein Standbild aus einem eigenen Talk-Dreh (`~/Downloads/Dieter Können Pod 17.png`, ROBIN GUT Shirt),
 Footer „Foto Dieter Könnes: KlassenMedia“. Offen: Herkunft/Lizenz des Flyer-Motivs (Guido).
+Live seit 01.11.2026 (PR #7, 05b814c); Andreas bestätigt, dass die Rechte am Flyer-Motiv bei ROBIN GUT liegen.
+
+## 14. Feinschliff nach externen Audits (02.11.2026)
+
+Quelle: zwei KI-Audits (Gemini, DeepSeek) der Live-Seite, gegen den echten Stand geprüft.
+
+Umgesetzt:
+- Partner-Links mit `↗` und Hinweis „Preis und Anmeldung findest du auf der Seite unseres Partners.“ (ohne Namen).
+- Zielgruppen-Überschrift „Für Haushalte, Landwirte und Unternehmen“, sprechende Kartenknöpfe, „Ü20-Anlage“ im Landwirte-Text.
+- Rechner: Verbrauchs-Knöpfe 2 / 3 / 4 Personen = 2.500 / 3.500 / 4.000 kWh (Stromspiegel 2025, Wohnung mit
+  elektrischem Warmwasser, laut Sekundärquellen; Originaltabelle stromspiegel.de vor Go-Live gegenprüfen), erst mit
+  JavaScript sichtbar, `aria-pressed` folgt dem geparsten Feldwert. Kein 1-Person-Knopf: Die Grundpreis-Staffel
+  ist erst ab 2.500 kWh abgerufen, darunter würde hochgerechnet. Beim Neuabruf eine Stufe 1.500 kWh aufnehmen.
+
+Bewusst nicht übernommen: Partnername (Entscheidung Timo/Dieter), KI-Hinweise nur im Footer, nur Privathaushalte
+im Einstieg (Briefing: alle Zielgruppen), Kicker über der H1, Geminis JSON-LD-Vorlage (ungeprüfte Aussagen
+„100 % Ökostrom“, „Versorgung jederzeit gesichert“). Schon vorhanden waren noindex, Meta-Description, FAQPage,
+Schaubild „virtuelles Kabel“ und vorbelegte Rechnerwerte.
+
+Offen bei Timo: Darf „Energy Sharing“ / § 42c EnWG genannt werden (Gebiet „ganz Deutschland“ vs. Bilanzierungsgebiet)?
+Brauchen reine Verbraucher den Lesekopf? Rückruf-Formular statt `mailto:` erst mit Server und Datenschutzerklärung der GbR.
+
+Review (02.11.2026, voll für den Rechner, kurz für Texte): **FREIGABE**, Nachreview der Fixes **FREIGABE**.
+Behoben: kein Knopf unter der kleinsten Grundpreis-Stufe, aria-pressed über den geparsten Wert, Knöpfe erst mit JS,
+aria-label mit kWh, Ü20 auch auf /landwirte/. Akzeptiert: Grundpreis-Staffel ist eine Treppe (2.500–14.999 kWh gleich),
+beim Neuabruf Stufen 3.500/4.000 aufnehmen; keine Radio-Gruppe/Live-Region; Test koppelt an `closest`.
+MITTEL offen beim Kunden: Partnername nach § 5b Abs. 1 Nr. 2 UWG neben Preis und Anmeldung (rechtlich klären).

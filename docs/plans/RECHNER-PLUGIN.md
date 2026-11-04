@@ -169,6 +169,19 @@ dem WSE-Standard (ohne Slug); Bedeutung mit Timo bestätigen.
     damit sehr wahrscheinlich die Besucher-IP; ein Beweis ist von außen nicht möglich.
   Shortcode in den Entwürfen 1241, 1243 und 1246 statt des WSE-Musters (Block 325), jeweils in
   einer Gruppe mit Anker `rechner`; Vorschau 1241 rechnet 102 €.
+- 04.11.2026: Version 1.0.1 (Commit 8b624aa). Eigenes Straßen-Dropdown statt `datalist`
+  (Combobox mit Liste, Maus, Pfeiltasten, Enter, Esc, Ansage für Screenreader) und Hinweis
+  „Steht auf deinem Kontoauszug oder deiner letzten Stromrechnung“ beim Abschlag. Drei kurze
+  Reviews, alle FREIGABE; nachgezogen:
+  - Ergebnis bleibt abgeblendet, solange es zu einer geänderten Adresse gehören kann.
+  - Alte Antworten verfallen, gleiche Anfragen gehen nicht doppelt raus.
+  - Die Suche stoppt nach der Auswahl.
+  - Genaue Meldung, ob Straße oder Hausnummer fehlt.
+  - Ansage „nicht verfügbar“ bei Störung; Autofill ohne Fokus rechnet normal.
+  Neuer Browser-Test `tests/plugin-oberflaeche.test.mjs` (21 Fälle, Playwright aus
+  `~/node_modules` mit installiertem Chrome über `channel: "chrome"`, REST per Attrappe;
+  auf anderen Rechnern Playwright installieren oder `RGR_BROWSER_CHANNEL` setzen). Mutationen
+  auf Kopie: 14 von 14 erkannt. Upload von 1.0.1: Ersetzen in WordPress durch Andreas.
 - Offen: Provision/Aufschlag mit Timo bestätigen; Gutschein-Frage mit Dieter; Lesekopf-Preise
   (Stand Sept. 2026) bestätigen; Datenschutzerklärung um den Rechner ergänzen; Plugin-Upload ins
   Live-WordPress und Einbau in die Entwürfe nur nach Freigabe. Der Harness-Ordner gehört nicht

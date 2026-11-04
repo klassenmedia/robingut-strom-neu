@@ -180,6 +180,27 @@ pruefe("ohne Abschlag kein Vergleich", () => {
   assert.equal(R.berechne(P, null).vergleich, null);
 });
 
+console.log("Straßen-Dropdown");
+
+pruefe("Pfeil runter springt vom Feld auf den ersten Vorschlag und läuft im Kreis", () => {
+  assert.equal(R.naechsterVorschlag(-1, 3, "ArrowDown"), 0);
+  assert.equal(R.naechsterVorschlag(0, 3, "ArrowDown"), 1);
+  assert.equal(R.naechsterVorschlag(2, 3, "ArrowDown"), 0);
+});
+
+pruefe("Pfeil hoch springt vom Feld auf den letzten Vorschlag", () => {
+  assert.equal(R.naechsterVorschlag(-1, 3, "ArrowUp"), 2);
+  assert.equal(R.naechsterVorschlag(0, 3, "ArrowUp"), 2);
+  assert.equal(R.naechsterVorschlag(2, 3, "ArrowUp"), 1);
+});
+
+pruefe("ohne Vorschläge oder mit anderer Taste bleibt nichts gewählt bzw. unverändert", () => {
+  assert.equal(R.naechsterVorschlag(-1, 0, "ArrowDown"), -1);
+  assert.equal(R.naechsterVorschlag(1, 3, "a"), 1);
+  assert.equal(R.naechsterVorschlag(5, 3, "ArrowDown"), 0);
+  assert.equal(R.naechsterVorschlag(5, 3, "ArrowUp"), 2);
+});
+
 console.log("Anzeige");
 
 pruefe("Euro und Cent deutsch formatiert", () => {

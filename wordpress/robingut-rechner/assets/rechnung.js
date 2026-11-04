@@ -88,6 +88,15 @@
     };
   }
 
+  // Pfeiltasten im Straßen-Dropdown; -1 heißt: Fokus steht im Eingabefeld.
+  function naechsterVorschlag(aktuell, anzahl, taste) {
+    if (anzahl <= 0) return -1;
+    const gueltig = aktuell >= 0 && aktuell < anzahl ? aktuell : -1;
+    if (taste === "ArrowDown") return (gueltig + 1) % anzahl;
+    if (taste === "ArrowUp") return gueltig <= 0 ? anzahl - 1 : gueltig - 1;
+    return aktuell;
+  }
+
   const zahl = (wert, stellen) =>
     wert.toLocaleString("de-DE", { minimumFractionDigits: stellen, maximumFractionDigits: stellen });
   const euro = (wert, stellen = 0) => `${zahl(wert, stellen)} €`;
@@ -95,7 +104,7 @@
 
   const api = {
     VERBRAUCH_MIN, VERBRAUCH_MAX, LESEKOPF_MIETE_MONAT, LESEKOPF_KAUF,
-    kwhAusEingabe, betragAusEingabe, pruefeVerbrauch, pruefePreise, berechne, euro, cent,
+    kwhAusEingabe, betragAusEingabe, pruefeVerbrauch, pruefePreise, berechne, naechsterVorschlag, euro, cent,
   };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else wurzel.RGRechnung = Object.freeze(api);

@@ -59,8 +59,11 @@ function rgr_shortcode(): string
       <div class="rgr-felder">
         <div class="rgr-feld rgr-feld-breit">
           <label for="<?php echo esc_attr($id); ?>-strasse">Straße</label>
-          <input id="<?php echo esc_attr($id); ?>-strasse" name="strasse" type="text" maxlength="100" autocomplete="address-line1" list="<?php echo esc_attr($id); ?>-strassen">
-          <datalist id="<?php echo esc_attr($id); ?>-strassen"></datalist>
+          <div class="rgr-kombi">
+            <input id="<?php echo esc_attr($id); ?>-strasse" name="strasse" type="text" maxlength="100" autocomplete="off" placeholder="Anfang tippen, z. B. Köl" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="<?php echo esc_attr($id); ?>-strassen">
+            <ul id="<?php echo esc_attr($id); ?>-strassen" class="rgr-vorschlaege" role="listbox" aria-label="Vorschläge für die Straße" hidden></ul>
+            <p class="rgr-ansage" aria-live="polite"></p>
+          </div>
         </div>
         <div class="rgr-feld">
           <label for="<?php echo esc_attr($id); ?>-hausnummer">Hausnummer</label>
@@ -72,7 +75,8 @@ function rgr_shortcode(): string
       <summary>Was zahlst du heute? Dann zeigen wir dir deine Ersparnis.</summary>
       <div class="rgr-feld">
         <label for="<?php echo esc_attr($id); ?>-abschlag">Dein Abschlag im Monat (€)</label>
-        <input id="<?php echo esc_attr($id); ?>-abschlag" name="abschlag" type="text" inputmode="decimal" maxlength="7" placeholder="z. B. 95">
+        <input id="<?php echo esc_attr($id); ?>-abschlag" name="abschlag" type="text" inputmode="decimal" maxlength="7" placeholder="z. B. 95" aria-describedby="<?php echo esc_attr($id); ?>-abschlag-hinweis">
+        <p id="<?php echo esc_attr($id); ?>-abschlag-hinweis" class="rgr-klein rgr-feldhinweis">Steht auf deinem Kontoauszug oder deiner letzten Stromrechnung.</p>
       </div>
     </details>
   </form>

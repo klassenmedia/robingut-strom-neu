@@ -2,7 +2,7 @@
 /**
  * Plugin Name: ROBIN GUT Preisrechner
  * Description: Zeigt den monatlichen Strompreis von ROBIN GUT Strom mit den Live-Preisen unseres Partners. Einbinden mit [robingut_rechner].
- * Version: 1.0.0
+ * Version: 1.0.1
  * Requires at least: 6.4
  * Requires PHP: 8.0
  * Author: KlassenMedia
@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-const RGR_VERSION = '1.0.0';
+const RGR_VERSION = '1.0.1';
 const RGR_DATEI = __FILE__;
 
 require_once __DIR__ . '/includes/logik.php';

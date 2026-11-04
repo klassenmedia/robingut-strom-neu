@@ -181,7 +181,10 @@ dem WSE-Standard (ohne Slug); Bedeutung mit Timo bestätigen.
   Neuer Browser-Test `tests/plugin-oberflaeche.test.mjs` (21 Fälle, Playwright aus
   `~/node_modules` mit installiertem Chrome über `channel: "chrome"`, REST per Attrappe;
   auf anderen Rechnern Playwright installieren oder `RGR_BROWSER_CHANNEL` setzen). Mutationen
-  auf Kopie: 14 von 14 erkannt. Upload von 1.0.1: Ersetzen in WordPress durch Andreas.
+  auf Kopie: 14 von 14 erkannt. Upload von 1.0.1: Ersetzen in WordPress durch Andreas
+  (der automatische Klick wurde blockiert). Live geprüft: neue `rechner.js` wird ausgeliefert,
+  Routen 200/403 wie zuvor, Privathaushalte-Vorschau 41812 → „Haupt“, Pfeil + Enter →
+  Hauptstr. 5 → 102 €, Hinweis beim Abschlag sichtbar, keine Konsolenfehler.
 - Offen: Provision/Aufschlag mit Timo bestätigen; Gutschein-Frage mit Dieter; Lesekopf-Preise
   (Stand Sept. 2026) bestätigen; Datenschutzerklärung um den Rechner ergänzen; Plugin-Upload ins
   Live-WordPress und Einbau in die Entwürfe nur nach Freigabe. Der Harness-Ordner gehört nicht

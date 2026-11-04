@@ -136,6 +136,16 @@ Wording:
   `[robingut_rechner]`, siehe `RECHNER-PLUGIN.md`) ersetzt in 1241, 1243 und 1246 das
   WSE-Muster „iFrameRechner“. Live-Startseite und alte Seiten nutzen weiter das Muster.
 
+- 04.11.2026 (Andreas: mehr Luft, Titelbild größer):
+  - Startseite: Das Titelbild ist jetzt 90vh hoch (Desktop 1.110 von 1.233 px Fensterhöhe,
+    Handy 760 von 844). Die H2 „Die Strom-Community …“ und der Rechner stehen in einem eigenen
+    Bereich mit x-large-Innenabstand. Vorher hingen sie in der alten Spaltenstruktur der
+    Live-Startseite, und der Rechner ragte 73 px in die Zielgruppen-Fläche.
+  - Rechner-Gruppe auf Privathaushalte und Preise mit medium-Abstand oben und unten.
+  - Alle eigenen Bereiche (Gruppen über die volle Breite) haben jetzt x-large statt large
+    (100 statt 80 px, auf dem Handy entsprechend weniger).
+  - Nachgemessen: keine zwei Bereiche mehr mit unter 64 px Abstand zwischen ihren Inhalten.
+
 ## Umstellen (Checkliste)
 
 1. Vollbackup (Mittwald oder WordPress-Export) und Stand notieren.

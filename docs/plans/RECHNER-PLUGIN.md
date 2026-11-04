@@ -157,6 +157,18 @@ dem WSE-Standard (ohne Slug); Bedeutung mit Timo bestätigen.
     `REMOTE_ADDR` darauf achten. `strtolower` hängt erst ab PHP 8.2 nicht mehr von der Locale ab;
     live läuft PHP 8.3. Kein eigener Test für das ZIP-Skript (prüft sich beim Bauen selbst).
   - Attrappe von `wp_make_link_relative` nutzt jetzt den Core-Regex.
+- 04.11.2026: PR #9. Plugin 1.0.0 per ZIP in www.robingut-strom.de hochgeladen und aktiviert
+  (WordPress hat dabei die Übersetzungen von WP Mail SMTP und Yoast selbst aktualisiert).
+  Live geprüft per curl:
+  - Preis 41747/2.500 → 200, 1.221,99 € (= API); `GET_LOCK` funktioniert.
+  - `Cache-Control: no-store` und `Expires: 0` kommen unverändert an.
+  - Fremde Origin → 403 ohne `Access-Control-Allow-Origin`, auch beim Preflight; GET → 404,
+    `_jsonp` → 403.
+  - Straßensuche und Ortsauswahl antworten.
+  - In den Antworten keine Proxy-Hinweise (kein Via, X-Cache, Cloudflare), `REMOTE_ADDR` ist
+    damit sehr wahrscheinlich die Besucher-IP; ein Beweis ist von außen nicht möglich.
+  Shortcode in den Entwürfen 1241, 1243 und 1246 statt des WSE-Musters (Block 325), jeweils in
+  einer Gruppe mit Anker `rechner`; Vorschau 1241 rechnet 102 €.
 - Offen: Provision/Aufschlag mit Timo bestätigen; Gutschein-Frage mit Dieter; Lesekopf-Preise
   (Stand Sept. 2026) bestätigen; Datenschutzerklärung um den Rechner ergänzen; Plugin-Upload ins
   Live-WordPress und Einbau in die Entwürfe nur nach Freigabe. Der Harness-Ordner gehört nicht

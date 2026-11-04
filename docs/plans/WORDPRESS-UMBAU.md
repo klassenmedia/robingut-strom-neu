@@ -132,6 +132,10 @@ Wording:
     Handy um und zeigt auf /community/; beim Umstellen auf /privathaushalte/ ändern).
   - Review noch nicht gelaufen; vor dem Umstellen nötig (Umfang voll, weil Zahlen und Preise).
 
+- 04.11.2026: Eigener Preisrechner (Plugin „ROBIN GUT Preisrechner“, Shortcode
+  `[robingut_rechner]`, siehe `RECHNER-PLUGIN.md`) ersetzt in 1241, 1243 und 1246 das
+  WSE-Muster „iFrameRechner“. Live-Startseite und alte Seiten nutzen weiter das Muster.
+
 ## Umstellen (Checkliste)
 
 1. Vollbackup (Mittwald oder WordPress-Export) und Stand notieren.

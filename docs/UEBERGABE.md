@@ -18,7 +18,7 @@ umgebaut** (Team pflegt Texte selbst), der statische Entwurf in `schlank/` ist n
 | Statischer Entwurf (Vorlage) | `schlank/`, als GitHub Page: https://klassenmedia.github.io/robingut-strom-neu/schlank/ |
 | Preisrechner-Plugin | `wordpress/robingut-rechner/` (Shortcode `[robingut_rechner]`) |
 | Pläne und Stand | `docs/plans/WORDPRESS-UMBAU.md`, `docs/plans/RECHNER-PLUGIN.md`, `docs/plans/SCHLANK.md` |
-| Code-Stand | Branch `rechner-plugin`, PR #9 (offen, nicht gemergt) |
+| Code-Stand | `main` (PR #9 am 05.11.2026 gemergt, 3aeccf9) |
 | Potenzialrechner (Berater-Tool, separat) | privates Repo `klassenmedia/robingut-bepreisung`, läuft auf dem CX33 |
 
 Zugänge: WordPress-Admin auf Live und Release mit den eigenen Logins (Release ist eine Kopie,

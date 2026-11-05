@@ -146,6 +146,26 @@ Wording:
     (100 statt 80 px, auf dem Handy entsprechend weniger).
   - Nachgemessen: keine zwei Bereiche mehr mit unter 64 px Abstand zwischen ihren Inhalten.
 
+- 05.11.2026: Umstellung auf **release.robingut-strom.de** (vollständige Kopie mit All-in-One
+  WP Migration, Basic-Auth-Schutz, Freigabe Andreas: „kannst live stellen“):
+  - 1230 Landwirte und 1243 Privathaushalte veröffentlicht.
+  - Inhalt 1244 → 1110 (Template No Title), 1245 → 1045, 1246 → 19. Die Entwürfe 1244–1246
+    bleiben liegen. Vorher geprüft: Die letzten fremden Revisionen dieser Seiten stammen aus
+    Mai/Juni, es ging also nichts verloren.
+  - 1241 als „Startseite“ (`startseite`) veröffentlicht und unter Lesen als statische
+    Startseite gesetzt. Guidos Text-Änderungen vom 04.11. abends bleiben erhalten.
+    Achtung: Die H1 sagt jetzt „Die Nr.1 Energy Sharing Plattform“, eine
+    Spitzenstellungswerbung, die einen Beleg braucht (UWG).
+  - Navigation 68 hat den Inhalt von 1247. Konzept (17) und Community (21) sind Entwurf.
+    Template-Teil „unsere-kunden“: Der Button heißt „Mehr für Privathaushalte“ und führt auf
+    /privathaushalte/. Das Template `home` ist unverändert und bleibt der Rückweg.
+  - Rechner-Plugin 1.0.2 hochgeladen. Es schickt `credentials: same-origin`, weil die
+    Anfragen hinter Basic Auth sonst mit 401 abgewiesen wurden. W3TC-Cache geleert.
+  - Geprüft: Alle Menüpunkte laden (200). Rechner auf Startseite, Privathaushalte und Preise,
+    41747 → 102 €. Review zu 1.0.2: FREIGABE. Hinweis: Der Basic-Auth-Benutzername sollte
+    kein WP-Benutzername sein, sonst greift die Prüfung der Anwendungspasswörter.
+  - Live-Seite www.robingut-strom.de unverändert.
+
 ## Umstellen (Checkliste)
 
 1. Vollbackup (Mittwald oder WordPress-Export) und Stand notieren.

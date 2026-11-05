@@ -166,6 +166,21 @@ Wording:
     kein WP-Benutzername sein, sonst greift die Prüfung der Anwendungspasswörter.
   - Live-Seite www.robingut-strom.de unverändert.
 
+- 05.11.2026 (Release, Chrome als Andreas):
+  - Datenschutzerklärung (66): neuer Abschnitt „Preisrechner“ hinter „Webhosting“, Text aus
+    `docs/texte/datenschutz-preisrechner.md`, Blöcke im Stil der Seite (alle 154 gültig).
+    Markiert ist, ob der Partner dort mit Namen stehen soll. Vor dem Go-Live rechtlich prüfen.
+  - Yoast-Titel und -Beschreibungen für 1241, 1243, 1230, 1110, 1045, 19, 154 und 23 aus
+    `docs/texte/yoast-meta.md`. Gesetzt über `wp.data.dispatch('yoast-seo/editor').updateData()`
+    und danach `savePost()`, weil Yoast die Felder nicht über die REST-API annimmt. Im Quelltext
+    aller acht Seiten geprüft. Danach den W3TC-Cache geleert.
+  - Nebenwirkung beim Speichern im Editor: Ultimate Blocks vergibt neue `blockID`s (1241), und
+    Essential Blocks erzeugt sein CSS neu (1045, dabei fällt das ungenutzte Glas-Effekt-CSS
+    weg). Der Inhalt ist sonst gleich, per Revisionsvergleich geprüft. Die übrigen sechs Seiten
+    haben keine neue Revision.
+  - Offen: Der Website-Name in Yoast heißt noch „Robin Gut Strom“ (globale Einstellung, nur
+    nach Rückfrage). „Über uns“ nennt den Partner noch mit Namen.
+
 ## Umstellen (Checkliste)
 
 1. Vollbackup (Mittwald oder WordPress-Export) und Stand notieren.

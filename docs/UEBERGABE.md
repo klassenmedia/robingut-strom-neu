@@ -84,8 +84,12 @@ Auf der Live-Seite liegen die neuen Seiten nur als Entwürfe, dort läuft noch P
 
 ## Offen
 
-- **Vor dem öffentlichen Einbau:** Datenschutzerklärung um den Rechner ergänzen (PLZ, Ort,
-  Straße, Hausnummer gehen an WSE).
+- Datenschutzerklärung: Der Abschnitt „Preisrechner“ steht seit 05.11. auf Release (Text in
+  `docs/texte/datenschutz-preisrechner.md`). Vor dem Go-Live rechtlich prüfen lassen und
+  entscheiden, ob der Partner dort mit Namen steht (markiert).
+- „Über uns“ (154) nennt den Partner noch mit Namen, das gehört zu den Markierungen.
+- Website-Name in Yoast lautet noch „Robin Gut Strom“ statt „ROBIN GUT Strom“ (globale
+  Einstellung, nur nach Rückfrage ändern).
 - Timo: Ist der Aufschlag im ROBIN-GUT-Tarif (+0,90 ct/kWh und +0,21 €/Monat netto gegenüber dem
   WSE-Standard) die Provision bzw. der Stiftungsanteil? Außerdem Plattformgebühr-Lesart,
   § 80 EEG (Landwirte-Beispiel 2), Community-Preise 5 ct vs. 10 ct.
@@ -93,8 +97,9 @@ Auf der Live-Seite liegen die neuen Seiten nur als Entwürfe, dort läuft noch P
 - Guido: Die H1 der Release-Startseite lautet „Die Nr.1 Energy Sharing Plattform“. Das ist eine
   Spitzenstellungsbehauptung und braucht einen Beleg (UWG).
 - Energy Sharing / § 42c EnWG und „ganz Deutschland“ mit dem Partner klären.
-- Alle gestrichelten Markierungen auflösen; Yoast-Titel und -Beschreibungen setzen;
-  Weiterleitungen für /konzept/ und /community/ (Yoast Premium oder Plugin).
+- Alle gestrichelten Markierungen auflösen; Weiterleitungen für /konzept/ und /community/
+  (Yoast Premium oder Plugin). Yoast-Titel und -Beschreibungen sind seit 05.11. auf Release
+  gesetzt (`docs/texte/yoast-meta.md`).
 - Bekommt die Seite IPv6, braucht der Rechner zusätzlich ein Limit je /48
   (siehe `RECHNER-PLUGIN.md`).
 - Der Potenzialrechner (`robingut-bepreisung`) kennt den Ort-Fall `requires_city_selection`

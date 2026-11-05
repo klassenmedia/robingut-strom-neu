@@ -186,6 +186,7 @@ dem WSE-Standard (ohne Slug); Bedeutung mit Timo bestätigen.
   Routen 200/403 wie zuvor, Privathaushalte-Vorschau 41812 → „Haupt“, Pfeil + Enter →
   Hauptstr. 5 → 102 €, Hinweis beim Abschlag sichtbar, keine Konsolenfehler.
 - Offen: Provision/Aufschlag mit Timo bestätigen; Gutschein-Frage mit Dieter; Lesekopf-Preise
-  (Stand Sept. 2026) bestätigen; Datenschutzerklärung um den Rechner ergänzen; Plugin-Upload ins
+  (Stand Sept. 2026) bestätigen; Datenschutz-Abschnitt (seit 05.11. auf Release, Text in
+  `docs/texte/datenschutz-preisrechner.md`) rechtlich prüfen lassen; Plugin-Upload ins
   Live-WordPress und Einbau in die Entwürfe nur nach Freigabe. Der Harness-Ordner gehört nicht
   ins ZIP für WordPress.

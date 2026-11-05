@@ -4,6 +4,7 @@
 //   node tests/plugin-rechnung.test.mjs
 
 import { createRequire } from "node:module";
+import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
 
 const require = createRequire(import.meta.url);
@@ -199,6 +200,14 @@ pruefe("ohne Vorschläge oder mit anderer Taste bleibt nichts gewählt bzw. unve
   assert.equal(R.naechsterVorschlag(1, 3, "a"), 1);
   assert.equal(R.naechsterVorschlag(5, 3, "ArrowDown"), 0);
   assert.equal(R.naechsterVorschlag(5, 3, "ArrowUp"), 2);
+});
+
+console.log("Anfragen");
+
+pruefe("Rechner schickt Zugangsdaten nur an die eigene Seite (Passwortschutz per Basic Auth)", () => {
+  const quelle = readFileSync(new URL("../wordpress/robingut-rechner/assets/rechner.js", import.meta.url), "utf8");
+  assert.match(quelle, /credentials: "same-origin"/);
+  assert.doesNotMatch(quelle, /credentials: "(omit|include)"/);
 });
 
 console.log("Anzeige");

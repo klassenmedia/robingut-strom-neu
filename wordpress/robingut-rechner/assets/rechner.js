@@ -56,7 +56,9 @@
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify(body),
-      credentials: "omit",
+      // same-origin statt omit: Hinter einem Basic-Auth-Passwortschutz (Release-Seite) käme sonst 401.
+      // Ohne REST-Nonce behandelt WordPress die Anfrage trotz Cookie als nicht angemeldet.
+      credentials: "same-origin",
     });
     const melde = (text) => { status.textContent = text || ""; };
     const laedt = (ja) => { ergebnis.classList.toggle("rgr-laedt", ja); ergebnis.setAttribute("aria-busy", String(ja)); };

@@ -1,5 +1,8 @@
 # ROBIN GUT Strom
 
+> **Aktueller Stand und Einstieg für neue Sitzungen:** [`docs/UEBERGABE.md`](docs/UEBERGABE.md)
+> (WordPress-Umbau, Release-Seite, Preisrechner-Plugin, offene Punkte).
+
 Landingpage für die ROBIN GUT Strom-Community (Energy Sharing mit WeShareEnergy).
 
 Neuaufbau der Inhalte von robingut-strom.de auf der Architektur der

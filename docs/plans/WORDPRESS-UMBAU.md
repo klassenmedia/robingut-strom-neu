@@ -207,6 +207,12 @@ Wording:
     hoch), der Text darunter auf Weiß, und der KI-Hinweis liegt unten rechts im Bild.
     Geprüft in Rahmen mit 1.440 und 390 px: Absatz 21/18 px, Knöpfe 18 px, kein Überlauf, alle
     Blöcke gültig. Rückweg: Revisionen vom 05.11. und das CSS aus den globalen Stilen löschen.
+  - KI-Hinweise (Andreas, 06.11.): Statt „Symbolbild, KI-generiert“ steht jetzt „KI-generiert“,
+    in 12 px, rechtsbündig und direkt unter dem Bild. Das betrifft 7 Stellen: Startseite (3
+    Karten), Privathaushalte (Titelbild und Waldbild), Landwirte und Organisationen (je
+    Titelbild). Alle haben die Klasse `rg-ki-hinweis`. Beim Titelbild sitzt der Hinweis am
+    Laptop 8 px unter dem Bild, rechts. Auf dem Handy steht er zwischen Bild und Text.
+    Gemessen: 6 bis 8 px Abstand zum Bild, kein Überlauf. Der Entwurf 1244 ist nicht angepasst.
   - Älterer Fehler, auch auf Live: Die Schrift Noto Sans (18 Schnitte) wird per
     `http://wordpress-robingut-strom.p709435.webspaceconfig.de/wp-content/uploads/fonts/…`
     eingebunden. Browser blockieren das auf https, die Seite zeigt deshalb die Ersatzschrift.

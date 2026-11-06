@@ -71,7 +71,10 @@ Auf der Live-Seite liegen die neuen Seiten nur als Entwürfe, dort läuft noch P
 - Unbestätigte Aussagen bekommen eine gestrichelte Markierung (`<mark>` mit
   `border-bottom: 3px dashed #9a5200` und `title` mit der offenen Frage). Vor dem Go-Live
   klären oder umformulieren, dann die Markierung entfernen.
-- KI-Bilder tragen direkt am Bild „Symbolbild, KI-generiert“.
+- KI-Bilder tragen klein unten rechts direkt unter dem Bild „KI-generiert“ (Vorgabe Andreas,
+  06.11.2026): Absatz mit Klasse `rg-ki-hinweis`, rechtsbündig. Das CSS dafür steht in den
+  globalen Stilen (Kopie `wordpress/titelbild.css`). Der statische Entwurf in `schlank/` nutzt
+  noch das alte „Symbolbild, KI-generiert“.
 - Texte positiv formulieren, keine kleinen Zeilen über Überschriften (Eyebrows).
 - Seiten in WordPress nur aus Core-Blöcken bauen (keine HTML-Blöcke), damit das Team sie
   bearbeiten kann. WP 7 speichert die Textausrichtung von Überschriften in

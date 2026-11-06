@@ -1,6 +1,6 @@
 /* Kopie aus WordPress (Release): Website-Editor → Stile → Zusätzliches CSS, Stand 06.11.2026.
    Gilt für Cover-Blöcke mit der Klasse rg-titelbild (Startseite, Privathaushalte, Landwirte,
-   Organisationen) und für Absätze mit der Klasse rg-ki-hinweis („KI-generiert“).
+   Organisationen) und für Absätze mit der Klasse rg-ki-hinweis („Mit KI-Unterstützung erstellt“).
    Verlauf und Textfarben stehen in den Blöcken selbst. */
 
 /* Titelbilder (Klasse rg-titelbild): Text links im weißen Verlauf, auf dem Handy Bild oben und Text darunter */
@@ -11,7 +11,7 @@
 .rg-titelbild .has-small-font-size { font-size: 18px !important; }
 .rg-titelbild .wp-block-button__link { font-size: 18px; }
 /* KI-Hinweis (Klasse rg-ki-hinweis): klein, rechts, direkt unter dem Bild */
-.rg-ki-hinweis { font-size: 12px !important; line-height: 1.3; margin-top: 6px !important; text-align: right; }
+.rg-ki-hinweis { font-size: 11px !important; line-height: 1.3; margin-top: 6px !important; text-align: right; }
 .wp-block-image:has(+ .rg-ki-hinweis) { margin-bottom: 0 !important; }
 .rg-titelbild.wp-block-cover { overflow: visible; }
 .rg-titelbild .wp-block-cover__inner-container, .rg-titelbild .wp-block-cover__inner-container > .wp-block-group { position: static; }

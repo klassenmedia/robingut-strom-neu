@@ -207,8 +207,8 @@ Wording:
     hoch), der Text darunter auf Weiß, und der KI-Hinweis liegt unten rechts im Bild.
     Geprüft in Rahmen mit 1.440 und 390 px: Absatz 21/18 px, Knöpfe 18 px, kein Überlauf, alle
     Blöcke gültig. Rückweg: Revisionen vom 05.11. und das CSS aus den globalen Stilen löschen.
-  - KI-Hinweise (Andreas, 06.11.): Statt „Symbolbild, KI-generiert“ steht jetzt „KI-generiert“,
-    in 12 px, rechtsbündig und direkt unter dem Bild. Das betrifft 7 Stellen: Startseite (3
+  - KI-Hinweise (Andreas, 06.11.): Statt „Symbolbild, KI-generiert“ steht jetzt „Mit KI-Unterstützung
+    erstellt“ (Wortlaut Andreas, Hinweis auf Art. 50 AI Act gegeben), in 11 px, rechtsbündig und direkt unter dem Bild. Das betrifft 7 Stellen: Startseite (3
     Karten), Privathaushalte (Titelbild und Waldbild), Landwirte und Organisationen (je
     Titelbild). Alle haben die Klasse `rg-ki-hinweis`. Beim Titelbild sitzt der Hinweis am
     Laptop 8 px unter dem Bild, rechts. Auf dem Handy steht er zwischen Bild und Text.

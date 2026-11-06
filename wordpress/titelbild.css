@@ -1,0 +1,30 @@
+/* Kopie aus WordPress (Release): Website-Editor → Stile → Zusätzliches CSS, Stand 06.11.2026.
+   Gilt für Cover-Blöcke mit der Klasse rg-titelbild (Startseite, Privathaushalte, Landwirte,
+   Organisationen) und für Absätze mit der Klasse rg-ki-hinweis („Mit KI-Unterstützung erstellt“).
+   Verlauf und Textfarben stehen in den Blöcken selbst. */
+
+/* Titelbilder (Klasse rg-titelbild): Text links im weißen Verlauf, auf dem Handy Bild oben und Text darunter */
+.rg-titelbild .wp-block-cover__inner-container { max-width: none !important; width: 100%; }
+.rg-titelbild .wp-block-cover__inner-container > .wp-block-group { margin-left: max(24px, 6vw) !important; margin-right: auto !important; max-width: min(680px, 48vw) !important; }
+.rg-titelbild .wp-block-cover__inner-container > .wp-block-group > * { margin-left: 0 !important; max-width: none !important; }
+.rg-titelbild .has-medium-font-size { font-size: clamp(19px, 1.45vw, 23px) !important; line-height: 1.5; }
+.rg-titelbild .has-small-font-size { font-size: 18px !important; }
+.rg-titelbild .wp-block-button__link { font-size: 18px; }
+/* KI-Hinweis (Klasse rg-ki-hinweis): klein, rechts, direkt unter dem Bild */
+.rg-ki-hinweis { font-size: 11px !important; line-height: 1.3; margin-top: 6px !important; text-align: right; }
+.wp-block-image:has(+ .rg-ki-hinweis) { margin-bottom: 0 !important; }
+.rg-titelbild.wp-block-cover { overflow: visible; }
+.rg-titelbild .wp-block-cover__inner-container, .rg-titelbild .wp-block-cover__inner-container > .wp-block-group { position: static; }
+.rg-titelbild .wp-block-cover__inner-container > .wp-block-group > * { position: relative; z-index: 2; }
+.rg-titelbild .rg-ki-hinweis { position: absolute !important; right: max(16px, 2vw); bottom: -24px; margin: 0 !important; }
+@media (max-width: 781px) {
+  .rg-titelbild.wp-block-cover { display: block; min-height: 0 !important; padding: 0 !important; }
+  .rg-titelbild .wp-block-cover__image-background { position: relative !important; display: block; width: 100%; height: 62vw !important; }
+  .rg-titelbild .wp-block-cover__background { display: none !important; }
+  .rg-titelbild .wp-block-cover__inner-container { padding: 36px 20px 40px; background: #fff; }
+  .rg-titelbild .wp-block-cover__inner-container > .wp-block-group { margin-left: 0 !important; max-width: none !important; }
+  .rg-titelbild .has-medium-font-size { font-size: 18px !important; }
+  .rg-titelbild .has-small-font-size { font-size: 17px !important; }
+  .rg-titelbild .wp-block-cover__inner-container { position: relative; }
+  .rg-titelbild .rg-ki-hinweis { top: 8px; bottom: auto; right: 20px; }
+}

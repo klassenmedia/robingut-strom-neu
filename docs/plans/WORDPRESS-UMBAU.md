@@ -178,8 +178,47 @@ Wording:
     Essential Blocks erzeugt sein CSS neu (1045, dabei fällt das ungenutzte Glas-Effekt-CSS
     weg). Der Inhalt ist sonst gleich, per Revisionsvergleich geprüft. Die übrigen sechs Seiten
     haben keine neue Revision.
-  - Offen: Der Website-Name in Yoast heißt noch „Robin Gut Strom“ (globale Einstellung, nur
-    nach Rückfrage). „Über uns“ nennt den Partner noch mit Namen.
+  - Website-Name auf „ROBIN GUT Strom“ gesetzt (Freigabe Andreas), so wie im Impressum
+    („ROBIN GUT Strom GbR“). Geändert wurden der WordPress-Website-Titel (Seitentitel,
+    `og:site_name`) und der Yoast-Website-Name (Schema `WebSite`). Die Yoast-Organisation hieß
+    schon „ROBIN GUT Strom GbR“. Im Header erscheint der Titel nicht.
+  - Fehler aus der Migration: Auf Release lautet die Kontakt-Mail in 8 Seiten
+    `info@wordpress-release-robingut-strom.p709435.webspaceconfig.de` statt
+    `info@robingut-strom.de` (live). Betroffen sind 64, 71, 19, 1110, 1230, 1243 und die
+    Entwürfe 1244 und 1246, auch die mailto-Links mit Betreff. Der Austausch der Domain hat
+    beim Import offenbar auch die Mailadresse erwischt.
+    Behoben am 05.11. (Freigabe Andreas, Werte wie auf Live): 27 Stellen in den 8 Seiten
+    → `info@robingut-strom.de`. Contact Form 7 „Kontakt Allgemein“: Empfänger
+    `info@robingut-strom.de`, Absender `noreply@robingut-strom.de`. WP Mail SMTP: Absender
+    `noreply@robingut-strom.de`, SMTP-Benutzer `no-reply@robingut-strom.de` (vorher auch die
+    Testadresse, Release konnte also keine Mails verschicken). Nicht angefasst: GUIDs (sieht
+    niemand, WordPress ändert sie nie), Mail 2 im Formular (inaktiv, wie auf Live), Option
+    `uagb_site_url`. Danach steht die Domain im fertigen HTML keiner Seite mehr in mailto-Links.
+    Einen Formular-Test mit echter Mail gibt es noch nicht.
+  - Titelbilder auf 1241, 1243, 1230 und 1110 neu (Andreas, 05./06.11.): Der grüne Verlauf ist
+    raus (vorher rgba(0,40,0,.88–.9) von links). Jetzt gibt es einen weißen Verlauf von links
+    (`customGradient` 90deg, .92 → .84 bei 40 % → 0 bei 70 %, `isDark` false). Der Text steht
+    links in Theme-Farbe `secondary` (#003d00), die zweite Überschriftenzeile in
+    `custom-secondary` (#0e670e), die Outline-Knöpfe sind dunkelgrün. Die Hauptzeile der
+    Startseite hat jetzt die Größe clamp(2.6rem, 5vw, 5rem).
+    Im Cover steckt die Klasse `rg-titelbild`, im KI-Hinweis die Klasse `rg-ki-hinweis`.
+    Lage, Schriftgrößen und Handy-Ansicht regelt das Zusätzliche CSS in den globalen Stilen
+    (Kopie: `wordpress/titelbild.css`). Auf dem Handy (≤ 781 px) steht das Bild frei oben (62vw
+    hoch), der Text darunter auf Weiß, und der KI-Hinweis liegt unten rechts im Bild.
+    Geprüft in Rahmen mit 1.440 und 390 px: Absatz 21/18 px, Knöpfe 18 px, kein Überlauf, alle
+    Blöcke gültig. Rückweg: Revisionen vom 05.11. und das CSS aus den globalen Stilen löschen.
+  - KI-Hinweise (Andreas, 06.11.): Statt „Symbolbild, KI-generiert“ steht jetzt „Mit KI-Unterstützung
+    erstellt“ (Wortlaut Andreas, Hinweis auf Art. 50 AI Act gegeben), in 11 px, rechtsbündig und direkt unter dem Bild. Das betrifft 7 Stellen: Startseite (3
+    Karten), Privathaushalte (Titelbild und Waldbild), Landwirte und Organisationen (je
+    Titelbild). Alle haben die Klasse `rg-ki-hinweis`. Beim Titelbild sitzt der Hinweis am
+    Laptop 8 px unter dem Bild, rechts. Auf dem Handy steht er zwischen Bild und Text.
+    Gemessen: 6 bis 8 px Abstand zum Bild, kein Überlauf. Der Entwurf 1244 ist nicht angepasst.
+  - Älterer Fehler, auch auf Live: Die Schrift Noto Sans (18 Schnitte) wird per
+    `http://wordpress-robingut-strom.p709435.webspaceconfig.de/wp-content/uploads/fonts/…`
+    eingebunden. Browser blockieren das auf https, die Seite zeigt deshalb die Ersatzschrift.
+    Die Dateien liegen auf beiden Servern unter `/wp-content/uploads/fonts/`. Die Adresse steht
+    in der Font-Bibliothek (Familie 75, 18 Font-Faces) und in den globalen Stilen (18-mal).
+  - Offen: „Über uns“ nennt den Partner noch mit Namen.
 
 ## Umstellen (Checkliste)
 

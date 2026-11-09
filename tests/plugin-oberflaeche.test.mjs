@@ -501,6 +501,9 @@ await pruefeRolle("keine Vergleichszeile bei Wind, Förderung oder über 100 kWp
   assert.equal(await zeile(), false);
   assert.equal(await zuSehen(page, ".rgr-hinweis-foerderung"), true);
   await page.check("[name=foerderung][value=nein]");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await ergebnisDa(page);
+  assert.equal(await zuSehen(page, ".rgr-hinweis-foerderung"), false);
   await page.fill("[name=kwp]", "150");
   await page.click(".rgr-schritt-2 button[type=submit]");
   await ergebnisDa(page);
@@ -609,6 +612,43 @@ await pruefeRolle("Beides mit 100.000 kWh: Hinweis zum Verbrauch bleibt neben de
   await ergebnisDa(page);
   assert.match(await page.textContent(".rgr-status-bezug"), /individuelles Angebot/);
   assert.equal(await statusErzeugung(page), "");
+});
+
+await pruefeRolle("nach einem Partnerfehler fragt Weiter mit gleichen Eingaben neu", { rolle: "einspeisen" }, async (page, z) => {
+  let erst = true;
+  z.antwort = () => { if (erst) { erst = false; return { status: 502, daten: { fehler: "x" } }; } return {}; };
+  await anlageEingeben(page);
+  await page.waitForFunction(() => /nicht erreichbar/.test(document.querySelector(".rgr-status-erzeugung").textContent));
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await ergebnisDa(page);
+  assert.equal(z.erzeuger, 2);
+});
+
+await pruefeRolle("A → B (langsam) → A → B: B wird neu gefragt und gezeigt", { rolle: "einspeisen" }, async (page, z) => {
+  z.antwort = (b) => ({ daten: b.kwp === 10 ? { individuell: false, grund_monat: 31, vermarktung_ct: 0.2, einrichtung: 390 } : ERZEUGER });
+  await anlageEingeben(page);
+  await ergebnisDa(page);
+  z.verzoegerung = (b) => (b.kwp === 10 && z.erzeuger <= 2 ? 1200 : 0);
+  await page.fill("[name=kwp]", "10");
+  await page.waitForTimeout(700);
+  await page.fill("[name=kwp]", "100");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await page.fill("[name=kwp]", "10");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await page.waitForFunction(() => /12 × 31,00 €/.test(document.querySelector('[data-feld="grund-rechnung"]').textContent), null, { timeout: 5000 });
+  await ergebnisDa(page);
+});
+
+await pruefeRolle("Rollenwechsel weg und zurück, dann Weiter mit gleichen Eingaben: Ergebnis kommt", { rolle: "einspeisen" }, async (page, z) => {
+  z.verzoegerung = () => 800;
+  await page.fill("[name=kwp]", "100");
+  await page.fill("[name=ueberschuss]", "66.500");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await page.click("label:has([name=rolle][value=beziehen])");
+  await page.click("label:has([name=rolle][value=einspeisen])");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await ergebnisDa(page);
+  assert.equal(await feldText(page, "bleibt"), "rund 5.372 €");
 });
 
 console.log(`\n${bestanden} Prüfungen bestanden`);

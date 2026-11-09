@@ -67,14 +67,17 @@ dem WSE-Standard (ohne Slug); Bedeutung mit Timo bestätigen.
 (b) Untrusted Inputs
 - REST `preis` (POST, JSON): `plz`, `kwh`, `ort`, `strasse`, `hausnummer`.
 - REST `strassen` (POST, JSON): `plz`, `stadt`, `suche`.
+- REST `erzeuger` (POST, JSON): `art` (nur pv|wind), `kwp`, `kwh`, `einspeisung`, `foerderung`.
 - Kopfzeilen `Origin`, `Sec-Fetch-Site`, Query `_jsonp`; `REMOTE_ADDR`.
 - Antwort der Partner-API (alle Felder, auch `cities` und `requires_*`).
-- Browser-Eingaben: Abschlag, Verbrauch.
+- Browser-Eingaben: Abschlag, Verbrauch, Anlagenart, Leistung, Überschuss, Wunschpreis.
+- Shortcode-Attribute `rolle` und `anrede` (Redakteure im WordPress).
 
 (c) Worst Case
 - Falsche Preise beim Kunden (Zusage, UWG) durch kaputte oder manipulierte Antwort.
 - XSS auf robingut-strom.de über Felder der Partner-API.
 - Sperre des Partner-Kontingents, Rechner und Anmeldung des Partners zeitweise gestört.
+- Falscher oder veralteter Erlös für Erzeuger (andere Anlage als angezeigt, falsche Posten-Summe).
 
 (d) Gegenmaßnahmen
 - Strenge Typ- und Formatprüfung (`plz` 5 Ziffern als String, `kwh` Ganzzahl 500–100.000,
@@ -87,6 +90,11 @@ dem WSE-Standard (ohne Slug); Bedeutung mit Timo bestätigen.
   Cache je Anfrage 6 h über Transients, nur gültige Antworten.
 - Ausgabe im Browser nur über `textContent` / `createElement`, nie `innerHTML`.
 - Keine Speicherung oder Protokollierung von PLZ, Straße oder Abschlag.
+- `/erzeuger`: kwp 1–1.000 (eine Nachkommastelle), kwh 100–10.000.000, nur pv|wind; Posten der
+  Antwort in festen Grenzen und Summe = Grundpreis (±0,01); eigenes IP-Limit 40/h, Partner-Takt
+  geteilt. Im Browser wird ein Erlös nur gezeigt, wenn er zu den aktuellen Eingaben gehört
+  (Anfragenummer + Vergleich der Eingaben); Anfragen brechen nach 15 s ab.
+- Shortcode-Attribute nur aus Whitelist, sonst Standard.
 
 ## Stand
 
@@ -199,13 +207,13 @@ dem WSE-Standard (ohne Slug); Bedeutung mit Timo bestätigen.
   (Ort, Straße, Abschlag) bleibt.
 - **Erzeuger:** Grundpreis, Vermarktungsentgelt und Einrichtung kommen vom öffentlichen
   Angebotsrechner Direktvermarktung des Partners: `POST /api/direktvermarktung/calculate-price`,
-  `pricing_model_id` 77, Felder `erzeugungsart` (pv|wind|water|chp), `nennleistung_kwp`,
+  `pricing_model_id` 77, Felder `erzeugungsart` (pv|wind; water und chp lehnt Modell 77 mit 422 ab), `nennleistung_kwp`,
   `einspeiseart` (voll|teil), `einspeisemenge_kwh`, `foerderung` (0|1). Ein CSRF-Token ist nicht
   nötig. Eine feste Tabelle geht nicht: Der Grundpreis hängt auch von der Menge ab. Beispiel
   30 kWp: 42,93 € bei 5.000 kWh, aber 65,48 € bei 66.500 kWh. Die Übergabe nennt 48,43 €.
 - **Antworten des Partners:** Über 1.000 kWp meldet er `individual_offer: true`. Die Förderung
-  ändert den Preis nicht, ist aber Pflichtfeld. „Biogas“ kennt er nicht, es läuft als `chp`
-  (BHKW).
+  ändert den Preis nicht, ist aber Pflichtfeld. Wasserkraft und Biogas rechnet er öffentlich nicht;
+  der Rechner zeigt dafür ein individuelles Angebot (siehe unten).
 - **Kontrolle:** 100 kWp / 66.500 kWh ergibt 95,38 €, genau wie im Rechenbeispiel der
   Landwirte-Seite (live geprüft am 09.11.).
 - Neue Route `POST /robingut-rechner/v1/erzeuger` mit denselben Schutzmaßnahmen wie `/preis`.

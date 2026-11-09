@@ -6,6 +6,7 @@
   const R = window.RGRechnung;
   const VERZOEGERUNG_MS = 450;
   const STRASSEN_VERZOEGERUNG_MS = 250;
+  const ZEITLIMIT_MS = 15000;
   const ANMELDE_TEXT = { beziehen: "Jetzt anmelden", einspeisen: "Als Erzeuger anmelden", beides: "Weiter zur Anmeldung" };
   const MELDUNG_ERZEUGER = {
     "kwp-ungueltig": "Bitte die Leistung der Anlage in kWp eingeben, zum Beispiel 100 oder 9,8.",
@@ -85,6 +86,8 @@
       // same-origin statt omit: Hinter einem Basic-Auth-Passwortschutz (Release-Seite) käme sonst 401.
       // Ohne REST-Nonce behandelt WordPress die Anfrage trotz Cookie als nicht angemeldet.
       credentials: "same-origin",
+      // Ohne Zeitlimit bliebe eine im Netz hängende Anfrage für immer „unterwegs“ und sperrte Weiter.
+      signal: AbortSignal.timeout(ZEITLIMIT_MS),
     });
     const sie = wurzel.dataset.anrede === "sie";
     const text = (schluessel) => (sie && MELDUNG_SIE[schluessel]) || MELDUNG[schluessel];

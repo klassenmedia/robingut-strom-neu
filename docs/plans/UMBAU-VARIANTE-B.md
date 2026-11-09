@@ -230,3 +230,23 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
     einer Kachelreihe so breit wie die Reihe.
   - Review-Punkte: Fokusrahmen am Play-Knopf, Kachelregeln nur in `.rgb-karte`, helle Links in
     Kacheln auf dunklem Grund. Bewusst offen: Vorher-nachher-Karte hat im Raster genau zwei Teile.
+- 09.11.2026 **Video-Sperre überarbeitet** (Review BLOCKIERT → Fix), Kundenstimmen eingeschlossen:
+  - Liegt jetzt einmal in der Fußzeile (Vorlagenteil `footer`, HTML-Block), die Kopien auf 1241/1355
+    sind entfernt. Kopie: `wordpress/video-cookie-sperre.js`, Test: `tests/video-cookie-sperre.test.mjs`
+    (13 Fälle, Playwright, CCM und Player als Attrappen, jeder YouTube-Abruf wird gezählt).
+  - Fängt click, keydown/keyup/keypress, pointerdown, mousedown, touchstart in der Capture-Phase auf
+    `window` ab; Hinweis nur bei Klick, Enter, Leertaste. Netz darunter: MutationObserver entfernt
+    jedes YouTube-iframe ohne Zustimmung (auch bei nachträglich gesetztem `src`).
+  - Freigabe nur bei Dienstname genau „YouTube Video“ (am echten CCM19 abgelesen). Zustimmung über
+    das Banner wird erkannt (Prüfung alle 0,5 s ab Hinweis), danach Start nach 0,6 s, weil CCM19 das
+    blockierte Skript der Kundenstimmen erst freischaltet.
+  - Live geprüft (echtes CCM19, YouTube nicht erlaubt): Hinweis bei Video und Kundenstimme, kein
+    iframe, 0 Abrufe bei YouTube/ytimg/googlevideo, auch nicht beim Laden und Scrollen.
+    Datenschutzerklärung hat einen Abschnitt „YouTube“ (Einwilligung).
+  - Threat Model Video-Sperre: (a) Player lädt über anderen Eingabeweg, Player-Update ändert den Weg,
+    Dienst mit ähnlichem Namen gibt frei; (b) Eingaben: Nutzerereignisse, CCM-Zustand, DOM-Änderungen
+    durch Plugins; (c) Worst Case: IP-Übertragung an Google ohne Einwilligung (§ 25 TDDDG);
+    (d) Abfangen aller Eingabewege + MutationObserver + exakter Dienstname; fail-closed ohne CCM.
+- 09.11.2026 Weitere Wünsche: Menüpunkt „So geht's“ heißt „Energy Sharing“; KI-Kennzeichnung als
+  „AI“ im Kreis unten rechts im Bild (Satz bleibt für Screenreader); 3D-Play-Knöpfe auch bei den
+  Kundenstimmen (unten rechts, nicht übers Gesicht); grüne Knöpfe mit Tiefe, auch im Rechner.

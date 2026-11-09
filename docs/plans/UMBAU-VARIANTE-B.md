@@ -182,3 +182,7 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
   - Personen-Knöpfe klein in einer Reihe, kein Pfeil mehr im Anmelde-Knopf.
   - Offen bei WSE/Timo: Rolle in der Anmelde-URL, Ziel für „individuelles Angebot“, Wasserkraft
     und Biogas fehlen im öffentlichen Preismodell (die Landwirte-Seite nennt Biogas).
+  - Offen (Inhalt): Kleine Anlagen mit wenig Überschuss rechnen sich in der Direktvermarktung nicht.
+    Beispiel 30 kWp / 5.000 kWh / 9 ct: 450 € Erlös − 515 € Grundpreis − 10 € Vermarktung = „rund -25 €“.
+    Die Rechnung stimmt. Klären: Hinweis oder Mindestmenge zeigen, Minus als „−“ setzen?
+  - 1.1.1 auf Release (Zeitlimit auch für iOS 14/15).

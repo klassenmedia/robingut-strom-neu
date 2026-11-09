@@ -304,3 +304,15 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
   das entfernte `#prinzip`, jetzt `#so-funktionierts` am Band „Teilen lohnt sich“.
 - 09.11.2026 **Rechner zeigt „nicht erreichbar“**: weshareenergy.de antwortete 17:4x Uhr überhaupt nicht
   (Startseite, Anmeldeseite, API: Zeitüberschreitung nach 20 s, auch vom Mac). Kein Fehler bei uns.
+- 09.11.2026 **Kästen global gleich hoch und mit Tiefe** (Andreas): Zahlen-Kacheln (`rgb-kachel`) füllen
+  ihre Spalte (gleich hoch, betraf „Was bisher gewachsen ist“ auf Über uns), weiß→hellgrüner Verlauf
+  mit Schatten; grüne/dunkle Kachel wie die Vorher-nachher-Kästen. Bildkarten, `rgb-beispiel`, getönte
+  und dunkle `rgb-spalte` bekommen ebenfalls Schatten. Alle Spaltenreihen aller Seiten per Skript bei
+  1440/1024/800 px gemessen.
+- 09.11.2026 Frage Go-Live bei Mittwald: machbar per All-in-One WP Migration im Browser (vorher
+  Vollsicherung Live = Archiv, ggf. Mittwald-Backup). Andreas loggt sich selbst ein, Umstellung nur
+  nach ausdrücklichem „Go“; Go-Live-Punkte aus `docs/plans/SCHLANK.md` §6 und Datenschutz-Prüfung vorher.
+- 09.11.2026 **Neues Dieter-Foto** auf Über uns (Andreas, aus seinen Downloads `image00001.jpeg`,
+  ohne Urheberangabe in den Metadaten): auf 4:5 zugeschnitten, Metadaten entfernt, 1200 × 1500 WebP,
+  Medien-ID 1436 `dieter-koennes-wald.webp`, Karte zeigt es 4:5 statt 4:3. Altes Bild 1242 ist frei.
+  Offen: Fotografen-Nennung klären, falls nötig.

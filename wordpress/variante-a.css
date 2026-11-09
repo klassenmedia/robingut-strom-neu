@@ -267,3 +267,16 @@ p.rg-ki-hinweis { position: absolute !important; width: 1px; height: 1px; paddin
   .rgb-kosten-flaeche .rgb-preisteile > .wp-block-column + .wp-block-column { padding-top: 28px; }
   .rgb-kosten-flaeche .rgb-preisteile > .wp-block-column + .wp-block-column::before { left: 50%; top: calc(clamp(28px, 4vw, 56px) / -2 + 4px); }
 }
+
+/* Zahlen-Kacheln: in einer Reihe gleich hoch, mit Tiefe wie die übrigen Karten (Andreas 09.11.) */
+.rgb-karte .wp-block-column:has(> .rgb-kachel:only-child) { display: flex; flex-direction: column; }
+.rgb-karte .wp-block-column > .rgb-kachel:only-child { flex: 1 1 auto; }
+.rgb-karte .rgb-kachel { border-radius: 16px; background: linear-gradient(180deg, #FFFFFF 0%, #F3F8E9 100%); box-shadow: inset 0 1px 0 #fff, inset 0 -3px 0 rgba(0, 61, 0, 0.06), 0 1px 2px rgba(0, 61, 0, 0.05), 0 12px 30px rgba(0, 61, 0, 0.09); }
+.rgb-karte .rgb-kachel.rgb-kachel-gruen { border-color: transparent; background: linear-gradient(180deg, #C6E872 0%, #A4D235 55%, #8CBA26 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -3px 0 rgba(0, 61, 0, 0.16), 0 3px 6px rgba(0, 61, 0, 0.16), 0 12px 24px rgba(0, 61, 0, 0.16); }
+.rgb-karte .rgb-kachel.rgb-kachel-dunkel { border-color: transparent; background: linear-gradient(180deg, #0B5A0B 0%, #003D00 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), inset 0 -3px 0 rgba(0, 0, 0, 0.25), 0 3px 6px rgba(0, 61, 0, 0.2), 0 12px 28px rgba(0, 61, 0, 0.22); }
+/* Übrige Kästen mit derselben Tiefe (Andreas 09.11.: „global überall 3D“) */
+.rgb-karte :is(.rgb-spalte:has(> figure:not(.rgb-icon)), .rgb-beispiel) { box-shadow: 0 1px 2px rgba(0, 61, 0, 0.05), 0 12px 30px rgba(0, 61, 0, 0.09); }
+@supports selector(:nth-child(1 of .x)) {
+  .wp-block-post-content > .rgb-karte:nth-child(odd of .rgb-karte:not(.rgb-dunkel, .has-background)) .rgb-spalte:not(:has(> figure:not(.rgb-icon))) { box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(0, 61, 0, 0.05), 0 10px 26px rgba(0, 61, 0, 0.08); }
+}
+.rgb-karte.rgb-dunkel .rgb-spalte:not(:has(> figure:not(.rgb-icon))) { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 10px 28px rgba(0, 0, 0, 0.25); }

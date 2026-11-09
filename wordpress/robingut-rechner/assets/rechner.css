@@ -172,3 +172,23 @@ legend.rgr-schritt-titel + * { clear: both; }
 @media (prefers-reduced-motion: reduce) {
   .rgr-knopf { transition: none; }
 }
+
+/* 1.2.0: Preisbildung wie im Rechner des Partners, Zubehör, eingebettete Anmeldung */
+.rgr-preisbildung { display: grid; gap: 14px; margin-top: 12px; padding: 14px; border-radius: 12px; background: var(--rgr-hell); }
+.rgr-regel label { display: flex; justify-content: space-between; gap: 10px; font-size: 15px; color: var(--rgr-gruen); }
+.rgr-regel label strong { white-space: nowrap; }
+.rgr-regel .rgr-klein { margin-top: 2px; }
+.rgr-regel input[type=range] { width: 100%; margin: 8px 0 0; accent-color: var(--rgr-gruen); }
+.rgr-skala { display: flex; justify-content: space-between; margin-top: 0; font-size: 12px; }
+.rgr-mischpreis { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin: 0; padding-top: 12px; border-top: 1px solid var(--rgr-rand); color: var(--rgr-gruen); font-weight: 700; }
+.rgr-mischpreis strong { font-size: 20px; white-space: nowrap; }
+.rgr-zubehoer-liste { width: 100%; border-collapse: collapse; font-size: 15px; }
+.rgr-zubehoer-liste th, .rgr-zubehoer-liste td { padding: 9px 6px; border-bottom: 1px solid var(--rgr-linie); text-align: left; vertical-align: top; }
+.rgr-zubehoer-liste thead th { font-size: 13px; color: var(--rgr-grau); font-weight: 600; }
+.rgr-zubehoer-liste tbody th { color: var(--rgr-gruen); }
+.rgr-wse { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--rgr-linie); scroll-margin-top: 90px; }
+.rgr-wse iframe { display: block; width: 100%; margin-top: 12px; border: 0; }
+.rgr-geschaetzt { margin: 4px 0 0; font-size: 15px; color: var(--rgr-gruen); }
+.rgr-geschaetzt strong { white-space: nowrap; }
+.rgr-mischpreis .rgr-zzgl { display: block; font-size: 13px; font-weight: 400; color: var(--rgr-grau); }
+.rgr-anmelden-hinweis { margin-top: 6px; }

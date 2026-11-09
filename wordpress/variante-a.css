@@ -311,3 +311,12 @@ p.rg-ki-hinweis { position: absolute !important; width: 1px; height: 1px; paddin
   .rgb-karte .rg-fall-zeile { grid-template-columns: minmax(0, 1fr); }
   .rgb-karte .rg-fall-zeile > .rg-fall-legende { grid-column: 1; }
 }
+
+/* WeShareEnergy-Rechner mit Zwei-Klick-Lösung (Andreas 09.11.): Startfläche, Knopf wie die 3D-Knöpfe */
+.rgb-karte .rg-wse-start { display: grid; justify-items: start; gap: 16px; padding: clamp(20px, 2.4vw, 32px); border: 1px solid #DCE3D6; border-radius: 16px; background: linear-gradient(180deg, #FFFFFF 0%, #F3F8E9 100%); box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(0, 61, 0, 0.05), 0 12px 30px rgba(0, 61, 0, 0.09); }
+.rgb-karte .rg-wse-start p { margin: 0 !important; max-width: 70ch; font-size: clamp(15px, 0.9vw, 17px); }
+.rgb-karte .rg-wse-start a { color: #003D00; text-decoration-color: #A4D235; text-underline-offset: 3px; }
+.rgb-karte .rg-wse-laden { padding: 14px 28px; border: 0; border-radius: 100px; font: inherit; font-size: 17px; cursor: pointer; color: #003D00; background: linear-gradient(180deg, #C6E872 0%, #A4D235 55%, #8CBA26 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -3px 0 rgba(0, 61, 0, 0.16), 0 3px 6px rgba(0, 61, 0, 0.16), 0 12px 24px rgba(0, 61, 0, 0.16); }
+.rgb-karte .rg-wse-laden:hover { filter: brightness(1.04); }
+.rgb-karte .rg-wse-laden:focus-visible { outline: 3px solid #003D00; outline-offset: 3px; }
+.rgb-karte .rg-wse-ausweg { margin-top: 10px !important; font-size: 15px !important; }

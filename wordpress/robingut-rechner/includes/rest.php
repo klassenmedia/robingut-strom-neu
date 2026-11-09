@@ -155,7 +155,8 @@ function rgr_route_preis(WP_REST_Request $anfrage): WP_REST_Response
     $werte = $geprueft['werte'];
     // Adressgenaue Anfragen werden nicht gespeichert, sonst verriete die Antwortzeit frühere Abfragen.
     $mit_adresse = $werte['strasse'] !== '';
-    $schluessel = rgr_cache_schluessel('preis', $werte);
+    // „preis2“ seit 1.2.0: Antworten ohne Netzkosten aus dem alten Cache nicht weiter ausliefern.
+    $schluessel = rgr_cache_schluessel('preis2', $werte);
     $gespeichert = $mit_adresse ? false : get_transient($schluessel);
     if (is_array($gespeichert)) {
         return rgr_antwort($gespeichert['daten'], (int) $gespeichert['status']);

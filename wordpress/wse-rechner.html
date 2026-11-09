@@ -1,0 +1,40 @@
+<div class="rg-wse-rechner">
+<div class="rg-wse-start">
+<p>Der Preisrechner und die Anmeldung kommen von unserem Partner WeShareEnergy. Erst wenn der Rechner geladen wird, werden Daten wie die IP-Adresse an weshareenergy.de übertragen. Mehr dazu in der <a href="/datenschutzerklaerung/#preisrechner">Datenschutzerklärung</a>.</p>
+<button type="button" class="rg-wse-laden">Preisrechner laden</button>
+</div>
+<iframe class="rg-wse-frame" title="Preisrechner und Anmeldung bei unserem Partner WeShareEnergy" width="100%" style="display:none;width:100%;height:720px;border:0" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+<script>
+/* Preisrechner von WeShareEnergy wie auf der alten Seite (Andreas 09.11.2026), aber erst nach Klick geladen:
+   vorher geht nichts an weshareenergy.de. Höhe nur von weshareenergy.de aus dem passenden iframe.
+   Einmal je Seite eingerichtet, per Ereignis-Delegation: egal, wo und wann ein Optimierer das Skript ausführt.
+   Sichtbarkeit über style.display, damit Theme-Regeln sie nicht überstimmen. Test: tests/wse-rechner.test.mjs */
+(function () {
+  if (window.rgWseRechner) return;
+  window.rgWseRechner = true;
+  var HERKUNFT = "https://weshareenergy.de";
+  var ADRESSE = HERKUNFT + "/stromcommunitys/neukunde/robin-gut-strom?iframe=1&buttonColor=0e670e&borderRadius=9999px&fontFamily=NotoSans";
+  document.addEventListener("click", function (e) {
+    var knopf = e.target && e.target.closest ? e.target.closest(".rg-wse-laden") : null;
+    var box = knopf && knopf.closest(".rg-wse-rechner");
+    var iframe = box && box.querySelector(".rg-wse-frame");
+    if (!iframe) return;
+    if (!iframe.getAttribute("src")) iframe.setAttribute("src", ADRESSE);
+    iframe.style.display = "block";
+    box.querySelector(".rg-wse-start").style.display = "none";
+    iframe.focus();
+  });
+  window.addEventListener("message", function (e) {
+    if (e.origin !== HERKUNFT) return;
+    var d = e.data;
+    if (!d || d.type !== "IFRAME_HEIGHT" || typeof d.height !== "number" || !isFinite(d.height)) return;
+    var frames = document.querySelectorAll(".rg-wse-frame");
+    for (var i = 0; i < frames.length; i++) {
+      if (frames[i].contentWindow === e.source) {
+        frames[i].style.height = Math.max(300, Math.min(5000, Math.round(d.height))) + "px";
+      }
+    }
+  });
+})();
+</script>
+</div>

@@ -169,7 +169,7 @@ pruefe('Partnerfehler: 502 und kurz gespeichert', function () {
     gleich(preis(['plz' => '41747', 'kwh' => 2500])->status, 502);
     gleich(preis(['plz' => '41747', 'kwh' => 2500])->status, 502);
     gleich(aufrufe(), 1);
-    gleich($GLOBALS['rgr_transient_ttl'][rgr_cache_schluessel('preis', rgr_pruefe_preis_anfrage(['plz' => '41747', 'kwh' => 2500])['werte'])], 60);
+    gleich($GLOBALS['rgr_transient_ttl'][rgr_cache_schluessel('preis2', rgr_pruefe_preis_anfrage(['plz' => '41747', 'kwh' => 2500])['werte'])], 60);
 });
 
 pruefe('Zeitüberschreitung beim Partner: 502', function () {
@@ -287,7 +287,7 @@ pruefe('Fehler der Datenbank-Sperre (NULL) gilt als nicht gesperrt', function ()
 pruefe('adressgenaue Anfrage hinterlässt keinen Eintrag im Zwischenspeicher', function () {
     $body = ['plz' => '41812', 'kwh' => 2500, 'strasse' => 'Kölner Str.', 'hausnummer' => '10'];
     preis($body);
-    $schluessel = rgr_cache_schluessel('preis', rgr_pruefe_preis_anfrage($body)['werte']);
+    $schluessel = rgr_cache_schluessel('preis2', rgr_pruefe_preis_anfrage($body)['werte']);
     gleich(get_transient($schluessel), false);
     gleich(isset($GLOBALS['rgr_transient_ttl'][$schluessel]), false);
 });
@@ -435,7 +435,10 @@ pruefe('Shortcode: unbekannte Anrede fällt auf du zurück', function () {
 
 pruefe('Shortcode: Rolle aus der Liste vorbelegt, sonst Strom beziehen', function () {
     gleich(str_contains(rgr_shortcode(['rolle' => 'einspeisen']), 'value="einspeisen" checked'), true);
-    gleich(str_contains(rgr_shortcode(['rolle' => 'beides']), 'value="beides" checked'), true);
+    gleich(str_contains(rgr_shortcode(['rolle' => 'zubehoer']), 'value="zubehoer" checked'), true);
+    // „beides“ gibt es seit 1.2.0 nicht mehr
+    gleich(str_contains(rgr_shortcode(['rolle' => 'beides']), 'value="beziehen" checked'), true);
+    gleich(str_contains(rgr_shortcode([]), 'value="beides"'), false);
     gleich(str_contains(rgr_shortcode([]), 'value="beziehen" checked'), true);
     $boese = rgr_shortcode(['rolle' => '"><script>alert(1)</script>']);
     gleich(str_contains($boese, '<script>alert'), false);
@@ -443,9 +446,16 @@ pruefe('Shortcode: Rolle aus der Liste vorbelegt, sonst Strom beziehen', functio
 });
 
 pruefe('Shortcode zeigt keine Mailadresse und keinen Pfeil im Anmeldeknopf', function () {
-    $html = rgr_shortcode(['rolle' => 'beides']);
+    $html = rgr_shortcode(['rolle' => 'zubehoer']);
     gleich(preg_match('/@robingut-strom\.de|@robin-gut\.org/', $html), 0);
     gleich(str_contains($html, '↗'), false);
+});
+
+pruefe('Shortcode: Anmeldeknopf führt fest auf die WSE-Strecke, iframe erst per JavaScript', function () {
+    $html = rgr_shortcode([]);
+    gleich(str_contains($html, 'data-wse="https://weshareenergy.de/stromcommunitys/neukunde/robin-gut-strom?iframe=1&amp;buttonColor=0e670e&amp;borderRadius=9999px&amp;fontFamily=NotoSans"'), true);
+    gleich(str_contains($html, '<iframe'), false);
+    gleich(str_contains($html, 'class="rgr-wse"'), true);
 });
 
 echo "\n$bestanden Prüfungen bestanden\n";

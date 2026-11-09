@@ -237,9 +237,11 @@ pruefe("Rechner schickt Zugangsdaten nur an die eigene Seite (Passwortschutz per
 console.log("Rollen und Erzeugerrechnung");
 
 pruefe("Rolle nur aus der Liste, sonst Strom beziehen", () => {
-  assert.deepEqual(R.ROLLEN, ["beziehen", "einspeisen", "beides"]);
+  assert.deepEqual(R.ROLLEN, ["beziehen", "einspeisen", "zubehoer"]);
   assert.equal(R.rolleAusWert("einspeisen"), "einspeisen");
-  assert.equal(R.rolleAusWert("beides"), "beides");
+  assert.equal(R.rolleAusWert("zubehoer"), "zubehoer");
+  // „beides“ gibt es seit 1.2.0 nicht mehr (Andreas: durch Zubehör ersetzt)
+  assert.equal(R.rolleAusWert("beides"), "beziehen");
   for (const roh of ["", "EINSPEISEN", "admin", null, undefined, 3, ["beides"]]) {
     assert.equal(R.rolleAusWert(roh), "beziehen", String(roh));
   }
@@ -343,6 +345,83 @@ pruefe("Anlagenarten: Wasserkraft und Biogas nur mit individuellem Angebot", () 
 pruefe("Rechner zeigt keine Mailadresse von ROBIN GUT", () => {
   const quelle = readFileSync(new URL("../wordpress/robingut-rechner/assets/rechner.js", import.meta.url), "utf8");
   assert.doesNotMatch(quelle, /@robingut-strom\.de|@robin-gut\.org/);
+});
+
+// Antwort der Partner-API für 40225 / 2.500 kWh vom 09.11.2026 (Auszug, brutto). Der WSE-Rechner
+// zeigt dazu: Community 29,53 ct (9,52 + 20,01), bei 50 % Anteil 34,64 ct/kWh.
+const DUESSELDORF = {
+  energy_price: 39.75909,
+  minimum_energy_price_gross: 20.00509,
+  transaction_fee: 1.19,
+  base_price: 168.04,
+  monthly_base_price: 14,
+  annual_total: 1191.76725,
+  annual_consumption_kwh: 2500,
+  city: "Düsseldorf",
+};
+
+console.log("Preisbildung (Community-Anteil, wie im WSE-Rechner)");
+
+pruefe("Netzkosten werden übernommen, wenn sie plausibel und kleiner als der Reststrom sind", () => {
+  const p = R.pruefePreise(DUESSELDORF, 2500);
+  nahe(p.netzCt, 20.00509);
+  assert.equal(p.kwh, 2500);
+});
+
+pruefe("fehlende oder unplausible Netzkosten: Preis bleibt gültig, nur ohne Preisbildung", () => {
+  for (const netz of [undefined, null, "20", NaN, Infinity, 0, 9.99, 40.01, 39.75909, 45]) {
+    const p = R.pruefePreise({ ...DUESSELDORF, minimum_energy_price_gross: netz }, 2500);
+    assert.ok(p, String(netz));
+    assert.equal(p.netzCt, null, String(netz));
+    assert.equal(R.preisbildung(p, 50, null), null, String(netz));
+  }
+});
+
+pruefe("Community-Preis startet wie bei WSE: Netzkosten + 8 ct netto, brutto", () => {
+  nahe(R.communityStart(20.00509, 39.75909), 29.52509);
+  // begrenzt auf die Spanne Netzkosten bis Reststrom
+  nahe(R.communityStart(20, 25), 25);
+});
+
+pruefe("Mischpreis und Jahresbetrag bei 50 % Anteil wie im WSE-Rechner", () => {
+  const p = R.pruefePreise(DUESSELDORF, 2500);
+  const b = R.preisbildung(p, 50, null);
+  nahe(b.communityCt, 29.52509);
+  nahe(b.energieCt, 9.52);
+  assert.equal(b.anteil, 50);
+  nahe(b.mischCt, 34.64209);
+  assert.equal(R.cent(b.mischCt), "34,64 ct");
+  const r = R.berechne(p, null, b);
+  assert.equal(r.jahr, 1063.84);
+  assert.equal(r.monat, 88.65);
+});
+
+pruefe("0 % Anteil ergibt genau den WSE-Jahresbetrag, 100 % nur Community-Preis", () => {
+  const p = R.pruefePreise(DUESSELDORF, 2500);
+  assert.equal(R.berechne(p, null, R.preisbildung(p, 0, null)).jahr, 1191.77);
+  assert.equal(R.berechne(p, null).jahr, 1191.77);
+  assert.equal(R.berechne(p, null, R.preisbildung(p, 100, null)).jahr, 935.92);
+});
+
+pruefe("Reglerwerte außerhalb der Spanne oder ohne Zahl werden begrenzt bzw. auf den Start gesetzt", () => {
+  const p = R.pruefePreise(DUESSELDORF, 2500);
+  assert.equal(R.preisbildung(p, 150, null).anteil, 100);
+  assert.equal(R.preisbildung(p, -5, null).anteil, 0);
+  assert.equal(R.preisbildung(p, "abc", null).anteil, 50);
+  assert.equal(R.preisbildung(p, "", null).anteil, 50);
+  assert.equal(R.preisbildung(p, 33.6, null).anteil, 34);
+  nahe(R.preisbildung(p, 50, 5).communityCt, 20.00509);
+  nahe(R.preisbildung(p, 50, 99).communityCt, 39.75909);
+  nahe(R.preisbildung(p, 50, "x").communityCt, 29.52509);
+  nahe(R.preisbildung(p, 50, 25).energieCt, 25 - 20.00509);
+});
+
+pruefe("Vergleich mit dem Abschlag nutzt den Betrag mit Preisbildung", () => {
+  const p = R.pruefePreise(DUESSELDORF, 2500);
+  const b = R.preisbildung(p, 50, null);
+  // 1.063,84 € + 12 × 3,90 € Lesekopf = 1.110,64 € → 92,55 € im Monat ist etwa gleich
+  assert.equal(R.berechne(p, 92.55, b).vergleich.art, "gleich");
+  assert.equal(R.berechne(p, 99.31, b).vergleich.art, "ersparnis");
 });
 
 console.log("Anzeige");

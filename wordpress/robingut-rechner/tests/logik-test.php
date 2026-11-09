@@ -124,6 +124,17 @@ pruefe('Antwort mit fehlenden oder falschen Zahlen wird verworfen', function () 
     gleich(rgr_filtere_preis_antwort(null, 2500), null);
 });
 
+pruefe('Netzkosten (minimum_energy_price_gross) nur plausibel und kleiner als der Reststrom', function () use ($viersen) {
+    $mit = array_merge($viersen, ['minimum_energy_price_gross' => 20.00509]);
+    gleich(rgr_filtere_preis_antwort($mit, 2500)['minimum_energy_price_gross'], 20.00509);
+    foreach ([null, '20', 'abc', NAN, INF, 0, 9.99, 40.01, 38.16449, 45.0, [20], true] as $netz) {
+        $r = rgr_filtere_preis_antwort(array_merge($viersen, ['minimum_energy_price_gross' => $netz]), 2500);
+        gleich(is_array($r), true, var_export($netz, true));
+        gleich(array_key_exists('minimum_energy_price_gross', $r), false, var_export($netz, true));
+    }
+    gleich(array_key_exists('minimum_energy_price_gross', rgr_filtere_preis_antwort($viersen, 2500)), false);
+});
+
 pruefe('Stadt wird von Tags und Steuerzeichen befreit', function () use ($viersen) {
     $r = rgr_filtere_preis_antwort(array_merge($viersen, ['city' => "<img src=x onerror=alert(1)>Vier\x07sen"]), 2500);
     gleich($r['city'], 'Viersen');

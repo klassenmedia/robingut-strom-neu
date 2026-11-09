@@ -21,6 +21,8 @@ const RGR_PREISFELDER = ['energy_price', 'transaction_fee', 'base_price', 'month
 // Plausible Spannen; was außerhalb liegt, deutet auf geänderte oder kaputte Felder hin.
 const RGR_ARBEITSPREIS_CT = [15.0, 80.0];
 const RGR_GEBUEHR_CT = [0.0, 10.0];
+// Netzkosten & Umlagen (Untergrenze des Community-Preises); optional, fehlt sie, zeigt der Rechner keine Preisbildung.
+const RGR_NETZKOSTEN_CT = [10.0, 40.0];   // wie NETZKOSTEN_CT in rechnung.js
 const RGR_GRUNDPREIS_JAHR = [0.0, 5000.0];
 const RGR_GRUNDPREIS_MONAT_TOLERANZ = 0.05;
 const RGR_SUMME_TOLERANZ_ANTEIL = 0.005;
@@ -134,6 +136,10 @@ function rgr_filtere_preis_antwort($daten, int $kwh): ?array
     }
     if (($daten['annual_consumption_kwh'] ?? null) !== $kwh || !rgr_preise_plausibel($antwort, $kwh)) {
         return null;
+    }
+    $netz = $daten['minimum_energy_price_gross'] ?? null;
+    if (rgr_ist_endliche_zahl($netz) && rgr_in_spanne((float) $netz, RGR_NETZKOSTEN_CT) && (float) $netz < $antwort['energy_price']) {
+        $antwort['minimum_energy_price_gross'] = (float) $netz;
     }
     $antwort['annual_consumption_kwh'] = $kwh;
     $antwort['city'] = $stadt;

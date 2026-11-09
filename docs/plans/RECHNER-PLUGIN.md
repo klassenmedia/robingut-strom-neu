@@ -268,3 +268,64 @@ dem WSE-Standard (ohne Slug); Bedeutung mit Timo bestätigen.
   Servermeldungen siezen bzw. sind neutral auf Sie-Seiten. Review VOLL: FREIGABE; dessen
   Empfehlungen (Tests Mehrkosten/Sie, Rundung, Lesekopf, Meldungen) sind umgesetzt.
   Tests: Rechnung 35, Browser 56, Logik 35, Routen 45.
+
+## Version 1.2.0: Preiszusammensetzung, Zubehör, WSE-Strecke (09.11.2026, Andreas)
+
+Auslöser: Im alten Rechner (eingebettete WeShareEnergy-Strecke auf /preise) gibt es Schieberegler für
+die Preisbildung, und „Jetzt Community beitreten“ führt in die vorbelegte Anmeldung. Entscheidung
+Andreas: eigener Rechner bleibt, bekommt die Regler, der Knopf öffnet darunter die WSE-Strecke.
+
+Ermittelt am 09.11.2026 im Code der WSE-Seite (`/stromcommunitys/neukunde/robin-gut-strom?iframe=1`):
+- Reststrom = `energy_price` (brutto), Netzkosten & Umlagen = `minimum_energy_price_gross`.
+- Community-Preis (Regler von Netzkosten bis Reststrom, Schritt 0,01) startet bei
+  `(minimum_energy_price_gross / 1,19 + 8) × 1,19`, begrenzt auf die Spanne. Die 8 ct netto stehen fest
+  im WSE-Code, nicht in der API.
+- Community-Anteil (Regler 0–100 %, Start 50 %). Mischpreis = Anteil × Community + (1 − Anteil) × Reststrom.
+  Ist Netzkosten ≥ Reststrom, blendet WSE die Regler aus.
+- „Jetzt Community beitreten“: `POST /checkout/create-session` (Web-Route mit CSRF und Sitzungs-Cookie)
+  liefert ein Token, der Link geht auf `/checkout/verbraucher?token=…` (5 Schritte, neuer Tab).
+  Vorbelegen per Adresse geht nicht (nur `refcode`); create-session nutzen wir nicht (interne Route).
+- Zubehör-Reiter: IOmeter- und WSE-Lesekopf, je 89 € Kauf oder 3,90 €/Monat Miete, ohne Knopf.
+
+Umsetzung:
+1. Server: `minimum_energy_price_gross` zusätzlich durchlassen (optional; plausibel nur 5–80 ct und
+   kleiner als `energy_price`, sonst weglassen). Bisherige Prüfungen bleiben.
+2. rechnung.js: `communityStart(netz, rest)`, `mischpreis(anteil, community, rest)`; `berechne` nimmt
+   Anteil und Community-Preis: Jahr = annual_total − kWh × (Reststrom − Mischpreis) / 100. Bei 0 %
+   Anteil also genau der WSE-Jahresbetrag (Plattformgebühr wie dort auf alle kWh).
+3. Oberfläche: Ergebnis zeigt Grundpreis, Reststrom, Community-Preis (Energiepreis + Netzkosten),
+   beide Regler, voraussichtlichen Strompreis, Monatsbetrag. Ohne gültige Netzkosten: wie bisher ohne Regler.
+4. Rolle „beides“ entfällt, dafür „Zubehör“ (Lesekopf-Liste aus den Konstanten, keine Partner-Anfrage).
+   Unternehmen-Seite: Shortcode auf `rolle="einspeisen"`.
+5. Knopf „Jetzt Community beitreten“ / „Als Erzeuger anmelden“ blendet darunter die WSE-Strecke als iframe
+   ein (erst beim Klick geladen). Ohne JavaScript bleibt er ein normaler Link. Höhe per postMessage nur
+   von `https://weshareenergy.de` und nur vom eigenen iframe, Typ `IFRAME_HEIGHT`, auf 300–5000 px begrenzt.
+   Hinweis: PLZ und Verbrauch dort noch einmal eingeben.
+
+### Threat Model 1.2.0
+(a) Angreifer: fremde Seite/Frame schickt gefälschte postMessage; manipulierte oder kaputte Partner-Antwort
+    (z. B. Netzkosten > Reststrom, NaN, Text); Nutzer verschiebt Regler auf Extremwerte; Clickjacking/Phishing
+    über das eingebettete Formular; Datenschutz (Aufruf von weshareenergy.de im Browser).
+(b) Untrusted Inputs: Partnerfeld `minimum_energy_price_gross`; Reglerwerte (DOM, manipulierbar);
+    `message`-Ereignisse (origin, source, data); Shortcode-Attribut `rolle`.
+(c) Worst Case: falscher, zu niedriger Preis beim Kunden (Werbeversprechen); iframe auf fremde Adresse
+    umgebogen (Phishing der Anmeldedaten); beliebige iframe-Höhe zerstört das Layout.
+(d) Gegenmaßnahmen: Server- und Browserprüfung des neuen Felds (Zahl, Spanne, < Reststrom), sonst Regler aus;
+    Reglerwerte im Code auf die Spanne begrenzt und als Zahl geprüft; iframe-Adresse fest im Plugin
+    (esc_url, nur https://weshareenergy.de), kein Wert aus der Seite; postMessage nur bei exakter origin,
+    `event.source === iframe.contentWindow`, Typ und Zahl, Höhe begrenzt; Rolle nur aus Whitelist;
+    iframe erst nach Klick (keine Datenübertragung ohne Handlung), Datenschutztext ergänzen (vor Go-Live
+    rechtlich prüfen). Tests: Rechnung (Formel, Grenzen, Negativfälle), PHP-Filter, Oberfläche (Regler,
+    Zubehör, iframe nach Klick, gefälschte Nachrichten ignoriert).
+
+**Stand 1.2.0 (09.11.2026, abends): gebaut, getestet, NICHT ausgerollt.** Voll-Review FREIGABE (3 MITTEL:
+Monatsbetrag oben jetzt Partnerbetrag, Schätzung darunter; iframe mit sandbox; Hinweis vor dem Klick und
+Ausweg-Link – alles umgesetzt; Tests Rechnung 44, Oberfläche 66, Logik 36, Routen 46). Danach Entscheidung
+Andreas: vorerst **kein eigener Rechner**, sondern die Original-Strecke von WeShareEnergy als iframe wie auf
+der alten Seite (`wordpress/wse-rechner.html`). Auf Release läuft weiter Plugin 1.1.2, aber auf keiner Seite
+mehr ein Shortcode. Wichtig für später: WSE erlaubt die Einbettung nur von robingut-strom.de und
+www.robingut-strom.de (`frame-ancestors`), nicht von release.robingut-strom.de. Der Einspeiser-Checkout
+`/checkout/einspeiser?token=…` entsteht erst im WSE-Reiter „Für Einspeiser“ (Sitzungstoken, nicht fest
+verlinkbar; ohne Token Weiterleitung auf die WSE-Startseite). Offen an WSE: Freigabe der Release-Domain,
+dauerhafter Einspeiser-Link, Prefill-Parameter; Unterschied Community-Einspeiser (2,90 €/Monat) zu
+Direktvermarktung (unser Erzeuger-Rechner) klären.

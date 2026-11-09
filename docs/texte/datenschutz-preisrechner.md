@@ -1,4 +1,4 @@
-# Datenschutzerklärung: Abschnitt Preisrechner (05.11.2026, ergänzt 09.11.2026 für Rechner 1.1.0)
+# Datenschutzerklärung: Abschnitt Preisrechner (05.11.2026, ergänzt 09.11.2026 für Rechner 1.1.0 und 1.2.0)
 
 Seit 05.11.2026 eingebaut in Seite 66 (Datenschutzerklärung) auf release.robingut-strom.de,
 direkt nach dem Abschnitt „Webhosting“. Sie-Form wie der Rest der Erklärung. Fassung für Plugin
@@ -38,9 +38,13 @@ Datenschutzerklärung. [MARKIERT: Partner hier mit Namen, Anschrift und Link zur
 Datenschutzerklärung nennen? Art. 13 DSGVO verlangt Empfänger oder Kategorien von
 Empfängern; mit Namen ist es eindeutiger.]
 
-Mit „Jetzt anmelden“, „Als Erzeuger anmelden“ oder „Weiter zur Anmeldung“ gelangen Sie auf die
-Anmeldeseite des Partners. Dabei übergeben wir keine
-Ihrer Eingaben.
+Mit „Jetzt Community beitreten“ oder „Als Erzeuger anmelden“ öffnen wir unter dem Rechner die
+Anmeldung unseres Partners als eingebetteten Bereich (iframe). Erst mit diesem Klick lädt Ihr
+Browser Inhalte direkt vom Server des Partners. Dabei erhält der Partner technisch bedingt Ihre
+IP-Adresse und Angaben zu Ihrem Browser und kann für die Anmeldung notwendige Cookies setzen.
+Ihre Eingaben aus unserem Rechner übergeben wir nicht. Was Sie in der Anmeldung eingeben,
+verarbeitet der Partner nach seiner Datenschutzerklärung. Ohne JavaScript führt der Knopf auf die
+Anmeldeseite des Partners. [MARKIERT 09.11.2026: gilt für Rechner 1.2.0, der NICHT ausgerollt ist. Aktuell bindet die Seite die WSE-Strecke direkt ein (wordpress/wse-rechner.html), sie lädt beim Seitenaufruf; dafür muss dieser Abschnitt vor Go-Live neu geschrieben werden, siehe UMBAU-VARIANTE-B.md.]
 
 ### Wie lange werden Daten gespeichert?
 

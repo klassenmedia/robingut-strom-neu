@@ -362,3 +362,13 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
   (2) „viertelstündlich“ bestätigen (sonst streichen), (3) Vergleichsbasis der –1,29 ct / 53.000 € (netto
   nach entgangenem Einspeiseerlös?), (4) Kachel „76 % Autarkie“ besser „76 % bilanzielle Eigenversorgung“
   (Physik: Strom kommt über das Netz; UWG). Grau steht in Karte 1 für Einspeisung, in Karte 2 für Bezug.
+- 09.11.2026 **Rechner: Original-Strecke von WeShareEnergy statt eigenem Rechner** (Andreas). Auf Startseite,
+  Energy Sharing, Privathaushalte, Landwirte, Unternehmen ersetzt `[robingut_rechner …]` durch den HTML-Block
+  aus `wordpress/wse-rechner.html` (iframe wie alte Seite, Höhe per postMessage nur von weshareenergy.de aus
+  dem eigenen iframe, sandbox ohne Top-Navigation, Ausweg-Link). Anker `#rechner` bleibt. Auf Release bleibt
+  die Fläche grau: WSE erlaubt Einbettung nur auf robingut-strom.de/www (frame-ancestors). Nach der
+  Domain-Umstellung läuft es; vorher WSE um Freigabe von release.robingut-strom.de bitten.
+  **Vor Go-Live:** Datenschutz-Abschnitt „Preisrechner“ (Seite 66) passt nicht mehr (beschreibt den eigenen
+  Rechner über unseren Server); neu: Einbettung lädt beim Seitenaufruf Inhalte von weshareenergy.de
+  (IP-Übertragung, Cookies der Anmeldung) → Text anpassen und rechtlich prüfen (ggf. Zwei-Klick-Lösung).
+  Rechner-Plugin 1.2.0 liegt fertig im Repo (nicht ausgerollt), siehe RECHNER-PLUGIN.md.

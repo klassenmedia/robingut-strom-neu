@@ -13,7 +13,11 @@
     setTimeout(() => abbruch.abort(), ZEITLIMIT_MS);
     return abbruch.signal;
   };
-  const ANMELDE_TEXT = { beziehen: "Jetzt anmelden", einspeisen: "Als Erzeuger anmelden", beides: "Weiter zur Anmeldung" };
+  const ANMELDE_TEXT = { beziehen: "Jetzt Community beitreten", einspeisen: "Als Erzeuger anmelden", zubehoer: "Jetzt Community beitreten" };
+  // Eingebettete Strecke des Partners: nur diese Herkunft, Höhe begrenzt (wie auf der alten Seite).
+  const WSE_HERKUNFT = "https://weshareenergy.de";
+  const WSE_HOEHE = [300, 5000];
+  const WSE_START_HOEHE = 720;
   const MELDUNG_ERZEUGER = {
     "kwp-ungueltig": "Bitte die Leistung der Anlage in kWp eingeben, zum Beispiel 100 oder 9,8.",
     "kwp-zu-klein": "Der Rechner beginnt bei 1 kWp.",
@@ -108,7 +112,12 @@
     const teilBezug = wurzel.querySelector(".rgr-teil-bezug");
     const teilErzeugung = wurzel.querySelector(".rgr-teil-erzeugung");
     const anmelden = wurzel.querySelector(".rgr-anmelden");
-    const aktualisiereLeer = () => { leer.hidden = !ergebnis.hidden || !erzeugerBox.hidden; };
+    const preisbildungBox = wurzel.querySelector(".rgr-preisbildung");
+    const geschaetztBox = wurzel.querySelector(".rgr-geschaetzt");
+    const zubehoer = wurzel.querySelector(".rgr-zubehoer");
+    const weiter = wurzel.querySelector(".rgr-weiter");
+    const wse = wurzel.querySelector(".rgr-wse");
+    const aktualisiereLeer = () => { leer.hidden = !ergebnis.hidden || !erzeugerBox.hidden || !zubehoer.hidden; };
     const melde = (inhalt) => { status.textContent = inhalt || ""; };
     const laedt = (ja) => { ergebnis.classList.toggle("rgr-laedt", ja); ergebnis.setAttribute("aria-busy", String(ja)); };
     const versteckeErgebnis = () => { ergebnis.hidden = true; preise = null; laedt(false); aktualisiereLeer(); };
@@ -116,12 +125,22 @@
     // frisch: Die Zahlen kommen gerade vom Server. Sonst (Abschlag getippt) bleiben Abblendung und
     // Status, wie sie sind, denn das Ergebnis kann zu einer schon geänderten Adresse gehören.
     function zeige(frisch = false) {
+      if (frisch) stelleRegler();
+      const bildung = R.preisbildung(preise, feld("anteil").value, feld("community").value);
+      zeigePreisbildung(bildung);
+      // Oben der Betrag des Partners (belegt), die Schätzung mit Community-Anteil nur darunter.
       const r = R.berechne(preise, R.betragAusEingabe(feld("abschlag").value));
+      const geschaetzt = bildung ? R.berechne(preise, null, bildung) : null;
+      geschaetztBox.hidden = !geschaetzt || geschaetzt.status !== "ok";
+      if (!geschaetztBox.hidden) {
+        teil("anteil-kurz").textContent = `${bildung.anteil} %`;
+        teil("monat-community").textContent = R.euro(geschaetzt.monat, 2);
+      }
       if (r.status !== "ok") return versteckeErgebnis();
       teil("monat").textContent = R.euro(r.monat, 2);
       teil("jahr").textContent = R.euro(r.jahr, 2);
       teil("ort").textContent = preise.stadt ? ` · Netzgebiet ${preise.stadt}` : "";
-      teil("arbeitspreis").textContent = `${R.cent(preise.arbeitspreisCt)} pro kWh`;
+      teil("reststrom").textContent = `${R.cent(preise.arbeitspreisCt)}/kWh`;
       teil("gebuehr").textContent = `${R.cent(preise.gebuehrCt)} pro kWh`;
       teil("grundpreis").textContent = R.euro(preise.grundMonat, 2);
       teil("lesekopf").textContent = `${R.euro(R.LESEKOPF_MIETE_MONAT, 2)} im Monat Miete oder einmalig ${R.euro(R.LESEKOPF_KAUF)} Kauf`;
@@ -138,6 +157,29 @@
         laedt(false);
         melde("");
       }
+    }
+
+    // Neue Partnerpreise: Spanne und Startwert des Community-Preises wie im Rechner des Partners.
+    // Den Anteil behält der Regler, er hängt nicht vom Netzgebiet ab.
+    function stelleRegler() {
+      const community = feld("community");
+      if (!preise || preise.netzCt === null) return;
+      community.min = String(preise.netzCt);
+      community.max = String(preise.arbeitspreisCt);
+      community.value = String(R.communityStart(preise.netzCt, preise.arbeitspreisCt));
+      teil("community-min").textContent = `${R.cent(preise.netzCt)}/kWh`;
+      teil("community-max").textContent = `${R.cent(preise.arbeitspreisCt)}/kWh`;
+    }
+
+    function zeigePreisbildung(bildung) {
+      preisbildungBox.hidden = !bildung;
+      if (!bildung) return;
+      teil("community").textContent = `${R.cent(bildung.communityCt)}/kWh`;
+      teil("community-teile").textContent = `${R.cent(bildung.energieCt)} Energie + ${R.cent(bildung.netzCt)} Netzkosten und Umlagen`;
+      teil("anteil").textContent = `${bildung.anteil} %`;
+      feld("anteil").setAttribute("aria-valuetext", `${bildung.anteil} %`);
+      feld("community").setAttribute("aria-valuetext", `${R.cent(bildung.communityCt)}/kWh`);
+      teil("mischpreis").textContent = `${R.cent(bildung.mischCt)}/kWh`;
     }
 
     function fuelleOrte(orte) {
@@ -437,9 +479,13 @@
     }
 
     function setzeRolle(rolle) {
-      teilBezug.hidden = rolle === "einspeisen";
-      teilErzeugung.hidden = rolle === "beziehen";
+      teilBezug.hidden = rolle !== "beziehen";
+      teilErzeugung.hidden = rolle !== "einspeisen";
+      zubehoer.hidden = rolle !== "zubehoer";
+      weiter.hidden = rolle === "zubehoer";
+      aktualisiereLeer();
       anmelden.textContent = ANMELDE_TEXT[rolle];
+      zeigeWseHinweis();
       if (teilBezug.hidden) { verwerfeLaufende(); versteckeErgebnis(); }
       if (teilErzeugung.hidden) { erzeugerNr++; erzeugerLaeuft = ""; versteckeErzeuger(); meldeE(""); }
       melde("");
@@ -460,6 +506,7 @@
       const name = e.target.name;
       if (name === "rolle") return;
       if (name === "wunschpreis") return zeigeErzeuger();
+      if (name === "anteil" || name === "community") return preise && zeige();
       if (ERZEUGER_FELDER.includes(name)) {
         if (kosten && !erzeugerBox.hidden) blendeAb(true);
         clearTimeout(erzeugerWarten);
@@ -490,6 +537,42 @@
     form.addEventListener("focusout", (e) => {
       if (e.target.name === "strasse" || e.target.name === "hausnummer") { clearTimeout(warten); rechne(); }
     });
+    // Anmelden: Strecke des Partners erst beim Klick laden (vorher geht nichts an weshareenergy.de).
+    // Ohne JavaScript bleibt der Knopf ein normaler Link auf die Seite des Partners.
+    let wseFrame = null;
+    function zeigeWseHinweis() {
+      const erzeuger = form.querySelector("[name=rolle]:checked")?.value === "einspeisen";
+      wse.querySelector(".rgr-wse-bezug").hidden = erzeuger;
+      wse.querySelector(".rgr-wse-erzeuger").hidden = !erzeuger;
+    }
+    anmelden.addEventListener("click", (e) => {
+      const adresse = anmelden.dataset.wse || "";
+      if (!adresse.startsWith(`${WSE_HERKUNFT}/`)) return;
+      e.preventDefault();
+      if (!wseFrame) {
+        wseFrame = document.createElement("iframe");
+        wseFrame.src = adresse;
+        wseFrame.title = "Anmeldung bei WeShareEnergy";
+        // Ohne allow-top-navigation: Die fremde Seite darf unsere Seite nicht umleiten.
+        // Der Checkout des Partners öffnet in einem neuen Tab, dafür die Popup-Rechte.
+        wseFrame.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox");
+        wseFrame.referrerPolicy = "strict-origin-when-cross-origin";
+        wseFrame.style.height = `${WSE_START_HOEHE}px`;
+        wse.appendChild(wseFrame);
+      }
+      zeigeWseHinweis();
+      wse.hidden = false;
+      wse.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    window.addEventListener("message", (e) => {
+      if (!wseFrame || e.origin !== WSE_HERKUNFT || e.source !== wseFrame.contentWindow) return;
+      const daten = e.data;
+      if (!daten || typeof daten !== "object" || daten.type !== "IFRAME_HEIGHT") return;
+      const hoehe = Number(daten.height);
+      if (typeof daten.height !== "number" || !Number.isFinite(hoehe)) return;
+      wseFrame.style.height = `${Math.min(Math.max(Math.round(hoehe), WSE_HOEHE[0]), WSE_HOEHE[1])}px`;
+    });
+
     form.addEventListener("click", (e) => {
       const knopf = e.target.closest(".rgr-person");
       if (!knopf) return;

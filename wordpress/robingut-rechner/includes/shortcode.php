@@ -1,5 +1,5 @@
 <?php
-// Shortcode [robingut_rechner rolle="beziehen|einspeisen|beides" anrede="du|sie"]:
+// Shortcode [robingut_rechner rolle="beziehen|einspeisen|zubehoer" anrede="du|sie"]:
 // Klickstrecke Rolle → Daten → Ergebnis; gerechnet wird im Browser.
 
 declare(strict_types=1);
@@ -9,14 +9,20 @@ if (!defined('ABSPATH')) {
 }
 
 const RGR_ANMELDE_URL = 'https://weshareenergy.de/stromcommunitys/neukunde/robin-gut-strom';
+// Eingebettete Strecke des Partners wie auf der alten Seite; der Knopf lädt sie erst beim Klick.
+const RGR_WSE_STRECKE = RGR_ANMELDE_URL . '?iframe=1&buttonColor=0e670e&borderRadius=9999px&fontFamily=NotoSans';
+// Zubehör-Reiter des Partners (geprüft 09.11.2026): beide Leseköpfe zum gleichen Preis.
+const RGR_LESEKOEPFE = ['IOmeter-Lesekopf', 'WSE-Lesekopf'];
+const RGR_LESEKOPF_KAUF = '89,00 €';
+const RGR_LESEKOPF_MIETE = '3,90 € im Monat';
 const RGR_PERSONEN = [2 => 2500, 3 => 3500, 4 => 4000];   // Stromspiegel 2025, siehe SCHLANK.md §14
 const RGR_VORBELEGUNG_KWH = 2500;
 const RGR_ROLLEN = [
     'beziehen' => ['Strom beziehen', 'Ich bin Verbraucher'],
     'einspeisen' => ['Strom einspeisen', 'Ich habe eine Anlage'],
-    'beides' => ['Beides', 'Ich erzeuge und verbrauche'],
+    'zubehoer' => ['Zubehör', 'Lesekopf kaufen oder mieten'],
 ];
-const RGR_ANMELDE_TEXT = ['beziehen' => 'Jetzt anmelden', 'einspeisen' => 'Als Erzeuger anmelden', 'beides' => 'Weiter zur Anmeldung'];
+const RGR_ANMELDE_TEXT = ['beziehen' => 'Jetzt Community beitreten', 'einspeisen' => 'Als Erzeuger anmelden', 'zubehoer' => 'Jetzt Community beitreten'];
 const RGR_ANLAGEN_NAMEN = ['pv' => 'Photovoltaik', 'wind' => 'Wind', 'wasser' => 'Wasserkraft', 'biogas' => 'Biogas'];
 const RGR_TEXTE = [
     'du' => [
@@ -31,6 +37,13 @@ const RGR_TEXTE = [
         'bleibt' => 'Bleibt für dich',
         'wunsch' => 'Dein Wunschpreis',
         'eigene' => 'Fernwirktechnik ab 25 kW stellst du selbst.',
+        'anteil' => 'Community-Anteil deines Verbrauchs',
+        'anteil_hinweis' => 'So viel deines Stroms kommt zeitgleich aus der Community, den Rest liefert Reststrom (Ökostrom).',
+        'mischpreis' => 'Dein voraussichtlicher Strompreis',
+        'zubehoer' => 'Für Energy Sharing brauchst du einen Lesekopf an deinem digitalen Stromzähler. Du wählst ihn bei der Anmeldung aus.',
+        'wse' => 'Die Anmeldung läuft bei unserem Partner WeShareEnergy. Gib dort deine Postleitzahl und deinen Verbrauch bitte noch einmal ein.',
+        'wse_erzeuger' => 'Die Anmeldung läuft bei unserem Partner WeShareEnergy. Wechsle dort oben auf „Für Einspeiser“, dann geht es zur Anmeldung als Erzeuger.',
+        'geschaetzt' => 'im Monat, geschätzt',
     ],
     'sie' => [
         'schritt1' => 'Was möchten Sie?', 'schritt2' => 'Ihre Daten', 'schritt3' => 'Ihr Ergebnis',
@@ -44,6 +57,13 @@ const RGR_TEXTE = [
         'bleibt' => 'Bleibt für Sie',
         'wunsch' => 'Ihr Wunschpreis',
         'eigene' => 'Fernwirktechnik ab 25 kW stellen Sie selbst.',
+        'anteil' => 'Community-Anteil Ihres Verbrauchs',
+        'anteil_hinweis' => 'So viel Ihres Stroms kommt zeitgleich aus der Community, den Rest liefert Reststrom (Ökostrom).',
+        'mischpreis' => 'Ihr voraussichtlicher Strompreis',
+        'zubehoer' => 'Für Energy Sharing brauchen Sie einen Lesekopf an Ihrem digitalen Stromzähler. Sie wählen ihn bei der Anmeldung aus.',
+        'wse' => 'Die Anmeldung läuft bei unserem Partner WeShareEnergy. Bitte geben Sie dort Postleitzahl und Verbrauch noch einmal ein.',
+        'wse_erzeuger' => 'Die Anmeldung läuft bei unserem Partner WeShareEnergy. Bitte wechseln Sie dort oben auf „Für Einspeiser“, dann geht es zur Anmeldung als Erzeuger.',
+        'geschaetzt' => 'im Monat, geschätzt',
     ],
 ];
 
@@ -72,8 +92,9 @@ function rgr_shortcode($atts = []): string
     [$rolle, $anrede] = rgr_shortcode_werte($atts);
     $t = RGR_TEXTE[$anrede];
     $id = wp_unique_id('rgr-');
-    $mit_bezug = $rolle !== 'einspeisen';
-    $mit_erzeugung = $rolle !== 'beziehen';
+    $mit_bezug = $rolle === 'beziehen';
+    $mit_erzeugung = $rolle === 'einspeisen';
+    $mit_zubehoer = $rolle === 'zubehoer';
     ob_start();
     ?>
 <div class="rgr" data-rest="<?php echo esc_attr(wp_make_link_relative(rest_url('robingut-rechner/v1/'))); ?>" data-anrede="<?php echo esc_attr($anrede); ?>">
@@ -172,28 +193,54 @@ function rgr_shortcode($atts = []): string
             <p class="rgr-klein rgr-feldhinweis">Empfehlung 7–11 ct je kWh, frei vereinbar.</p>
           </div>
         </div>
-        <button type="submit" class="rgr-knopf rgr-knopf-haupt">Weiter</button>
+        <div class="rgr-teil rgr-zubehoer"<?php echo $mit_zubehoer ? '' : ' hidden'; ?>>
+          <p class="rgr-hinweis"><?php echo esc_html($t['zubehoer']); ?></p>
+          <table class="rgr-zubehoer-liste">
+            <thead><tr><th scope="col">Lesekopf</th><th scope="col">Kauf</th><th scope="col">Miete</th></tr></thead>
+            <tbody>
+              <?php foreach (RGR_LESEKOEPFE as $lesekopf) : ?>
+                <tr><th scope="row"><?php echo esc_html($lesekopf); ?></th><td><?php echo esc_html(RGR_LESEKOPF_KAUF); ?> einmalig</td><td><?php echo esc_html(RGR_LESEKOPF_MIETE); ?></td></tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
+        <button type="submit" class="rgr-knopf rgr-knopf-haupt rgr-weiter"<?php echo $mit_zubehoer ? ' hidden' : ''; ?>>Weiter</button>
       </div>
 
       <div class="rgr-schritt rgr-schritt-3">
         <p class="rgr-schritt-titel"><span class="rgr-nr" aria-hidden="true">3</span> <?php echo esc_html($t['schritt3']); ?></p>
         <p class="rgr-status rgr-status-bezug" role="status" aria-live="polite"></p>
         <p class="rgr-status rgr-status-erzeugung" role="status" aria-live="polite"></p>
-        <p class="rgr-leer rgr-klein"><?php echo esc_html($t['leer']); ?></p>
+        <p class="rgr-leer rgr-klein"<?php echo $mit_zubehoer ? ' hidden' : ''; ?>><?php echo esc_html($t['leer']); ?></p>
         <div class="rgr-ergebnis" hidden>
           <p class="rgr-label"><?php echo esc_html($t['monat']); ?></p>
           <p class="rgr-betrag"><strong data-feld="monat"></strong> <span class="rgr-zzgl">zzgl. Lesekopf</span></p>
+          <p class="rgr-geschaetzt" hidden>Mit <span data-feld="anteil-kurz"></span> Community-Anteil voraussichtlich <strong data-feld="monat-community"></strong> <?php echo esc_html($t['geschaetzt']); ?></p>
           <p class="rgr-jahr">Im Jahr <span data-feld="jahr"></span><span data-feld="ort"></span></p>
           <div class="rgr-vergleich" hidden>
             <strong data-feld="vergleich-titel"></strong>
             <span data-feld="vergleich-text"></span>
           </div>
+          <div class="rgr-preisbildung" hidden>
+            <div class="rgr-regel">
+              <label for="<?php echo esc_attr($id); ?>-community">Strompreis Community <strong data-feld="community"></strong></label>
+              <p class="rgr-klein" data-feld="community-teile"></p>
+              <input id="<?php echo esc_attr($id); ?>-community" name="community" type="range" step="0.01">
+              <p class="rgr-skala rgr-klein" aria-hidden="true"><span data-feld="community-min"></span><span data-feld="community-max"></span></p>
+            </div>
+            <div class="rgr-regel">
+              <label for="<?php echo esc_attr($id); ?>-anteil"><?php echo esc_html($t['anteil']); ?> <strong data-feld="anteil"></strong></label>
+              <input id="<?php echo esc_attr($id); ?>-anteil" name="anteil" type="range" min="0" max="100" step="1" value="50" aria-describedby="<?php echo esc_attr($id); ?>-anteil-hinweis">
+              <p id="<?php echo esc_attr($id); ?>-anteil-hinweis" class="rgr-klein"><?php echo esc_html($t['anteil_hinweis']); ?></p>
+            </div>
+            <p class="rgr-mischpreis"><span><?php echo esc_html($t['mischpreis']); ?> <span class="rgr-zzgl">zzgl. Plattformgebühr</span></span> <strong data-feld="mischpreis"></strong></p>
+          </div>
           <dl class="rgr-details">
-            <div><dt>Arbeitspreis</dt><dd data-feld="arbeitspreis"></dd></div>
-            <div><dt>Plattformgebühr</dt><dd data-feld="gebuehr"></dd></div>
             <div><dt>Grundpreis im Monat</dt><dd data-feld="grundpreis"></dd></div>
+            <div><dt>Reststrom</dt><dd data-feld="reststrom"></dd></div>
+            <div><dt>Plattformgebühr</dt><dd data-feld="gebuehr"></dd></div>
           </dl>
-          <p class="rgr-klein">Preise für ROBIN GUT Strom inklusive Umsatzsteuer. Dazu kommt der Lesekopf: <span data-feld="lesekopf"></span>. Unverbindliche Berechnung, verbindlich ist der Preis bei der Anmeldung.</p>
+          <p class="rgr-klein">Preise für ROBIN GUT Strom inklusive Umsatzsteuer. Community-Anteil und Community-Preis sind Schätzwerte wie im Rechner unseres Partners WeShareEnergy. Dazu kommt der Lesekopf: <span data-feld="lesekopf"></span>. Unverbindliche Berechnung, verbindlich ist der Preis bei der Anmeldung.</p>
         </div>
         <div class="rgr-ergebnis-erzeuger" hidden>
           <p class="rgr-label">Ergebnis im Jahr (Beispiel)</p>
@@ -207,10 +254,16 @@ function rgr_shortcode($atts = []): string
           <p class="rgr-klein rgr-hinweis-foerderung" hidden>Läuft die feste Einspeisevergütung noch, bleibt sie meist bis zum Förderende die bessere Wahl.</p>
           <p class="rgr-klein">Einmalig <span data-feld="einrichtung"></span> Einrichtung.<span class="rgr-fernwirk" hidden> <?php echo esc_html($t['eigene']); ?></span> Alle Preise netto, unverbindliche Beispielrechnung, verbindlich ist der Preis bei der Anmeldung.</p>
         </div>
-        <p><a class="rgr-knopf rgr-knopf-haupt rgr-anmelden" href="<?php echo esc_url(RGR_ANMELDE_URL); ?>" rel="noopener noreferrer"><?php echo esc_html(RGR_ANMELDE_TEXT[$rolle]); ?></a></p>
+        <p><a class="rgr-knopf rgr-knopf-haupt rgr-anmelden" href="<?php echo esc_url(RGR_ANMELDE_URL); ?>" data-wse="<?php echo esc_attr(RGR_WSE_STRECKE); ?>" rel="noopener noreferrer"><?php echo esc_html(RGR_ANMELDE_TEXT[$rolle]); ?></a></p>
+        <p class="rgr-klein rgr-anmelden-hinweis">Öffnet hier die Anmeldung unseres Partners WeShareEnergy (weshareenergy.de).</p>
       </div>
     </div>
   </form>
+  <div class="rgr-wse" hidden>
+    <p class="rgr-hinweis rgr-wse-bezug"><?php echo esc_html($t['wse']); ?></p>
+    <p class="rgr-hinweis rgr-wse-erzeuger" hidden><?php echo esc_html($t['wse_erzeuger']); ?></p>
+    <p class="rgr-klein"><a class="rgr-wse-tab" href="<?php echo esc_url(RGR_ANMELDE_URL); ?>" target="_blank" rel="noopener noreferrer">Anmeldung lieber in einem neuen Tab öffnen</a></p>
+  </div>
   <noscript><p class="rgr-status">Der Rechner braucht JavaScript. Zur Anmeldung geht es <a href="<?php echo esc_url(RGR_ANMELDE_URL); ?>" rel="noopener noreferrer">hier</a>.</p></noscript>
 </div>
     <?php

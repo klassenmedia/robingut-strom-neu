@@ -220,4 +220,13 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
     hohe Kacheln: weiß mit Schatten auf Grün-Bändern, hellgrün auf weißen, durchscheinend auf dunklen.
   - Video: Der Play-Knopf des Essential-Blocks-Players war 0 × 0 px groß. Jetzt Lime-Kreis mit
     Dreieck mittig auf dem Vorschaubild.
-  - Offen: YouTube ist in CCM19 nicht als Dienst eingetragen und wird deshalb nicht blockiert.
+  - Video-Cookies: CCM19 kennt den Dienst „YouTube Video“ (Social Media), blockiert aber den
+    Essential-Blocks-Player nicht von selbst. Darum hängt hinter dem Video auf Startseite (1241) und
+    Energy Sharing (1355) ein HTML-Block mit `wordpress/video-cookie-sperre.js` (Kopie im Repo):
+    Ohne Zustimmung fängt es den Klick ab, zeigt einen Hinweis mit „Cookie-Einstellungen öffnen“
+    und startet das Video, sobald „YouTube Video“ erlaubt ist. Das Vorschaubild liegt lokal, vor dem
+    Klick geht nichts an Google. Live getestet (ohne/mit Zustimmung, Attrappe für CCM).
+  - Über dem Video fett „Alles Wichtige in diesem Video“ (Absatz `rg-video-titel`), Text direkt vor
+    einer Kachelreihe so breit wie die Reihe.
+  - Review-Punkte: Fokusrahmen am Play-Knopf, Kachelregeln nur in `.rgb-karte`, helle Links in
+    Kacheln auf dunklem Grund. Bewusst offen: Vorher-nachher-Karte hat im Raster genau zwei Teile.

@@ -138,7 +138,8 @@ body h1, body h2, body h3, body h4, body p, body li, body summary, body .wp-bloc
 .rgb-vn > .wp-block-columns > .wp-block-column:has(> .rgb-vn-vorher, > .rgb-vn-nachher) { display: flex; flex-direction: column; align-self: stretch !important; }
 .rgb-vn-vorher, .rgb-vn-nachher { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; }
 .rgb-vn > .wp-block-columns > .wp-block-column:has(> .rgb-vn-pfeil) { align-self: center !important; }
-/* Zwei Karten nebeneinander: Überschrift und Kästen auf gemeinsamer Linie, auch wenn eine Überschrift umbricht */
+/* Zwei Karten nebeneinander: Überschrift und Kästen auf gemeinsamer Linie, auch wenn eine Überschrift umbricht.
+   Eine Karte hat genau zwei Teile (h3 + Spalten); ein drittes Element bräuchte eine dritte Rasterzeile. */
 @media (min-width: 782px) {
   .wp-block-columns:has(> .wp-block-column:first-child > .rgb-vn):has(> .wp-block-column:nth-child(2):last-child > .rgb-vn) { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: auto 1fr; row-gap: 0 !important; }
   .wp-block-columns:has(> .wp-block-column:first-child > .rgb-vn):has(> .wp-block-column:nth-child(2):last-child > .rgb-vn) > .wp-block-column { display: grid; grid-row: span 2; grid-template-rows: subgrid; }
@@ -147,12 +148,12 @@ body h1, body h2, body h3, body h4, body p, body li, body summary, body .wp-bloc
 
 /* Textspalten (Schritte, Vorteile) als gleich hohe Kacheln (Andreas 09.11.); Spalten mit Foto haben eigene Kachel oben */
 .rgb-karte .wp-block-column:has(> .rgb-spalte) { display: flex; flex-direction: column; }
-.rgb-spalte:not(:has(> figure:not(.rgb-icon))) { flex: 1 1 auto; height: auto; background: #fff; border: 1px solid #DCE3D6; border-radius: 16px; padding: clamp(22px, 2vw, 30px) !important; box-shadow: 0 1px 2px rgba(0, 61, 0, 0.04), 0 10px 28px rgba(0, 61, 0, 0.07); }
-.rgb-spalte:not(:has(> figure:not(.rgb-icon))) > h3 { font-weight: 600 !important; }
+.rgb-karte .rgb-spalte:not(:has(> figure:not(.rgb-icon))) { flex: 1 1 auto; height: auto; background: #fff; border: 1px solid #DCE3D6; border-radius: 16px; padding: clamp(22px, 2vw, 30px) !important; box-shadow: 0 1px 2px rgba(0, 61, 0, 0.04), 0 10px 28px rgba(0, 61, 0, 0.07); }
+.rgb-karte .rgb-spalte:not(:has(> figure:not(.rgb-icon))) > h3 { font-weight: 600 !important; }
 @supports selector(:nth-child(1 of .x)) {
   .wp-block-post-content > .rgb-karte:nth-child(odd of .rgb-karte:not(.rgb-dunkel, .has-background)) .rgb-spalte:not(:has(> figure:not(.rgb-icon))) { background: #F6FAEC; border-color: #E1ECCB; box-shadow: none; }
 }
-.rgb-dunkel .rgb-spalte:not(:has(> figure:not(.rgb-icon))) { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.18); box-shadow: none; }
+.rgb-karte.rgb-dunkel .rgb-spalte:not(:has(> figure:not(.rgb-icon))) { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.18); box-shadow: none; }
 
 /* Video: sichtbarer Play-Knopf auf dem Vorschaubild (der Knopf des Video-Blocks war 0 × 0 px groß) */
 .eb-av-yt-facade { cursor: pointer; }
@@ -161,3 +162,17 @@ body h1, body h2, body h3, body h4, body p, body li, body summary, body .wp-bloc
 .eb-av-yt-facade .eb-av-yt-play::before { content: ""; width: clamp(64px, 8vw, 92px); aspect-ratio: 1; border-radius: 50%; background: #A4D235 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8 5.5v13l10.5-6.5z' fill='%23003D00'/%3E%3C/svg%3E") no-repeat 56% 50% / 42%; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35); transition: transform 0.15s ease-out; }
 .eb-av-yt-facade:hover .eb-av-yt-play::before, .eb-av-yt-facade:focus-visible .eb-av-yt-play::before { transform: scale(1.08); }
 @media (prefers-reduced-motion: reduce) { .eb-av-yt-facade .eb-av-yt-play::before { transition: none; } }
+
+/* Review 09.11.: Fokusrahmen am Play-Knopf, helle Links in Kacheln auf dunklem Grund */
+.eb-av-yt-facade:focus-visible { outline: 3px solid #A4D235; outline-offset: 3px; }
+.rgb-karte.rgb-dunkel .rgb-spalte .rgb-link a { color: #fff !important; }
+/* Text direkt vor einer Kachel- oder Spaltenreihe so breit wie die Reihe (Andreas 09.11.) */
+.rgb-karte > p:has(+ .wp-block-columns) { max-width: none; }
+/* Überschrift über dem Video und Cookie-Hinweis im Video (vor Zustimmung zu YouTube) */
+.rgb-karte p.rg-video-titel { margin-bottom: -8px !important; font-size: clamp(18px, 1.2vw, 21px) !important; color: #003D00; }
+.eb-react-player:has(> .rg-video-hinweis) { position: relative; }
+.rg-video-hinweis { position: absolute; left: 16px; right: 16px; bottom: 16px; z-index: 3; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 14px 18px; border-radius: 12px; background: rgba(0, 40, 0, 0.9); }
+.rg-video-hinweis p { flex: 1 1 260px; margin: 0 !important; color: #fff !important; font-size: 15px !important; line-height: 1.5 !important; }
+.rg-video-hinweis button { border: 0; border-radius: 100px; padding: 10px 18px; background: #A4D235; color: #003D00; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+.rg-video-hinweis button:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+@media (max-width: 600px) { .rg-video-hinweis { left: 8px; right: 8px; bottom: 8px; padding: 10px 12px; } .rg-video-hinweis p { font-size: 14px !important; } }

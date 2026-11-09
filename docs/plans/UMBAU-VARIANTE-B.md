@@ -14,8 +14,8 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
   Variante B kommt über CSS-Klassen an Gruppen (`rgb-…`) und steht im Zusätzlichen CSS der
   globalen Stile, Kopie in `wordpress/variante-b.css`.
 - **Icons:** Linien-Icons als SVG-Medien (Safe SVG ist aktiv), eingebunden als Bild-Block.
-- **Weiterleitungen:** Plugin „Redirection“ oder `.htaccess`. Die Entscheidung von Andreas steht
-  noch aus.
+- **Weiterleitungen:** Plugin „Redirection“ (Andreas, 09.11.). Damit wandern sie beim Go-Live per
+  All-in-One WP Migration mit.
 
 ## Reihenfolge
 
@@ -84,5 +84,44 @@ Weiterleitung auf eine fremde Seite.
   - Der Rechner ist vorerst der bisherige Shortcode.
   - Das Zitat von Dieter fehlt in der Markdown-Datei. Ich habe es aus der HTML-Vorlage
     übernommen: „Mit der ROBIN GUT Stromcommunity verbinden wir Menschen.“
-  - Noch offen: Das Menü 68 zeigt die alten Punkte. Es wird umgestellt, sobald
-    `/energy-sharing/` steht. Die Handy-Ansicht ist noch nicht geprüft.
+- 09.11.2026 alle Seiten auf Release (Chrome als Andreas):
+  - Plugin „Redirection“ 5.10.1 ist installiert (Freigabe Andreas). Permalink-Überwachung ist
+    an (Gruppe „Geänderte Beiträge“), Protokoll und IP-Speicherung sind aus. Es gibt 5
+    Weiterleitungen (301) nach README §6, alle geprüft. Die alten Seiten So geht's (1045),
+    Preise (19) und Kontakt (71) stehen auf Entwurf.
+  - Neue Seite „Energy Sharing einfach erklärt“ (1355, `/energy-sharing/`) mit Tabelle „Auf
+    einen Blick“.
+  - Neu gebaut sind außerdem Privathaushalte (1243), Landwirte (1230), Unternehmen &
+    Organisationen (1110, mit Kundenfall-Grafik) und Über ROBIN GUT (154, mit Partner-Logo
+    und Siegeln auf dunkler Kachel).
+  - Alle Seiten nutzen jetzt die Vorlage `no-title`, alle Blöcke sind gültig. Die Texte
+    stammen wörtlich aus `Texte/*.md`.
+  - Menü 68: So geht's · Privathaushalte · Landwirte · Unternehmen & Organisationen ·
+    Über ROBIN GUT · FAQ.
+  - FAQ (23): 6 Gruppen mit Sprungmarken und 48 Fragen als Aufklapper. Die Fragen „neu“ und
+    „geändert“ kommen aus `07_FAQ_Aenderungsliste.html`, die Antworten „bleibt“ sind
+    unverändert übernommen, die zwei doppelten Fragen sind gelöscht und der Link `/reise/`
+    ist korrigiert.
+  - Impressum (64) ohne die Zeile zur USt-ID. Impressum und Datenschutzerklärung stehen in je
+    einer Karte.
+  - Andreas wollte die volle Bildschirmbreite: Karten, Kopf- und Fußzeile laufen jetzt mit
+    24 px Rand über die ganze Breite und sind bündig. Die Schrift wächst bis 64 px (H1) mit,
+    Fließtext ist auf 90 Zeichen pro Zeile begrenzt, Bilder auf 560 px Höhe.
+  - Den Pfeil „↗“ in den Knöpfen hat Andreas als hässlich abgelehnt, er ist entfernt. Die
+    Markdown-Texte enthalten ihn noch, das ist bewusst.
+  - Geprüft: keine toten Links und keine fehlenden Anker (25 Ziele). Handy 390 px ohne
+    Überlauf. Die Suche nach „Nr. 1“, „unser Partner“, „Rückruf“, Telefon und Mail außerhalb
+    von Impressum, FAQ und Über uns findet nur die Entwurfsseiten 19 und 71 (die werden
+    umgeleitet).
+  - Platzhalter (gestrichelt markiert): Rechner auf Landwirte und Unternehmen (Klickstrecke
+    folgt), Foto Nadine Büscher, Teamfoto Mitarbeiterstrom. Auf Startseite, Energy Sharing
+    und Privathaushalte läuft vorerst der bisherige Verbraucher-Rechner.
+  - Selbst gesehen, nicht in der Übergabe:
+    - Das Impressum nennt Timo Russell als Gesellschafter. Das ist Pflichtangabe und bleibt,
+      obwohl Timo laut Übergabe nicht als Person genannt wird.
+    - Das Impressum verweist noch auf die OS-Plattform der EU. Die wurde nach meinem
+      Kenntnisstand im Juli 2025 eingestellt, das sollte geprüft werden.
+    - Ob das Bild 733 (Schriftzug aus Bäumen) KI-generiert ist, ist unklar. Es ist nicht
+      gekennzeichnet.
+    - Der Knopf „Jetzt wechseln ↗“ im Rechner-Plugin hat noch den Pfeil. Der fällt mit
+      dem Umbau des Plugins weg.

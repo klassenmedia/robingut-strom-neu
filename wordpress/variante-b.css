@@ -9,23 +9,23 @@ body { background: #F6F8F3; color: #22302A; font-family: Arial, Helvetica, sans-
 body h1, body h2, body h3, body h4, body p, body li, body summary, body .wp-block-button__link, body .wp-block-navigation { font-family: Arial, Helvetica, sans-serif; }
 .wp-site-blocks > main, .wp-site-blocks > .wp-block-group { background: transparent; }
 
-.rgb-karte { background: #fff; border: 1px solid #D5DDCF; border-radius: 16px; padding: 30px 34px !important; max-width: 1100px; margin-left: auto !important; margin-right: auto !important; box-sizing: border-box; }
+.rgb-karte { background: #fff; border: 1px solid #D5DDCF; border-radius: 16px; padding: 34px 40px !important; max-width: none !important; width: auto !important; margin-left: 24px !important; margin-right: 24px !important; box-sizing: border-box; }
 .rgb-karte.rgb-hell { background: #EEF6DA; border-color: #DCE9BD; }
 .rgb-karte.rgb-dunkel { background: #0E4D36; border-color: #0E4D36; color: #fff; }
 .rgb-karte + .rgb-karte, .rgb-karte + * + .rgb-karte { margin-top: 18px !important; }
 .wp-block-post-content > .rgb-karte:first-child { margin-top: 18px !important; }
 .wp-block-post-content > .rgb-karte:last-child { margin-bottom: 18px !important; }
 
-.rgb-karte h1 { font-size: clamp(32px, 4vw, 44px) !important; line-height: 1.07; font-weight: 800; color: #0E4D36; margin: 0; }
+.rgb-karte h1 { font-size: clamp(32px, 3.1vw, 64px) !important; line-height: 1.07; font-weight: 800; color: #0E4D36; margin: 0; }
 .rgb-karte h1 mark { color: #3F8F2A !important; background: none !important; }
-.rgb-karte h2 { font-size: clamp(22px, 2.4vw, 27px) !important; line-height: 1.2; font-weight: 800; color: #0E4D36; margin: 0; }
-.rgb-karte h3 { font-size: 16px !important; line-height: 1.3; font-weight: 700; color: #0E4D36; margin: 0; }
-.rgb-karte p, .rgb-karte li { font-size: 16px; line-height: 1.55; }
+.rgb-karte h2 { font-size: clamp(22px, 1.8vw, 36px) !important; line-height: 1.2; font-weight: 800; color: #0E4D36; margin: 0; }
+.rgb-karte h3 { font-size: clamp(16px, 1.05vw, 21px) !important; line-height: 1.3; font-weight: 700; color: #0E4D36; margin: 0; }
+.rgb-karte p, .rgb-karte li { font-size: clamp(16px, 0.95vw, 19px); line-height: 1.55; }
 .rgb-karte.rgb-dunkel h1, .rgb-karte.rgb-dunkel h2, .rgb-karte.rgb-dunkel h3, .rgb-karte.rgb-dunkel p { color: #fff; }
 
 .rgb-spalte { background: #fff; border: 1px solid #E1E7DC; border-radius: 12px; padding: 16px !important; height: 100%; box-sizing: border-box; }
 .rgb-hell .rgb-spalte { border-color: #D9E6C0; }
-.rgb-spalte p, .rgb-spalte li { font-size: 14px !important; line-height: 1.5; }
+.rgb-spalte p, .rgb-spalte li { font-size: clamp(14px, 0.85vw, 17px) !important; line-height: 1.5; }
 .rgb-spalte .wp-block-image img { border-radius: 10px; }
 .rgb-icon img { width: 28px !important; height: 28px !important; }
 .rgb-karte .wp-block-image img { border-radius: 10px; }
@@ -53,11 +53,11 @@ body h1, body h2, body h3, body h4, body p, body li, body summary, body .wp-bloc
 .rgb-faq[open] summary::after { content: "–"; }
 .rgb-faq > *:not(summary) { margin-top: 10px; font-size: 15px; }
 
-.rgb-kopf { background: #fff; border: 1px solid #D5DDCF; border-radius: 16px; max-width: 1100px; margin: 18px auto 0 !important; padding: 10px 22px !important; box-sizing: border-box; }
+.rgb-kopf { background: #fff; border: 1px solid #D5DDCF; border-radius: 16px; max-width: none !important; margin: 18px 24px 0 !important; padding: 10px 22px !important; box-sizing: border-box; }
 .rgb-kopf .wp-block-navigation a { color: #22302A !important; font-size: 15px; }
 .rgb-kopf .wp-block-navigation .current-menu-item > a { color: #0E4D36 !important; font-weight: 700; text-decoration: underline; text-decoration-color: #A3D237; text-decoration-thickness: 2px; text-underline-offset: 6px; }
 .rgb-kopf .wp-block-button__link { background: #A3D237 !important; color: #0E2A12 !important; border-radius: 999px !important; padding: 10px 18px !important; font-weight: 700; font-size: 15px; }
-.rgb-fuss { background: #fff; border: 1px solid #D5DDCF; border-radius: 16px; max-width: 1100px; margin: 0 auto 18px !important; padding: 16px 26px !important; box-sizing: border-box; color: #22302A; font-size: 14px; }
+.rgb-fuss { background: #fff; border: 1px solid #D5DDCF; border-radius: 16px; max-width: none !important; margin: 0 24px 18px !important; padding: 16px 26px !important; box-sizing: border-box; color: #22302A; font-size: 14px; }
 .rgb-fuss a { color: #0E4D36 !important; text-decoration: underline; }
 
 /* Feinschliff */
@@ -70,6 +70,29 @@ body h1, body h2, body h3, body h4, body p, body li, body summary, body .wp-bloc
 .rgb-karte .wp-block-template-part > .wp-block-column, .rgb-karte .wp-block-template-part > .wp-block-group { padding: 0 !important; margin: 0 !important; background: transparent !important; }
 .rgb-karte .wp-block-template-part h2 { color: #0E4D36 !important; }
 
+.rgb-tabelle table { border-collapse: collapse; width: 100%; }
+.rgb-tabelle td { border: 0 !important; border-bottom: 1px solid #E1E7DC !important; padding: 9px 4px !important; font-size: 14px; vertical-align: top; }
+.rgb-tabelle td:first-child { font-weight: 700; color: #0E4D36; width: 45%; }
+.rgb-beispiel { background: #EEF6DA; border: 1px solid #DCE9BD; border-radius: 12px; padding: 18px !important; height: 100%; box-sizing: border-box; }
+.rgb-kennzahl { font-size: 30px !important; font-weight: 800; color: #0E4D36; line-height: 1.2; }
+.wp-block-post-content > .rgb-karte { max-width: none !important; }
+.wp-site-blocks .rgb-kopf.alignwide, .wp-site-blocks .rgb-fuss.alignwide { max-width: none !important; }
+.wp-block-post-content:has(> .rgb-karte), main:has(.rgb-karte) .wp-block-post-content { padding-left: 0 !important; padding-right: 0 !important; }
+.rgb-karte .wp-block-image img { max-height: 560px; object-fit: cover; }
+.rgb-karte .rgb-icon img { max-height: none; }
+.rgb-karte > p, .rgb-karte > .rgb-faq, .rgb-karte .wp-block-column > p { max-width: 90ch; }
+.rgb-karte > p.has-text-align-center { margin-left: auto !important; margin-right: auto !important; }
+.rgb-kachel { background: #fff; border: 1px solid #E1E7DC; border-radius: 12px; padding: 18px 20px !important; box-sizing: border-box; }
+.rgb-kachel p { margin: 0 !important; font-size: 14px !important; }
+.rgb-kachel .rgb-kennzahl { font-size: clamp(26px, 2vw, 40px) !important; }
+.rgb-kachel-dunkel { background: #0E4D36; border-color: #0E4D36; }
+.rgb-kachel-dunkel p, .rgb-kachel-dunkel .rgb-kennzahl { color: #fff !important; }
+.rgb-kachel-gruen { background: #A3D237; border-color: #A3D237; margin-bottom: 12px !important; }
+.rgb-kachel-mitte { text-align: center; height: 100%; }
+.rgb-balken-eigen { background: #A3D237; color: #0E2A12; font-weight: 700; padding: 8px 12px !important; border-radius: 8px 0 0 8px; }
+.rgb-balken-netz { background: #DDE3DA; color: #22302A; font-weight: 700; padding: 8px 12px !important; border-radius: 0 8px 8px 0; text-align: right; }
+.rgb-kachel .wp-block-columns { margin: 0 !important; }
+.rgb-platzhalter { background: #EEF2EC; border-radius: 10px; padding: 60px 20px !important; text-align: center; color: #5B6B5F; }
 @media (max-width: 781px) {
   .rgb-karte { padding: 22px 18px !important; border-radius: 14px; margin-left: 10px !important; margin-right: 10px !important; }
   .rgb-kopf, .rgb-fuss { margin-left: 10px !important; margin-right: 10px !important; }

@@ -41,7 +41,7 @@ Preis die Provision schon enthält. Keine eigenen Annahmen zum Community-Anteil.
 - Ersparnis = heutiger Abschlag × 12 − Jahressumme; |Δ| < 12 € gilt als „etwa gleich“.
 - Grenzen: 500 bis 100.000 kWh, darüber individuelles Angebot.
 
-Beispiele (04.11.2026, live gegengeprüft): 41747 / 2.500 kWh → 1.221,99 € im Jahr, ca. 102 €
+Beispiele (04.11.2026, live gegengeprüft): 41747 / 2.500 kWh → 1.221,99 € im Jahr, 101,83 €
 im Monat; 41747 / 3.500 kWh → 1.615,54 €, ca. 135 €; 41812 Erkelenz (Netzgebiet über Straße)
 / 3.500 kWh → 1.615,54 € (gleiche Netzkosten wie Viersen, direkt bei der API bestätigt).
 
@@ -252,7 +252,7 @@ dem WSE-Standard (ohne Slug); Bedeutung mit Timo bestätigen.
   Browser 45 grün.
 - **Release 09.11.2026:** 1.1.0 installiert (ersetzt 1.0.2). Platzhalter auf Landwirte und
   Unternehmen durch den Rechner ersetzt. Live geprüft: 100 kWp / 66.500 kWh → rund 5.372 €
-  (wie Rechenbeispiel), Verbraucher 49152 → ca. 103 €/Monat, Rolle „Beides“ zeigt beide Teile,
+  (wie Rechenbeispiel), Verbraucher 49152 → 103,00 €/Monat, Rolle „Beides“ zeigt beide Teile,
   Handy 375 px ohne Überlauf. Datenschutz-Abschnitt auf Erzeuger erweitert.
 - **1.1.1 (09.11., viertes Review FREIGABE, Kurzumfang):** Zeitlimit über `AbortController` +
   `setTimeout`, weil `AbortSignal.timeout` erst ab Safari/iOS 16 existiert (sonst auf iOS 14/15 kein
@@ -260,3 +260,11 @@ dem WSE-Standard (ohne Slug); Bedeutung mit Timo bestätigen.
   während der Anfrage und zurück, Personen-Knöpfe bei 320 px. Browser 49 grün; die vorher
   überlebende Mutation (Sperre bei ungültiger Eingabe) wird jetzt erkannt. Offen (NIEDRIG):
   kein Test, der das 15-s-Limit selbst abwartet.
+
+- **1.1.2 (09.11.):** Monatsbetrag und Vergleich auf Euro und Cent ohne „ca.“ (Andreas: gerundet sahen
+  alle PLZ gleich aus; echte Spanne bei 2.500 kWh etwa 101,83–104,32 €). Gerechnet wird in ganzen
+  Cent (`inCent`), halbe Cent werden aufgerundet (500,58 € / 12 → 41,72 €). Am Betrag steht
+  „zzgl. Lesekopf“, weil die Miete nicht im Partnerpreis steckt. Vergleichstexte und zwei
+  Servermeldungen siezen bzw. sind neutral auf Sie-Seiten. Review VOLL: FREIGABE; dessen
+  Empfehlungen (Tests Mehrkosten/Sie, Rundung, Lesekopf, Meldungen) sind umgesetzt.
+  Tests: Rechnung 35, Browser 56, Logik 35, Routen 45.

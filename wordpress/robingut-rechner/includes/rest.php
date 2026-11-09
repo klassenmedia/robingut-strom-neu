@@ -24,9 +24,9 @@ const RGR_LIMIT_STRASSEN_IP_STUNDE = 80;
 const RGR_LIMIT_ERZEUGER_IP_STUNDE = 40;
 const RGR_MELDUNG_ERZEUGER = 'Die Kosten für Erzeuger sind gerade nicht erreichbar.';
 const RGR_SPERRE_SEKUNDEN = 2;
-const RGR_MELDUNG_VIEL = 'Gerade sind es zu viele Anfragen. Bitte versuch es gleich noch einmal.';
+const RGR_MELDUNG_VIEL = 'Gerade sind es zu viele Anfragen. Bitte gleich noch einmal versuchen.';
 const RGR_MELDUNG_PARTNER = 'Die Preise unseres Partners sind gerade nicht erreichbar.';
-const RGR_MELDUNG_UNBEKANNT = 'Zu dieser Postleitzahl haben wir keinen Tarif gefunden. Bitte prüf deine Eingabe.';
+const RGR_MELDUNG_UNBEKANNT = 'Zu dieser Postleitzahl haben wir keinen Tarif gefunden. Bitte die Eingabe prüfen.';
 
 add_action('rest_api_init', 'rgr_registriere_routen');
 add_filter('rest_pre_serve_request', 'rgr_ohne_cors', 20, 3);

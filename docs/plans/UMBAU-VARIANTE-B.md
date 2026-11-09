@@ -200,3 +200,5 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
   - Offen (rechtlich, nicht geändert): Die Datenschutzerklärung beschreibt Google Analytics,
     E-Mail-Marketing (rapidmail) und Social-Media-Dienste, die auf der Seite nicht eingebunden
     sind; YouTube ist eingebunden (lädt erst nach Klick).
+- 09.11.2026 Rechner 1.1.2: Beträge auf Euro und Cent, „zzgl. Lesekopf“ am Monatsbetrag, Sie-Texte im
+  Vergleich. Details in `RECHNER-PLUGIN.md`.

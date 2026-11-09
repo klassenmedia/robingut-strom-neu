@@ -148,11 +148,17 @@ console.log("Rechnung");
 
 const P = R.pruefePreise(VIERSEN, 2500);
 
-pruefe("Monat ist die Jahressumme des Partners geteilt durch 12", () => {
+pruefe("Monat ist die Jahressumme des Partners geteilt durch 12, kaufmännisch auf Cent", () => {
   const r = R.berechne(P, null);
   assert.equal(r.status, "ok");
-  nahe(r.monat, 1221.99225 / 12);
-  nahe(r.jahr, 1221.99225);
+  assert.equal(r.jahr, 1221.99);
+  assert.equal(r.monat, 101.83);
+});
+
+pruefe("halber Cent wird aufgerundet (500,58 € / 12 = 41,715 €)", () => {
+  const r = R.berechne({ ...P, jahr: 500.58 }, null);
+  assert.equal(r.monat, 41.72);
+  assert.equal(R.euro(r.monat, 2), "41,72 €");
 });
 
 pruefe("ohne gültige Preise keine Zahl", () => {
@@ -164,7 +170,7 @@ pruefe("ohne gültige Preise keine Zahl", () => {
 pruefe("Ersparnis rechnet die Lesekopf-Miete mit ein", () => {
   const r = R.berechne(P, 110);
   assert.equal(r.vergleich.art, "ersparnis");
-  nahe(r.vergleich.jahr, 110 * 12 - (1221.99225 + 12 * 3.9));
+  assert.equal(r.vergleich.jahr, 51.21);
 });
 
 pruefe("etwa gleich unter 12 € im Jahr Unterschied, mit Lesekopf", () => {
@@ -179,7 +185,7 @@ pruefe("etwa gleich unter 12 € im Jahr Unterschied, mit Lesekopf", () => {
 pruefe("Mehrkosten werden ehrlich ausgewiesen", () => {
   const r = R.berechne(P, 80);
   assert.equal(r.vergleich.art, "mehrkosten");
-  assert.ok(r.vergleich.jahr < 0);
+  assert.equal(r.vergleich.jahr, -308.79);
 });
 
 pruefe("ohne Abschlag kein Vergleich", () => {

@@ -154,9 +154,12 @@
   }
 
   // Der Lesekopf gehört zu den Kosten, die heute nicht anfallen; darum zählt er im Vergleich mit.
+  // In ganzen Cent rechnen: toLocaleString rundet sonst z. B. 41,714999… (= 500,58 / 12) ab.
+  const inCent = (euroBetrag) => Math.round(euroBetrag * 100);
+
   function vergleiche(jahr, abschlagMonat) {
     if (!(abschlagMonat > 0)) return null;
-    const differenz = abschlagMonat * 12 - (jahr + 12 * LESEKOPF_MIETE_MONAT);
+    const differenz = (inCent(abschlagMonat) * 12 - (inCent(jahr) + 12 * inCent(LESEKOPF_MIETE_MONAT))) / 100;
     if (Math.abs(differenz) < ETWA_GLEICH_JAHR) return { art: "gleich", jahr: differenz };
     return { art: differenz > 0 ? "ersparnis" : "mehrkosten", jahr: differenz };
   }
@@ -165,8 +168,8 @@
     if (!preise) return { status: "preise-fehlen" };
     return {
       status: "ok",
-      jahr: preise.jahr,
-      monat: preise.jahr / 12,
+      jahr: inCent(preise.jahr) / 100,
+      monat: Math.round(inCent(preise.jahr) / 12) / 100,
       vergleich: vergleiche(preise.jahr, abschlagMonat),
     };
   }

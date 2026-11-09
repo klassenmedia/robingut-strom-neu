@@ -153,6 +153,7 @@ legend.rgr-schritt-titel + * { clear: both; }
 .rgr-label { margin: 0; font-weight: 700; color: var(--rgr-gruen); }
 .rgr-betrag { margin: 4px 0 0; font-size: 20px; color: var(--rgr-gruen); }
 .rgr-betrag strong { font-size: clamp(36px, 3vw, 48px); line-height: 1.05; letter-spacing: -0.02em; }
+.rgr-zzgl { font-size: 15px; color: var(--rgr-grau); white-space: nowrap; }
 .rgr-jahr { margin: 4px 0 0; color: var(--rgr-grau); font-size: 15px; }
 .rgr-vergleich { margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; background: #fff; }
 .rgr-vergleich strong { display: block; font-size: 18px; }

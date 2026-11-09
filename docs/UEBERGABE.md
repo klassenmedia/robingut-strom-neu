@@ -29,7 +29,7 @@ hat. Keine Zugangsdaten ins Repo.
 
 Seit 09.11.2026 im Design **Variante A** aus der Übergabe vom 08.11. (Startseite 1241, Energy
 Sharing 1355, Privathaushalte 1243, Landwirte 1230, Unternehmen 1110, Über uns 154, FAQ 23).
-Stand und offene Punkte: `docs/plans/UMBAU-VARIANTE-B.md`. Rechner-Plugin **1.1.1** aktiv
+Stand und offene Punkte: `docs/plans/UMBAU-VARIANTE-B.md`. Rechner-Plugin **1.1.2** aktiv
 (Klickstrecke): Landwirte mit `rolle="einspeisen" anrede="sie"`, Unternehmen mit
 `rolle="beides" anrede="sie"`, sonst Standard (beziehen, du). Älterer Umbau und Rückweg:
 `WORDPRESS-UMBAU.md`.

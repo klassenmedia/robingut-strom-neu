@@ -53,9 +53,14 @@
     unplausibel: "Für diese Angaben konnten wir keinen verlässlichen Preis ermitteln. Bitte versuch es gleich noch einmal.",
   };
   const VERGLEICH = {
-    ersparnis: ["Du sparst", (j) => `ca. ${R.euro(j)} im Jahr gegenüber deinem heutigen Abschlag, Lesekopf-Miete schon abgezogen.`],
+    ersparnis: ["Du sparst", (j) => `${R.euro(j, 2)} im Jahr gegenüber deinem heutigen Abschlag, Lesekopf-Miete schon abgezogen.`],
     gleich: ["Etwa gleich", () => "wie dein heutiger Abschlag, mit Lesekopf-Miete."],
-    mehrkosten: ["Mehrkosten", (j) => `ca. ${R.euro(-j)} im Jahr mehr als dein heutiger Abschlag, mit Lesekopf-Miete.`],
+    mehrkosten: ["Mehrkosten", (j) => `${R.euro(-j, 2)} im Jahr mehr als dein heutiger Abschlag, mit Lesekopf-Miete.`],
+  };
+  const VERGLEICH_SIE = {
+    ersparnis: ["Sie sparen", (j) => `${R.euro(j, 2)} im Jahr gegenüber Ihrem heutigen Abschlag, Lesekopf-Miete schon abgezogen.`],
+    gleich: ["Etwa gleich", () => "wie Ihr heutiger Abschlag, mit Lesekopf-Miete."],
+    mehrkosten: ["Mehrkosten", (j) => `${R.euro(-j, 2)} im Jahr mehr als Ihr heutiger Abschlag, mit Lesekopf-Miete.`],
   };
 
   function starte(wurzel) {
@@ -97,6 +102,7 @@
     });
     const sie = wurzel.dataset.anrede === "sie";
     const text = (schluessel) => (sie && MELDUNG_SIE[schluessel]) || MELDUNG[schluessel];
+    const vergleichTexte = sie ? VERGLEICH_SIE : VERGLEICH;
     const leer = wurzel.querySelector(".rgr-leer");
     const erzeugerBox = wurzel.querySelector(".rgr-ergebnis-erzeuger");
     const teilBezug = wurzel.querySelector(".rgr-teil-bezug");
@@ -112,7 +118,7 @@
     function zeige(frisch = false) {
       const r = R.berechne(preise, R.betragAusEingabe(feld("abschlag").value));
       if (r.status !== "ok") return versteckeErgebnis();
-      teil("monat").textContent = R.euro(r.monat);
+      teil("monat").textContent = R.euro(r.monat, 2);
       teil("jahr").textContent = R.euro(r.jahr, 2);
       teil("ort").textContent = preise.stadt ? ` · Netzgebiet ${preise.stadt}` : "";
       teil("arbeitspreis").textContent = `${R.cent(preise.arbeitspreisCt)} pro kWh`;
@@ -123,8 +129,8 @@
       vergleichBox.hidden = !v;
       if (v) {
         vergleichBox.dataset.art = v.art;
-        teil("vergleich-titel").textContent = VERGLEICH[v.art][0];
-        teil("vergleich-text").textContent = VERGLEICH[v.art][1](v.jahr);
+        teil("vergleich-titel").textContent = vergleichTexte[v.art][0];
+        teil("vergleich-text").textContent = vergleichTexte[v.art][1](v.jahr);
       }
       ergebnis.hidden = false;
       aktualisiereLeer();

@@ -182,7 +182,7 @@ function rgr_shortcode($atts = []): string
         <p class="rgr-leer rgr-klein"><?php echo esc_html($t['leer']); ?></p>
         <div class="rgr-ergebnis" hidden>
           <p class="rgr-label"><?php echo esc_html($t['monat']); ?></p>
-          <p class="rgr-betrag">ca. <strong data-feld="monat"></strong></p>
+          <p class="rgr-betrag"><strong data-feld="monat"></strong></p>
           <p class="rgr-jahr">Im Jahr <span data-feld="jahr"></span><span data-feld="ort"></span></p>
           <div class="rgr-vergleich" hidden>
             <strong data-feld="vergleich-titel"></strong>

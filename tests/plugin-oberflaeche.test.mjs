@@ -683,4 +683,31 @@ await pruefeRolle("320 px: Personen-Knöpfe in einer Reihe, Text nicht abgeschni
   assert.ok(knoepfe.every((k) => k.passt), JSON.stringify(knoepfe));
 }, { breite: 320 });
 
+await pruefe("Monatsbetrag genau auf Euro und Cent, ohne „ca.“", async (page) => {
+  await mitErgebnis(page);
+  assert.equal(await page.textContent('.rgr-ergebnis [data-feld="monat"]'), "101,83 €");
+  assert.doesNotMatch(await page.textContent(".rgr-betrag"), /ca\./);
+});
+
+await pruefe("Ersparnis gegenüber dem Abschlag genau auf Euro und Cent", async (page) => {
+  await mitErgebnis(page);
+  await page.evaluate(() => { document.querySelector(".rgr-heute").open = true; });
+  await page.fill("[name=abschlag]", "110");
+  await page.waitForFunction(() => /51,21 €/.test(document.querySelector('[data-feld="vergleich-text"]').textContent));
+  assert.doesNotMatch(await page.textContent('[data-feld="vergleich-text"]'), /ca\./);
+});
+
+await pruefeRolle("Sie-Seite: Vergleich mit dem Abschlag siezt", { anrede: "sie" }, async (page) => {
+  await page.fill("[name=plz]", "41747");
+  await page.waitForSelector(".rgr-ergebnis:not([hidden])");
+  await page.evaluate(() => { document.querySelector(".rgr-heute").open = true; });
+  await page.fill("[name=abschlag]", "110");
+  await page.waitForFunction(() => /51,21 €/.test(document.querySelector('[data-feld="vergleich-text"]').textContent));
+  const titel = await page.textContent('[data-feld="vergleich-titel"]');
+  const satz = await page.textContent('[data-feld="vergleich-text"]');
+  assert.equal(titel, "Sie sparen");
+  assert.match(satz, /Ihrem heutigen Abschlag/);
+  assert.doesNotMatch(titel + satz, /\b(du|dein\w*)\b/i);
+});
+
 console.log(`\n${bestanden} Prüfungen bestanden`);

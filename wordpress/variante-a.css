@@ -240,3 +240,6 @@ p.rg-ki-hinweis { position: absolute !important; width: 1px; height: 1px; paddin
 .rgb-vn { box-shadow: 0 1px 2px rgba(0, 61, 0, 0.04), 0 12px 30px rgba(0, 61, 0, 0.08); }
 .rgb-vn-nachher { background: linear-gradient(180deg, #C6E872 0%, #A4D235 55%, #8CBA26 100%) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -3px 0 rgba(0, 61, 0, 0.16), 0 3px 6px rgba(0, 61, 0, 0.16), 0 12px 24px rgba(0, 61, 0, 0.16); }
 .rgb-vn-vorher { background: linear-gradient(180deg, #F6F8F3 0%, #E4E9DF 100%) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -2px 0 rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.08); }
+
+/* Kopfbilder Landwirte (1229) und Unternehmen (1239) im Format der Startseite, links beschnitten (Andreas 09.11.) */
+.wp-block-post-content > .rgb-karte:first-child .wp-block-column > figure.wp-block-image:not(.is-style-rounded) img:is(.wp-image-1229, .wp-image-1239) { aspect-ratio: 1743 / 1126 !important; object-fit: cover !important; object-position: right center !important; }

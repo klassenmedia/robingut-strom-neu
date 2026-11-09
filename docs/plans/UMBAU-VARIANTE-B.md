@@ -278,3 +278,6 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
   das Bild direkt in der Spalte, Spalte darf schrumpfen, Höhengrenze min(80vh, 760px), runde Bilder
   ausgenommen; Personenkarte zählt Absätze ohne `rg-ki-hinweis`, Foto vertikal mittig). Regel: Jede
   Seite beginnt mit dem Kopfband (`:first-child`). Vorher-nachher-Kästen mit Tiefe wie die Knöpfe.
+- 09.11.2026 Kopfbilder Landwirte (1229) und Unternehmen (1239) per CSS auf das Format der Startseite
+  (1743:1126 ≈ 1,55) gebracht, links beschnitten (`object-position: right`). Privathaushalte bleibt
+  1,34 (4:3, Andreas nannte es mit der Startseite als Vorbild).

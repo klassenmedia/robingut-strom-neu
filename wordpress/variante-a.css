@@ -284,3 +284,30 @@ p.rg-ki-hinweis { position: absolute !important; width: 1px; height: 1px; paddin
 /* Link unten in Karten bündig, auch wenn der Text darüber unterschiedlich lang ist (Andreas 09.11.) */
 .rgb-karte .rgb-spalte:has(> .rgb-link:last-child) { display: flex; flex-direction: column; flex: 1 1 auto; }
 .rgb-karte .rgb-spalte > .rgb-link:last-child { margin-block-start: auto !important; padding-top: 12px; }
+
+/* Kundenfall Unternehmen: Vorher-nachher als Anteilsbalken, darunter Verbrauch der Standorte (Andreas 09.11.).
+   Markup: wordpress/kundenfall-unternehmen.html. Grau = Netz, Lime = eigene Standorte, Dunkelgrün = Community. */
+.rgb-karte .rg-fall { display: grid; gap: clamp(18px, 2vw, 28px); }
+.rgb-karte .rg-fall-karte { display: grid; gap: 16px; background: linear-gradient(180deg, #FFFFFF 0%, #F3F8E9 100%); border: 1px solid #DCE3D6; border-radius: 16px; padding: clamp(20px, 2.4vw, 32px); box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(0, 61, 0, 0.05), 0 12px 30px rgba(0, 61, 0, 0.09); }
+.rgb-karte .rg-fall p, .rgb-karte .rg-fall ul, .rgb-karte .rg-fall h3 { margin: 0 !important; }
+.rgb-karte .rg-fall-titel { font-weight: 600 !important; }
+.rgb-karte .rg-fall .rg-fall-unter { font-size: clamp(15px, 0.9vw, 17px); color: #5A645C; margin-top: -10px !important; }
+.rgb-karte .rg-fall-zeile { display: grid; grid-template-columns: 96px minmax(0, 1fr); column-gap: 20px; row-gap: 10px; align-items: center; }
+.rgb-karte .rg-fall-zeile > .rg-fall-legende { grid-column: 2; }
+.rgb-karte .rg-fall .rg-fall-wann, .rgb-karte .rg-fall .rg-fall-titel { font-weight: 700; color: #003D00; }
+.rgb-karte .rg-fall-balken { display: flex; height: 44px; border-radius: 10px; overflow: hidden; background: #EEF1EB; box-shadow: 0 3px 8px rgba(0, 61, 0, 0.10); }
+.rgb-karte .rg-fall-balken-gross { height: 56px; }
+.rgb-karte .rg-seg { display: flex; align-items: center; justify-content: center; min-width: 0; font-size: 16px; font-weight: 700; white-space: nowrap; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -3px 0 rgba(0, 0, 0, 0.10); }
+.rgb-karte .rg-seg + .rg-seg { border-left: 2px solid #fff; }
+.rgb-karte .rg-seg-eigen { background: linear-gradient(180deg, #C6E872 0%, #A4D235 55%, #8CBA26 100%); color: #003D00; }
+.rgb-karte .rg-seg-community { background: linear-gradient(180deg, #0B5A0B 0%, #003D00 100%); color: #fff; }
+.rgb-karte .rg-seg-netz { background: linear-gradient(180deg, #EEF1EB 0%, #D5DCCF 100%); color: #3C3C3C; }
+.rgb-karte .rg-fall-legende { list-style: none; padding: 0 !important; display: grid; gap: 6px; }
+.rgb-karte .rg-fall-legende li { display: flex; gap: 10px; align-items: baseline; font-size: clamp(15px, 0.9vw, 17px); line-height: 1.5; color: #3C3C3C; }
+.rgb-karte .rg-fall-legende strong { color: #003D00; }
+.rgb-karte .rg-punkt { flex: 0 0 auto; width: 12px; height: 12px; border-radius: 3px; transform: translateY(1px); }
+.rgb-karte .rg-punkt.rg-seg-netz { border: 1px solid #A9B3A2; }
+@media (max-width: 600px) {
+  .rgb-karte .rg-fall-zeile { grid-template-columns: minmax(0, 1fr); }
+  .rgb-karte .rg-fall-zeile > .rg-fall-legende { grid-column: 1; }
+}

@@ -341,3 +341,24 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
   eingesetzt (Bögen vom Scheunendach zu Dorfdächern, Zuschnitt im Bild); „Drei Wege für Ihren Strom“ jetzt
   „Erst selbst nutzen“ · „Eigene Betriebsstätten versorgen“ · „Überschuss vermarkten“. Live geprüft.
   Hinweis: Guido sah um 20:4x „Aktualisierung fehlgeschlagen“ im Editor; ob danach etwas von ihm fehlt, prüft er.
+- 09.11.2026 **Unternehmen, Kundenfall als Schaubild** (Vorgabe Andreas/Guido): Kacheln (dunkel → grün/weiß)
+  und alter Verbrauchsbalken ersetzt durch HTML-Block (Quelle `wordpress/kundenfall-unternehmen.html`,
+  CSS-Block „Kundenfall Unternehmen“). Karte 1 „Wohin geht der Strom der 4 eigenen Anlagen?“: Vorher 100 %
+  Netz, Nachher 25 % (3.100 MWh) Standorte + 75 % (9.300 MWh) Community. Karte 2 „Woher kommt der Strom
+  der 3 Standorte?“: 76 % (3.100) eigene Anlagen + 24 % (1.000) Netz. Drei Kennzahl-Kacheln unverändert.
+  Farben: Grau = Netz, Lime = Standorte, Dunkelgrün = Community. Bei Zahlenänderung: HTML-Block in WP
+  und die Repo-Datei gleich ändern (Breiten im style-Attribut mitziehen). Vor dem Speichern Vorschau
+  per Screenshot freigegeben; gespeichert auf Guidos Stand 20:56.
+- 09.11.2026 Unternehmen „Strom für Ihre Mitarbeitenden“: Platzhalter durch das Kopfbild der alten
+  Startseite ersetzt (`header_rgstrom_verlauf`, Gruppe im Wald mit Schildern), auf 3:2 zugeschnitten,
+  Medien-ID 1464 `robin-gut-team-wald.webp`, mit KI-Kennzeichnung (wirkt KI-generiert: Schildtexte;
+  falls echtes Foto, Absatz `rg-ki-hinweis` darunter löschen).
+- 09.11.2026 Startseite „Das sagen unsere Kunden“ (Template-Part `frost//unsere-kunden`, nur Startseite):
+  Reihenfolge jetzt Stephan Schmitz · Timo Schmitz · René Platzbäcker; Video-IDs wandern mit den Karten.
+  Voll-Review Schaubild: FREIGABE, Zahlen und Breiten nachgerechnet. Gleich umgesetzt: „bilanziell“ bei den
+  76 %, Prozente auch in der Legende, „Nachher:“ in Karte 2, geschützte Leerzeichen, Farben robust auch im
+  dunklen Band, Untertitel-Abstand; neuer Test `tests/kundenfall-unternehmen.test.mjs` (5 Prüfungen,
+  5/5 Mutanten gefangen). **Vor Go-Live klären (Kunde/Guido):** (1) Freigabe des Kundenfalls schriftlich,
+  (2) „viertelstündlich“ bestätigen (sonst streichen), (3) Vergleichsbasis der –1,29 ct / 53.000 € (netto
+  nach entgangenem Einspeiseerlös?), (4) Kachel „76 % Autarkie“ besser „76 % bilanzielle Eigenversorgung“
+  (Physik: Strom kommt über das Netz; UWG). Grau steht in Karte 1 für Einspeisung, in Karte 2 für Bezug.

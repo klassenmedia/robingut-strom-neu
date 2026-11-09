@@ -372,3 +372,25 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
   Rechner über unseren Server); neu: Einbettung lädt beim Seitenaufruf Inhalte von weshareenergy.de
   (IP-Übertragung, Cookies der Anmeldung) → Text anpassen und rechtlich prüfen (ggf. Zwei-Klick-Lösung).
   Rechner-Plugin 1.2.0 liegt fertig im Repo (nicht ausgerollt), siehe RECHNER-PLUGIN.md.
+- 09.11.2026, 22:37–23:0x **GO-LIVE: Release ist jetzt www.robingut-strom.de** (Andreas, nachts umgestellt).
+  Ablauf: (1) Mittwald-Wiederherstellungspunkt „Vor Go-Live Relaunch 09.11.2026 …“ (22:37, 1.507 MB Dateien,
+  51 MB DB; alte und neue Seite). (2) Mittwald → Domains: Ziel `www.robingut-strom.de` von
+  `/html/wordpress-robingut-strom/` auf `/html/wordpress-release-robingut-strom/`. (3) Mittwald →
+  Verzeichnisschutz: Eintrag „rg.strom / Release“ gelöscht. (4) Inhalte per REST von release. auf www.
+  umgeschrieben (Seiten, Menüs, Fußzeile, Kundenstimmen, Startseiten-Vorlage). (5) WordPress-Adresse und
+  Website-Adresse auf https://www.robingut-strom.de. (6) Rechner-Plugin 1.1.2 deaktiviert (unbenutzt).
+  **Archiv:** Die alte Seite liegt unverändert in `/html/wordpress-robingut-strom/` (eigene DB), plus
+  Wiederherstellungspunkt. **Rückweg:** Ziel von www wieder auf den alten Ordner stellen (1 Minute); die neue
+  Seite dann wieder auf release.… umstellen (WordPress-Adresse) und Verzeichnisschutz neu anlegen.
+  Geprüft: alle Hauptseiten 200 mit www-Canonical, release. und robingut-strom.de → 301 www, alte URLs
+  /preise/ /konzept/ → 301 neue Seiten, Sitemap 200, Rechner lädt und meldet Höhe (WSE frame-ancestors
+  erlaubt www). Browser, die während der Umstellung kurz die 301 www→release gesehen haben, brauchen ggf.
+  Cache leeren.
+  **Rechner lädt direkt ohne Zwei-Klick** (Entscheidung Andreas trotz Hinweis aufs Risiko: IP-Übertragung
+  an weshareenergy.de beim Seitenaufruf, vgl. LG München Google Fonts). Datenschutz-Abschnitt „Preisrechner“
+  beschreibt das (berechtigtes Interesse, Art. 6 Abs. 1 lit. f, Widerspruch Art. 21) – rechtlich prüfen lassen.
+  **Offen nach Go-Live:** Yoast-Logo in den Strukturdaten zeigt noch auf release.… (leitet um, funktioniert,
+  in Yoast → Einstellungen → Website-Darstellung neu speichern); robots.txt/llms.txt der alten Seite lagen als
+  Dateien im alten Ordner – neue Seite nutzt Yoast-robots.txt, llms.txt fehlt (neu schreiben); WSE bitten,
+  ggf. release.… freizugeben, falls wieder eine Testumgebung gebraucht wird; Mittwald fragt nach einer
+  Projekt-E-Mail-Adresse (Andreas entscheidet); Google Search Console: Sitemap neu einreichen.

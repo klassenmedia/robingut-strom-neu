@@ -1,5 +1,5 @@
 // Prüft die Einbettung des WeShareEnergy-Rechners (wordpress/wse-rechner.html) im echten Browser:
-// lädt erst nach Klick, Höhe nur von weshareenergy.de aus dem eigenen iframe, nur als Zahl, begrenzt.
+// lädt direkt (Entscheidung Andreas 09.11.), Höhe nur von weshareenergy.de aus dem eigenen iframe, nur als Zahl, begrenzt.
 // Nichts geht nach außen.
 //
 //   node tests/wse-rechner.test.mjs
@@ -45,10 +45,7 @@ async function pruefe(name, fn, { laden = true, block = BLOCK, seite = null } = 
   });
   await page.goto(`${BASIS}/`);
   try {
-    if (laden) {
-      await page.click(".rg-wse-laden");
-      await page.waitForFunction(() => document.querySelector(".rg-wse-frame").style.height === "1234px");
-    }
+    if (laden) await page.waitForFunction(() => document.querySelector(".rg-wse-frame").style.height === "1234px");
     await fn(page, z);
     bestanden += 1;
     console.log(`  ok  ${name}`);
@@ -69,44 +66,22 @@ const sende = async (page, daten) => {
 
 console.log("WSE-Rechner (Einbettung)");
 
-await pruefe("vor dem Klick: Hinweis sichtbar, keine Anfrage an weshareenergy.de", async (page, z) => {
-  await page.waitForTimeout(500);
-  assert.equal(z.wse, 0);
-  assert.equal(await sichtbar(page, ".rg-wse-frame"), false);
-  assert.equal(await sichtbar(page, ".rg-wse-start"), true);
-  assert.equal(await page.getAttribute(".rg-wse-frame", "src"), null);
-  assert.match(await page.textContent(".rg-wse-start"), /WeShareEnergy.*IP-Adresse/s);
-  assert.equal(await page.getAttribute(".rg-wse-start a", "href"), "/datenschutzerklaerung/#preisrechner");
-  await page.click(".rg-wse-laden");
-  await page.waitForFunction(() => document.querySelector(".rg-wse-frame").style.height === "1234px");
+await pruefe("lädt direkt sichtbar, ohne Startfläche", async (page, z) => {
   assert.equal(z.wse, 1);
-  assert.equal(await sichtbar(page, ".rg-wse-start"), false);
   assert.equal(await sichtbar(page, ".rg-wse-frame"), true);
-  assert.equal(await page.evaluate(() => document.activeElement.classList.contains("rg-wse-frame")), true);
-}, { laden: false });
+  assert.equal(await page.$$eval(".rg-wse-start, .rg-wse-laden", (l) => l.length), 0);
+});
 
-await pruefe("Skript ans Seitenende verschoben: beide Blöcke laden und wachsen für sich", async (page, z) => {
-  await page.click(".rg-wse-rechner:nth-of-type(2) .rg-wse-laden");
-  await page.waitForFunction(() => document.querySelectorAll(".rg-wse-frame")[1].style.height === "1234px");
-  assert.equal(await sichtbar(page, ".rg-wse-rechner:nth-of-type(1) .rg-wse-start"), true);
-  await page.click(".rg-wse-rechner:nth-of-type(1) .rg-wse-laden");
-  await page.waitForFunction(() => document.querySelectorAll(".rg-wse-frame")[0].style.height === "1234px");
+await pruefe("Skript ans Seitenende verschoben: beide Blöcke wachsen für sich", async (page, z) => {
+  await page.waitForFunction(() => [...document.querySelectorAll(".rg-wse-frame")].every((f) => f.style.height === "1234px"));
   assert.equal(z.wse, 2);
 }, { laden: false, seite: seiteMit(OHNE_SKRIPT + OHNE_SKRIPT) + SKRIPT });
 
-await pruefe("Skript verzögert ausgeführt (ohne currentScript): Knopf funktioniert", async (page, z) => {
+await pruefe("Skript verzögert ausgeführt: Höhe kommt trotzdem an", async (page) => {
   await page.waitForFunction(() => window.rgWseRechner === true);
-  await page.click(".rg-wse-laden");
-  await page.waitForFunction(() => document.querySelector(".rg-wse-frame").style.height === "1234px");
-  assert.equal(z.wse, 1);
+  await page.$eval(".rg-wse-frame", (f) => f.contentWindow.postMessage({ sende: { type: "IFRAME_HEIGHT", height: 900 } }, "*"));
+  await page.waitForFunction(() => document.querySelector(".rg-wse-frame").style.height === "900px");
 }, { laden: false, seite: seiteMit(OHNE_SKRIPT) + `<script>setTimeout(() => { const s = document.createElement("script"); s.textContent = ${JSON.stringify(SKRIPT.replace(/<\/?script>/g, ""))}; document.body.appendChild(s); }, 300);</script>` });
-
-await pruefe("zwei Blöcke auf einer Seite: jeder lädt und wächst für sich", async (page, z) => {
-  await page.click(".rg-wse-rechner:nth-of-type(2) .rg-wse-laden");
-  await page.waitForFunction(() => document.querySelectorAll(".rg-wse-frame")[1].style.height === "1234px");
-  assert.equal(await page.$$eval(".rg-wse-frame", (l) => l.map((f) => f.style.height).join()), "720px,1234px");
-  assert.equal(z.wse, 1);
-}, { laden: false, block: BLOCK + BLOCK });
 
 await pruefe("Adresse, Titel, Sandbox ohne Umleitung der Seite", async (page) => {
   assert.equal(await page.getAttribute(".rg-wse-frame", "src"), WSE);

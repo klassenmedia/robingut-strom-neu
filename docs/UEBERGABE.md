@@ -13,7 +13,8 @@ umgebaut** (Team pflegt Texte selbst), der statische Entwurf in `schlank/` ist n
 
 | Was | Wo |
 |---|---|
-| Live-Seite (alt, unverändert) | https://www.robingut-strom.de (WordPress 7.1, Theme Frost, Hosting Mittwald, DNS IONOS) |
+| Live-Seite (seit 09.11.2026 neu) | https://www.robingut-strom.de = Mittwald-Ordner `/html/wordpress-release-robingut-strom/` (WordPress 7.1, Theme Frost, Hosting Mittwald, DNS IONOS) |
+| Archiv der alten Seite | Mittwald-Ordner `/html/wordpress-robingut-strom/` (eigene DB, keine Domain mehr), Wiederherstellungspunkt 09.11.2026 22:37 |
 | Release-Seite (neu, umgestellt) | https://release.robingut-strom.de, Basic-Auth-Passwort davor, Kopie per All-in-One WP Migration |
 | Statischer Entwurf (Vorlage) | `schlank/`, als GitHub Page: https://klassenmedia.github.io/robingut-strom-neu/schlank/ |
 | Preisrechner-Plugin | `wordpress/robingut-rechner/` (Shortcode `[robingut_rechner]`) |

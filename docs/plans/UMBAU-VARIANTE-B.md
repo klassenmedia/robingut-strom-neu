@@ -281,3 +281,8 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
 - 09.11.2026 Kopfbilder Landwirte (1229) und Unternehmen (1239) per CSS auf das Format der Startseite
   (1743:1126 ≈ 1,55) gebracht, links beschnitten (`object-position: right`). Privathaushalte bleibt
   1,34 (4:3, Andreas nannte es mit der Startseite als Vorbild).
+  Hinweis aus dem Review: Die Regel hängt an den Bild-IDs 1229/1239; bei Bildtausch IDs nachziehen.
+- 09.11.2026 Über uns, Partner-Abschnitt: Logo-Kachel (dunkel) in den hellgrünen Kasten „Das macht wer“
+  verschoben (Klasse nur noch `rgb-logos`, Trennlinie oben). Neue helle Fassung des WeShare-Logos
+  (Medien-ID 1423, `weshare-energy-logo-positiv.svg`): Kopie von 204, nur die weiße Schrift auf
+  #1d2b22, Gelb unverändert. Geprüft bei 390/1024/1440, Logos im Kasten, kein Überlauf.

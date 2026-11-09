@@ -243,3 +243,7 @@ p.rg-ki-hinweis { position: absolute !important; width: 1px; height: 1px; paddin
 
 /* Kopfbilder Landwirte (1229) und Unternehmen (1239) im Format der Startseite, links beschnitten (Andreas 09.11.) */
 .wp-block-post-content > .rgb-karte:first-child .wp-block-column > figure.wp-block-image:not(.is-style-rounded) img:is(.wp-image-1229, .wp-image-1239) { aspect-ratio: 1743 / 1126 !important; object-fit: cover !important; object-position: right center !important; }
+
+/* Partner-Logos im hellgrünen Kasten „Das macht wer“ (Über uns, Andreas 09.11.); WeShare-Logo in heller Fassung (Medien-ID 1423) */
+.rgb-beispiel > .rgb-logos { margin-block-start: 20px !important; padding-top: 18px; border-top: 1px solid rgba(0, 61, 0, 0.12); gap: 24px !important; }
+.rgb-beispiel > .rgb-logos figure { margin: 0 !important; }

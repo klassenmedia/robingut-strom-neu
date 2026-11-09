@@ -280,3 +280,7 @@ p.rg-ki-hinweis { position: absolute !important; width: 1px; height: 1px; paddin
   .wp-block-post-content > .rgb-karte:nth-child(odd of .rgb-karte:not(.rgb-dunkel, .has-background)) .rgb-spalte:not(:has(> figure:not(.rgb-icon))) { box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(0, 61, 0, 0.05), 0 10px 26px rgba(0, 61, 0, 0.08); }
 }
 .rgb-karte.rgb-dunkel .rgb-spalte:not(:has(> figure:not(.rgb-icon))) { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 10px 28px rgba(0, 0, 0, 0.25); }
+
+/* Link unten in Karten bündig, auch wenn der Text darüber unterschiedlich lang ist (Andreas 09.11.) */
+.rgb-karte .rgb-spalte:has(> .rgb-link:last-child) { display: flex; flex-direction: column; flex: 1 1 auto; }
+.rgb-karte .rgb-spalte > .rgb-link:last-child { margin-block-start: auto !important; padding-top: 12px; }

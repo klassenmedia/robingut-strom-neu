@@ -316,3 +316,17 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
   ohne Urheberangabe in den Metadaten): auf 4:5 zugeschnitten, Metadaten entfernt, 1200 × 1500 WebP,
   Medien-ID 1436 `dieter-koennes-wald.webp`, Karte zeigt es 4:5 statt 4:3. Altes Bild 1242 ist frei.
   Offen: Fotografen-Nennung klären, falls nötig.
+- 09.11.2026 **Wartet auf Dieters Wording-Durchgang** (nichts an Texten ändern, bis Andreas Bescheid gibt):
+  - Kopfbereich Startseite: Satz mit „Energy-Sharing-Community“, „Solarstrom“, „öffentliches
+    Stromnetz“, „100 % Ökostrom“ unter die H1; „Kosten stark senken“ → „Kosten senken“ (UWG).
+  - „Was ist Energy Sharing?“: Solarstrom/öffentliches Stromnetz + Satz mit ROBIN GUT Strom ergänzen.
+  - Kasten „Wichtig zu wissen“: „virtuelles Kabel“ + „öffentliches Stromnetz“ + „Viertelstunde“.
+  - Dieter-Zitat konkreter (Vorschlag: „Der eine hat Strom übrig, der andere braucht ihn …“).
+  - SEO-Schnellfixes: Meta-Beschreibung Energy Sharing + Kontakt, og:image (Yoast-Standardbild),
+    llms.txt auf Live neu (alte URLs, Gründungsjahr Stiftung widersprüchlich). § 42c EnWG erst nach Klärung.
+- 09.11.2026 Startseite „Für Haushalte, Landwirte und Organisationen“: „Mehr für …“-Links unten bündig
+  (CSS: `.rgb-spalte` mit `.rgb-link` als letztem Kind wird Flex-Spalte, Link `margin-top: auto`).
+  Vorher bei 1024/800 px bis 52 px versetzt, jetzt bündig; sonst nirgends betroffen (alle Seiten gemessen).
+  Review FREIGABE; dessen Bedingung geprüft: Karten sind `is-layout-flow` (nicht constrained), Kinder voll breit.
+  Nebenbei gesehen: In den Vorher-nachher-Kästen bricht „Anschlussvergütung“ bei 1024 px ohne
+  Trennstrich mitten im Wort um („Anschlussvergüt|ung“), offen.

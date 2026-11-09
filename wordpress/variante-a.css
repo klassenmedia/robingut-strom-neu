@@ -211,14 +211,14 @@ p.rg-ki-hinweis { position: absolute !important; width: 1px; height: 1px; paddin
 
 /* Kopfbereich (Andreas 09.11.): Titelbild nimmt deutlich mehr Platz ein, mehr Breite und mehr Höhe */
 @media (min-width: 782px) {
-  .wp-block-post-content > .rgb-karte:first-child > .wp-block-columns > .wp-block-column:has(figure img) { flex: 0 0 55% !important; }
-  .wp-block-post-content > .rgb-karte:first-child > .wp-block-columns > .wp-block-column:not(:has(figure img)) { flex: 1 1 0 !important; min-width: 0; }
+  .wp-block-post-content > .rgb-karte:first-child > .wp-block-columns > .wp-block-column:has(> figure.wp-block-image img) { flex: 0 1 55% !important; }
+  .wp-block-post-content > .rgb-karte:first-child > .wp-block-columns > .wp-block-column:not(:has(> figure.wp-block-image img)) { flex: 1 1 0 !important; min-width: 0; }
 }
 @media (min-width: 1200px) {
-  .wp-block-post-content > .rgb-karte:first-child > .wp-block-columns > .wp-block-column:has(figure img) { flex-basis: 56% !important; }
+  .wp-block-post-content > .rgb-karte:first-child > .wp-block-columns > .wp-block-column:has(> figure.wp-block-image img) { flex-basis: 56% !important; }
 }
 /* Bild in voller Proportion, nichts abgeschnitten; Kopfbereich näher am Rand, damit die Überschrift breiter läuft */
-.wp-block-post-content > .rgb-karte:first-child .wp-block-column:has(figure img) .wp-block-image img { width: 100%; height: auto !important; max-height: none !important; aspect-ratio: auto !important; object-fit: contain !important; }
+.wp-block-post-content > .rgb-karte:first-child .wp-block-column > figure.wp-block-image:not(.is-style-rounded) img { width: 100%; height: auto !important; max-height: min(80vh, 760px) !important; aspect-ratio: auto !important; object-fit: contain !important; }
 .wp-block-post-content > .rgb-karte:first-child { padding-left: max(24px, 3vw, calc((100% - 1600px) / 2)) !important; padding-right: max(24px, 3vw, calc((100% - 1600px) / 2)) !important; }
 .wp-block-post-content > .rgb-karte:first-child > .wp-block-columns { align-items: center !important; }
 .wp-block-post-content > .rgb-karte:first-child h1 { font-size: clamp(34px, 3.3vw, 54px) !important; }
@@ -229,9 +229,14 @@ p.rg-ki-hinweis { position: absolute !important; width: 1px; height: 1px; paddin
 /* Einzelne Personenkarte (Über uns, nur Dieter): Foto links, Text mittig rechts statt einer leeren breiten Karte */
 @media (min-width: 782px) {
   .rgb-karte .wp-block-columns:has(> .wp-block-column:only-child) > .wp-block-column > .rgb-spalte:has(> figure:not(.rgb-icon)) { display: grid; grid-template-columns: minmax(220px, 340px) 1fr; grid-template-rows: 1fr auto auto auto 1fr; column-gap: clamp(24px, 3vw, 48px); }
-  .rgb-karte .wp-block-columns:has(> .wp-block-column:only-child) > .wp-block-column > .rgb-spalte:has(> figure:not(.rgb-icon)) > figure { grid-column: 1; grid-row: 1 / -1; margin: 0 !important; }
+  .rgb-karte .wp-block-columns:has(> .wp-block-column:only-child) > .wp-block-column > .rgb-spalte:has(> figure:not(.rgb-icon)) > figure { grid-column: 1; grid-row: 1 / -1; align-self: center; margin: 0 !important; }
   .rgb-karte .wp-block-columns:has(> .wp-block-column:only-child) > .wp-block-column > .rgb-spalte:has(> figure:not(.rgb-icon)) > :not(figure) { grid-column: 2; margin-block-start: 8px !important; }
   .rgb-karte .wp-block-columns:has(> .wp-block-column:only-child) > .wp-block-column > .rgb-spalte:has(> figure:not(.rgb-icon)) > h3 { grid-row: 2; margin-block-start: 0 !important; }
-  .rgb-karte .wp-block-columns:has(> .wp-block-column:only-child) > .wp-block-column > .rgb-spalte:has(> figure:not(.rgb-icon)) > p:nth-of-type(1) { grid-row: 3; }
-  .rgb-karte .wp-block-columns:has(> .wp-block-column:only-child) > .wp-block-column > .rgb-spalte:has(> figure:not(.rgb-icon)) > p:nth-of-type(2) { grid-row: 4; }
+  .rgb-karte .wp-block-columns:has(> .wp-block-column:only-child) > .wp-block-column > .rgb-spalte:has(> figure:not(.rgb-icon)) > :nth-child(1 of p:not(.rg-ki-hinweis)) { grid-row: 3; }
+  .rgb-karte .wp-block-columns:has(> .wp-block-column:only-child) > .wp-block-column > .rgb-spalte:has(> figure:not(.rgb-icon)) > :nth-child(2 of p:not(.rg-ki-hinweis)) { grid-row: 4; }
 }
+
+/* Vorher-nachher-Kästen mit Tiefe wie die Knöpfe (Andreas 09.11.) */
+.rgb-vn { box-shadow: 0 1px 2px rgba(0, 61, 0, 0.04), 0 12px 30px rgba(0, 61, 0, 0.08); }
+.rgb-vn-nachher { background: linear-gradient(180deg, #C6E872 0%, #A4D235 55%, #8CBA26 100%) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -3px 0 rgba(0, 61, 0, 0.16), 0 3px 6px rgba(0, 61, 0, 0.16), 0 12px 24px rgba(0, 61, 0, 0.16); }
+.rgb-vn-vorher { background: linear-gradient(180deg, #F6F8F3 0%, #E4E9DF 100%) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -2px 0 rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.08); }

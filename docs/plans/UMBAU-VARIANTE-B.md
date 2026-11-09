@@ -267,9 +267,14 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
   Fußmenü 4. /kontakt/ liefert 200 mit Kontaktdaten und CF7-Formular. Formular nicht abgeschickt
   (würde eine Mail auslösen). Offen: Seite ist noch im alten Look, nicht in Bändern.
 - 09.11.2026 **Dieter alleiniger Gründer** (Andreas): Nadine Büscher von Startseite, Privathaushalte,
-  Über uns entfernt (Text und Team-Karte). Unterschriften ohne „Gründer/Mitgründer“
-  („Dieter Könnes, ROBIN GUT Stiftung“, „Journalist und TV-Moderator.“), im Fließtext
+  Über uns entfernt (Text und Team-Karte). Korrektur Andreas: „Gründer“ bleibt, nur „Mit-“ fällt
+  weg → „Dieter Könnes, Gründer der ROBIN GUT Stiftung“ (Startseite, Privathaushalte, Über uns),
+  Team-Karte „Journalist und TV-Moderator, Gründer der ROBIN GUT Stiftung.“, im Fließtext
   „gegründet von TV-Moderator Dieter Könnes“. Entwürfe 1244 und 25 nicht geändert.
   Dieter-Karte als Querkarte (Foto links, Text rechts). Besseres Foto: Mediathek hat nur 1242
   (480 × 480); auf robin-gut.org gibt es ein Porträt (dieter-koennes-wdr-02.jpg, 1.200 × 800,
   vermutlich WDR-Rechte) und ein Aktionsfoto Müsch (1.920 × 1.280, © Jan Odenthal) → Rechte klären.
+- 09.11.2026 Kurz-Review Kopfbild/Personenkarte: FREIGABE; Härtung umgesetzt (Kopfbild-Regel nur für
+  das Bild direkt in der Spalte, Spalte darf schrumpfen, Höhengrenze min(80vh, 760px), runde Bilder
+  ausgenommen; Personenkarte zählt Absätze ohne `rg-ki-hinweis`, Foto vertikal mittig). Regel: Jede
+  Seite beginnt mit dem Kopfband (`:first-child`). Vorher-nachher-Kästen mit Tiefe wie die Knöpfe.

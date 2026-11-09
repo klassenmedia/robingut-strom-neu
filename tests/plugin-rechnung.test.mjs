@@ -126,7 +126,12 @@ pruefe("Verbrauch außerhalb der Grenzen", () => {
   assert.equal(R.pruefeVerbrauch(499), "zu-klein");
   assert.equal(R.pruefeVerbrauch(100001), "grossverbrauch");
   assert.equal(R.pruefeVerbrauch(500), "ok");
-  assert.equal(R.pruefeVerbrauch(100000), "ok");
+  assert.equal(R.pruefeVerbrauch(99999), "ok");
+});
+
+// Übergabe 08.11.2026: „Ab 100.000 kWh Jahresverbrauch erstellen wir ein individuelles Angebot.“
+pruefe("ab 100.000 kWh gibt es ein individuelles Angebot", () => {
+  assert.equal(R.pruefeVerbrauch(100000), "grossverbrauch");
 });
 
 pruefe("Abschlag in Euro mit Komma oder Punkt", () => {
@@ -208,6 +213,98 @@ pruefe("Rechner schickt Zugangsdaten nur an die eigene Seite (Passwortschutz per
   const quelle = readFileSync(new URL("../wordpress/robingut-rechner/assets/rechner.js", import.meta.url), "utf8");
   assert.match(quelle, /credentials: "same-origin"/);
   assert.doesNotMatch(quelle, /credentials: "(omit|include)"/);
+});
+
+console.log("Rollen und Erzeugerrechnung");
+
+pruefe("Rolle nur aus der Liste, sonst Strom beziehen", () => {
+  assert.deepEqual(R.ROLLEN, ["beziehen", "einspeisen", "beides"]);
+  assert.equal(R.rolleAusWert("einspeisen"), "einspeisen");
+  assert.equal(R.rolleAusWert("beides"), "beides");
+  for (const roh of ["", "EINSPEISEN", "admin", null, undefined, 3, ["beides"]]) {
+    assert.equal(R.rolleAusWert(roh), "beziehen", String(roh));
+  }
+});
+
+pruefe("Anlagenleistung mit Komma oder Tausenderpunkt", () => {
+  assert.equal(R.kwpAusEingabe("100"), 100);
+  assert.equal(R.kwpAusEingabe("9,8"), 9.8);
+  assert.equal(R.kwpAusEingabe("1.000"), 1000);
+  assert.equal(R.kwpAusEingabe(" 250 "), 250);
+  for (const roh of ["", "abc", "-5", "0", "1,234", "9.8", "1e3", null, undefined]) {
+    assert.equal(R.kwpAusEingabe(roh), null, String(roh));
+  }
+});
+
+pruefe("Anlage: Grenzen für Leistung und Überschuss", () => {
+  assert.equal(R.pruefeAnlage(100, 66500), "ok");
+  assert.equal(R.pruefeAnlage(1, 100), "ok");
+  assert.equal(R.pruefeAnlage(1000, 66500), "ok");
+  assert.equal(R.pruefeAnlage(null, 66500), "kwp-ungueltig");
+  assert.equal(R.pruefeAnlage(0.5, 500), "kwp-zu-klein");
+  assert.equal(R.pruefeAnlage(1000.1, 66500), "grossanlage");
+  assert.equal(R.pruefeAnlage(100, null), "ueberschuss-ungueltig");
+  assert.equal(R.pruefeAnlage(100, 99), "ueberschuss-zu-klein");
+  assert.equal(R.pruefeAnlage(100, 10000001), "ueberschuss-zu-gross");
+});
+
+pruefe("Wunschpreis nur 7 bis 11 ct in halben Cent", () => {
+  assert.equal(R.WUNSCHPREIS_VORBELEGUNG, 10);
+  assert.equal(R.wunschpreisAusWert("10"), 10);
+  assert.equal(R.wunschpreisAusWert("7"), 7);
+  assert.equal(R.wunschpreisAusWert("11"), 11);
+  assert.equal(R.wunschpreisAusWert("8.5"), 8.5);
+  for (const roh of ["6.5", "11.5", "8.3", "", "abc", null, "NaN", "Infinity"]) {
+    assert.equal(R.wunschpreisAusWert(roh), null, String(roh));
+  }
+});
+
+// Antwort unserer REST-Route /erzeuger (Werte von WSE für 100 kWp / 66.500 kWh, abgerufen 09.11.2026)
+const ERZEUGER_100 = { individuell: false, grund_monat: 95.38, vermarktung_ct: 0.2, einrichtung: 390 };
+
+pruefe("Erzeugerkosten: nur vollständige, plausible Werte", () => {
+  assert.deepEqual(R.pruefeErzeugerKosten(ERZEUGER_100), { individuell: false, grundMonat: 95.38, vermarktungCt: 0.2, einrichtung: 390 });
+  assert.deepEqual(R.pruefeErzeugerKosten({ individuell: true }), { individuell: true });
+  for (const kaputt of [null, "x", {}, { ...ERZEUGER_100, grund_monat: "95" }, { ...ERZEUGER_100, grund_monat: -1 },
+    { ...ERZEUGER_100, grund_monat: 2001 }, { ...ERZEUGER_100, vermarktung_ct: 5.1 }, { ...ERZEUGER_100, einrichtung: NaN },
+    { ...ERZEUGER_100, einrichtung: 10001 }, { ...ERZEUGER_100, individuell: "nein" }]) {
+    assert.equal(R.pruefeErzeugerKosten(kaputt), null, JSON.stringify(kaputt));
+  }
+});
+
+pruefe("Rechenbeispiel Landwirte: 100 kWp, 66.500 kWh, 10 ct", () => {
+  const e = R.berechneErzeuger(66500, 10, R.pruefeErzeugerKosten(ERZEUGER_100));
+  nahe(e.erloes, 6650);
+  nahe(e.grundJahr, 1144.56);
+  nahe(e.vermarktung, 133);
+  nahe(e.bleibt, 5372.44);
+  nahe(e.anschluss, 2992.5);
+  assert.equal(e.einrichtung, 390);
+  assert.equal(R.euro(e.bleibt), "5.372 €");
+  assert.equal(R.euro(e.anschluss), "2.993 €");
+});
+
+pruefe("Erzeugerrechnung ohne Kosten oder mit ungültigen Werten liefert nichts", () => {
+  assert.equal(R.berechneErzeuger(66500, 10, null), null);
+  assert.equal(R.berechneErzeuger(66500, null, R.pruefeErzeugerKosten(ERZEUGER_100)), null);
+  assert.equal(R.berechneErzeuger(null, 10, R.pruefeErzeugerKosten(ERZEUGER_100)), null);
+  assert.equal(R.berechneErzeuger(66500, 10, { individuell: true }), null);
+});
+
+pruefe("Fernwirktechnik ab 25 kW", () => {
+  assert.equal(R.brauchtFernwirktechnik(24.9), false);
+  assert.equal(R.brauchtFernwirktechnik(25), true);
+});
+
+pruefe("Anlagenarten: Biogas läuft beim Partner als BHKW", () => {
+  assert.deepEqual(Object.keys(R.ANLAGENARTEN), ["pv", "wind", "wasser", "biogas"]);
+  assert.equal(R.ANLAGENARTEN.biogas.partner, "chp");
+  assert.equal(R.ANLAGENARTEN.wasser.partner, "water");
+});
+
+pruefe("Rechner zeigt keine Mailadresse von ROBIN GUT", () => {
+  const quelle = readFileSync(new URL("../wordpress/robingut-rechner/assets/rechner.js", import.meta.url), "utf8");
+  assert.doesNotMatch(quelle, /@robingut-strom\.de|@robin-gut\.org/);
 });
 
 console.log("Anzeige");

@@ -9,10 +9,10 @@ body { background: #F6F8F3; color: #22302A; font-family: Arial, Helvetica, sans-
 body h1, body h2, body h3, body h4, body p, body li, body summary, body .wp-block-button__link, body .wp-block-navigation { font-family: Arial, Helvetica, sans-serif; }
 .wp-site-blocks > main, .wp-site-blocks > .wp-block-group { background: transparent; }
 
-.rgb-karte { background: #fff; border: 1px solid #D5DDCF; border-radius: 16px; padding: 34px 40px !important; max-width: none !important; width: auto !important; margin-left: 24px !important; margin-right: 24px !important; box-sizing: border-box; }
+.rgb-karte { background: #fff; border: 1px solid #D5DDCF; border-radius: 16px; padding: clamp(24px, 3vw, 56px) clamp(22px, 3.4vw, 64px) !important; max-width: none !important; width: auto !important; margin-left: clamp(16px, 5vw, 96px) !important; margin-right: clamp(16px, 5vw, 96px) !important; box-sizing: border-box; }
 .rgb-karte.rgb-hell { background: #EEF6DA; border-color: #DCE9BD; }
 .rgb-karte.rgb-dunkel { background: #0E4D36; border-color: #0E4D36; color: #fff; }
-.rgb-karte + .rgb-karte, .rgb-karte + * + .rgb-karte { margin-top: 18px !important; }
+.rgb-karte + .rgb-karte, .rgb-karte + * + .rgb-karte { margin-top: clamp(18px, 1.6vw, 28px) !important; }
 .wp-block-post-content > .rgb-karte:first-child { margin-top: 18px !important; }
 .wp-block-post-content > .rgb-karte:last-child { margin-bottom: 18px !important; }
 
@@ -25,7 +25,7 @@ body h1, body h2, body h3, body h4, body p, body li, body summary, body .wp-bloc
 
 .rgb-spalte { background: #fff; border: 1px solid #E1E7DC; border-radius: 12px; padding: 16px !important; height: 100%; box-sizing: border-box; }
 .rgb-hell .rgb-spalte { border-color: #D9E6C0; }
-.rgb-spalte p, .rgb-spalte li { font-size: clamp(14px, 0.85vw, 17px) !important; line-height: 1.5; }
+.rgb-spalte p, .rgb-spalte li { font-size: clamp(15px, 0.9vw, 18px) !important; line-height: 1.5; }
 .rgb-spalte .wp-block-image img { border-radius: 10px; }
 .rgb-icon img { width: 28px !important; height: 28px !important; }
 .rgb-karte .wp-block-image img { border-radius: 10px; }
@@ -34,14 +34,14 @@ body h1, body h2, body h3, body h4, body p, body li, body summary, body .wp-bloc
 .rgb-karte .is-style-outline .wp-block-button__link { padding: 10px 18px !important; background: #fff !important; color: #0E4D36 !important; border: 1.5px solid #0E4D36 !important; }
 .rgb-dunkel .is-style-outline .wp-block-button__link { background: transparent !important; color: #fff !important; border-color: #fff !important; }
 
-.rgb-link a, a.rgb-link { color: #0E4D36 !important; font-weight: 700; font-size: 14px; text-decoration: underline; text-decoration-color: #A3D237; text-decoration-thickness: 2px; text-underline-offset: 4px; }
-.rgb-merkmale { color: #3F8F2A !important; font-size: 13px !important; font-weight: 700; }
-.rgb-fussnote, .rgb-karte .rgb-fussnote { font-size: 13px !important; line-height: 1.5; color: #5B6B5F; }
+.rgb-link a, a.rgb-link { color: #0E4D36 !important; font-weight: 700; font-size: clamp(15px, 0.9vw, 18px); text-decoration: underline; text-decoration-color: #A3D237; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.rgb-merkmale { color: #3F8F2A !important; font-size: clamp(15px, 0.85vw, 17px) !important; font-weight: 700; }
+.rgb-fussnote, .rgb-karte .rgb-fussnote { font-size: clamp(14px, 0.8vw, 16px) !important; line-height: 1.5; color: #5B6B5F; }
 
 .rgb-vn { background: #fff; border: 1px solid #E1E7DC; border-radius: 12px; padding: 18px !important; }
 .rgb-vn-vorher { background: #EEF0EC; border-radius: 10px; padding: 12px !important; text-align: center; }
 .rgb-vn-nachher { background: #A3D237; border-radius: 10px; padding: 12px !important; text-align: center; }
-.rgb-vn-vorher p, .rgb-vn-nachher p { margin: 0 !important; font-size: 13px !important; }
+.rgb-vn-vorher p, .rgb-vn-nachher p { margin: 0 !important; font-size: clamp(14px, 0.85vw, 16px) !important; }
 .rgb-vn-wert { font-size: 26px !important; font-weight: 800; color: #0E4D36; line-height: 1.2; }
 .rgb-vn-vorher .rgb-vn-wert { color: #5B6B5F; }
 .rgb-vn-pfeil { color: #3F8F2A; font-size: 22px !important; text-align: center; align-self: center; }
@@ -53,11 +53,11 @@ body h1, body h2, body h3, body h4, body p, body li, body summary, body .wp-bloc
 .rgb-faq[open] summary::after { content: "–"; }
 .rgb-faq > *:not(summary) { margin-top: 10px; font-size: 15px; }
 
-.rgb-kopf { background: #fff; border: 1px solid #D5DDCF; border-radius: 16px; max-width: none !important; margin: 18px 24px 0 !important; padding: 10px 22px !important; box-sizing: border-box; }
+.rgb-kopf { background: #fff; border: 1px solid #D5DDCF; border-radius: 16px; max-width: none !important; margin: 18px clamp(16px, 5vw, 96px) 0 !important; padding: 10px 22px !important; box-sizing: border-box; }
 .rgb-kopf .wp-block-navigation a { color: #22302A !important; font-size: 15px; }
 .rgb-kopf .wp-block-navigation .current-menu-item > a { color: #0E4D36 !important; font-weight: 700; text-decoration: underline; text-decoration-color: #A3D237; text-decoration-thickness: 2px; text-underline-offset: 6px; }
 .rgb-kopf .wp-block-button__link { background: #A3D237 !important; color: #0E2A12 !important; border-radius: 999px !important; padding: 10px 18px !important; font-weight: 700; font-size: 15px; }
-.rgb-fuss { background: #fff; border: 1px solid #D5DDCF; border-radius: 16px; max-width: none !important; margin: 0 24px 18px !important; padding: 16px 26px !important; box-sizing: border-box; color: #22302A; font-size: 14px; }
+.rgb-fuss { background: #fff; border: 1px solid #D5DDCF; border-radius: 16px; max-width: none !important; margin: 0 clamp(16px, 5vw, 96px) 18px !important; padding: 16px 26px !important; box-sizing: border-box; color: #22302A; font-size: 16px; }
 .rgb-fuss a { color: #0E4D36 !important; text-decoration: underline; }
 
 /* Feinschliff */
@@ -71,7 +71,7 @@ body h1, body h2, body h3, body h4, body p, body li, body summary, body .wp-bloc
 .rgb-karte .wp-block-template-part h2 { color: #0E4D36 !important; }
 
 .rgb-tabelle table { border-collapse: collapse; width: 100%; }
-.rgb-tabelle td { border: 0 !important; border-bottom: 1px solid #E1E7DC !important; padding: 9px 4px !important; font-size: 14px; vertical-align: top; }
+.rgb-tabelle td { border: 0 !important; border-bottom: 1px solid #E1E7DC !important; padding: 9px 4px !important; font-size: clamp(15px, 0.9vw, 18px); vertical-align: top; }
 .rgb-tabelle td:first-child { font-weight: 700; color: #0E4D36; width: 45%; }
 .rgb-beispiel { background: #EEF6DA; border: 1px solid #DCE9BD; border-radius: 12px; padding: 18px !important; height: 100%; box-sizing: border-box; }
 .rgb-kennzahl { font-size: 30px !important; font-weight: 800; color: #0E4D36; line-height: 1.2; }
@@ -83,7 +83,7 @@ body h1, body h2, body h3, body h4, body p, body li, body summary, body .wp-bloc
 .rgb-karte > p, .rgb-karte > .rgb-faq, .rgb-karte .wp-block-column > p { max-width: 90ch; }
 .rgb-karte > p.has-text-align-center { margin-left: auto !important; margin-right: auto !important; }
 .rgb-kachel { background: #fff; border: 1px solid #E1E7DC; border-radius: 12px; padding: 18px 20px !important; box-sizing: border-box; }
-.rgb-kachel p { margin: 0 !important; font-size: 14px !important; }
+.rgb-kachel p { margin: 0 !important; font-size: clamp(15px, 0.9vw, 17px) !important; }
 .rgb-kachel .rgb-kennzahl { font-size: clamp(26px, 2vw, 40px) !important; }
 .rgb-kachel-dunkel { background: #0E4D36; border-color: #0E4D36; }
 .rgb-kachel-dunkel p, .rgb-kachel-dunkel .rgb-kennzahl { color: #fff !important; }
@@ -93,8 +93,10 @@ body h1, body h2, body h3, body h4, body p, body li, body summary, body .wp-bloc
 .rgb-balken-netz { background: #DDE3DA; color: #22302A; font-weight: 700; padding: 8px 12px !important; border-radius: 0 8px 8px 0; text-align: right; }
 .rgb-kachel .wp-block-columns { margin: 0 !important; }
 .rgb-platzhalter { background: #EEF2EC; border-radius: 10px; padding: 60px 20px !important; text-align: center; color: #5B6B5F; }
+.rgb-karte .has-small-font-size { font-size: clamp(15px, 0.9vw, 17px) !important; }
+.rgb-faq > *:not(summary) { font-size: clamp(16px, 0.95vw, 18px) !important; }
 @media (max-width: 781px) {
-  .rgb-karte { padding: 22px 18px !important; border-radius: 14px; margin-left: 10px !important; margin-right: 10px !important; }
-  .rgb-kopf, .rgb-fuss { margin-left: 10px !important; margin-right: 10px !important; }
+  .rgb-karte { padding: 22px 18px !important; border-radius: 14px; margin-left: 16px !important; margin-right: 16px !important; }
+  .rgb-kopf, .rgb-fuss { margin-left: 16px !important; margin-right: 16px !important; }
   .rgb-vn-pfeil { transform: rotate(90deg); }
 }

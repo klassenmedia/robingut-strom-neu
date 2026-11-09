@@ -37,12 +37,85 @@
     return wert > 0 && wert <= ABSCHLAG_MAX ? wert : null;
   }
 
+  // Ab 100.000 kWh gibt es laut Übergabe ein individuelles Angebot statt eines Rechnerpreises.
   function pruefeVerbrauch(kwh) {
     if (!Number.isFinite(kwh)) return "verbrauch-ungueltig";
     if (kwh < VERBRAUCH_MIN) return "zu-klein";
-    if (kwh > VERBRAUCH_MAX) return "grossverbrauch";
+    if (kwh >= VERBRAUCH_MAX) return "grossverbrauch";
     return "ok";
   }
+
+  const ROLLEN = Object.freeze(["beziehen", "einspeisen", "beides"]);
+  const rolleAusWert = (wert) => (ROLLEN.includes(wert) ? wert : "beziehen");
+
+  // Werte des Partners (Direktvermarktung, Stand 09.11.2026); Biogas läuft dort als BHKW.
+  const ANLAGENARTEN = Object.freeze({
+    pv: Object.freeze({ name: "Photovoltaik", partner: "pv" }),
+    wind: Object.freeze({ name: "Wind", partner: "wind" }),
+    wasser: Object.freeze({ name: "Wasserkraft", partner: "water" }),
+    biogas: Object.freeze({ name: "Biogas (BHKW)", partner: "chp" }),
+  });
+  const KWP_MIN = 1;
+  const KWP_MAX = 1000;                  // darüber individuelles Angebot beim Partner
+  const UEBERSCHUSS_MIN = 100;
+  const UEBERSCHUSS_MAX = 10000000;
+  const WUNSCHPREIS_MIN = 7;
+  const WUNSCHPREIS_MAX = 11;
+  const WUNSCHPREIS_VORBELEGUNG = 10;
+  const ANSCHLUSS_CT = 4.5;              // Jahresmarktwert Solar 2025 gerundet, Anschlussvergütung liegt darunter
+  const FERNWIRK_AB_KW = 25;
+  const KWP_MUSTER = /^([1-9]\d*|[1-9]\d{0,2}(\.\d{3})+)(,\d)?$/;
+
+  function kwpAusEingabe(roh) {
+    const text = ohneLeerzeichen(roh);
+    if (!KWP_MUSTER.test(text)) return null;
+    const wert = Number(text.replace(/\./g, "").replace(",", "."));
+    return wert > 0 ? wert : null;
+  }
+
+  function pruefeAnlage(kwp, kwh) {
+    if (!Number.isFinite(kwp)) return "kwp-ungueltig";
+    if (kwp < KWP_MIN) return "kwp-zu-klein";
+    if (kwp > KWP_MAX) return "grossanlage";
+    if (!Number.isFinite(kwh)) return "ueberschuss-ungueltig";
+    if (kwh < UEBERSCHUSS_MIN) return "ueberschuss-zu-klein";
+    if (kwh > UEBERSCHUSS_MAX) return "ueberschuss-zu-gross";
+    return "ok";
+  }
+
+  function wunschpreisAusWert(roh) {
+    const wert = Number(roh);
+    if (roh === null || roh === "" || !Number.isFinite(wert)) return null;
+    if (wert < WUNSCHPREIS_MIN || wert > WUNSCHPREIS_MAX || !Number.isInteger(wert * 2)) return null;
+    return wert;
+  }
+
+  // Gleiche Spannen wie rgr_filtere_erzeuger_antwort() in logik.php.
+  function pruefeErzeugerKosten(daten) {
+    if (!daten || typeof daten !== "object") return null;
+    if (daten.individuell === true) return { individuell: true };
+    if (daten.individuell !== false) return null;
+    const { grund_monat, vermarktung_ct, einrichtung } = daten;
+    if (!zahlIn(grund_monat, 0, 2000) || !zahlIn(vermarktung_ct, 0, 5) || !zahlIn(einrichtung, 0, 10000)) return null;
+    return { individuell: false, grundMonat: grund_monat, vermarktungCt: vermarktung_ct, einrichtung };
+  }
+
+  function berechneErzeuger(kwh, wunschCt, kosten) {
+    if (!kosten || kosten.individuell !== false || !Number.isFinite(kwh) || !Number.isFinite(wunschCt)) return null;
+    const erloes = (kwh * wunschCt) / 100;
+    const grundJahr = kosten.grundMonat * 12;
+    const vermarktung = (kwh * kosten.vermarktungCt) / 100;
+    return {
+      erloes,
+      grundJahr,
+      vermarktung,
+      bleibt: erloes - grundJahr - vermarktung,
+      anschluss: (kwh * ANSCHLUSS_CT) / 100,
+      einrichtung: kosten.einrichtung,
+    };
+  }
+
+  const brauchtFernwirktechnik = (kwp) => kwp >= FERNWIRK_AB_KW;
 
   const zahlIn = (wert, min, max) =>
     typeof wert === "number" && Number.isFinite(wert) && wert >= min && wert <= max;
@@ -104,7 +177,10 @@
 
   const api = {
     VERBRAUCH_MIN, VERBRAUCH_MAX, LESEKOPF_MIETE_MONAT, LESEKOPF_KAUF,
+    ROLLEN, ANLAGENARTEN, KWP_MAX, WUNSCHPREIS_MIN, WUNSCHPREIS_MAX, WUNSCHPREIS_VORBELEGUNG,
     kwhAusEingabe, betragAusEingabe, pruefeVerbrauch, pruefePreise, berechne, naechsterVorschlag, euro, cent,
+    rolleAusWert, kwpAusEingabe, pruefeAnlage, wunschpreisAusWert, pruefeErzeugerKosten, berechneErzeuger,
+    brauchtFernwirktechnik,
   };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else wurzel.RGRechnung = Object.freeze(api);

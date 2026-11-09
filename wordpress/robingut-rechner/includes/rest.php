@@ -21,6 +21,8 @@ const RGR_UNBEKANNT_CACHE_SEKUNDEN = HOUR_IN_SECONDS;
 const RGR_PAUSE_MAX_SEKUNDEN = 300;
 const RGR_LIMIT_PREIS_IP_STUNDE = 40;
 const RGR_LIMIT_STRASSEN_IP_STUNDE = 80;
+const RGR_LIMIT_ERZEUGER_IP_STUNDE = 40;
+const RGR_MELDUNG_ERZEUGER = 'Die Kosten für Erzeuger sind gerade nicht erreichbar.';
 const RGR_SPERRE_SEKUNDEN = 2;
 const RGR_MELDUNG_VIEL = 'Gerade sind es zu viele Anfragen. Bitte versuch es gleich noch einmal.';
 const RGR_MELDUNG_PARTNER = 'Die Preise unseres Partners sind gerade nicht erreichbar.';
@@ -40,6 +42,11 @@ function rgr_registriere_routen(): void
     register_rest_route(RGR_NAMENSRAUM, '/strassen', [
         'methods' => 'POST',
         'callback' => 'rgr_route_strassen',
+        'permission_callback' => '__return_true',
+    ]);
+    register_rest_route(RGR_NAMENSRAUM, '/erzeuger', [
+        'methods' => 'POST',
+        'callback' => 'rgr_route_erzeuger',
         'permission_callback' => '__return_true',
     ]);
 }
@@ -189,6 +196,42 @@ function rgr_route_preis(WP_REST_Request $anfrage): WP_REST_Response
     if (!$mit_adresse) {
         set_transient($schluessel, ['status' => $ergebnis['status'], 'daten' => $ergebnis['daten']], $ergebnis['dauer']);
     }
+    return rgr_antwort($ergebnis['daten'], $ergebnis['status']);
+}
+
+// Kosten der Direktvermarktung für Erzeuger; Werte des Partners hängen von Leistung und Menge ab.
+function rgr_route_erzeuger(WP_REST_Request $anfrage): WP_REST_Response
+{
+    if (rgr_fremd($anfrage)) {
+        return rgr_antwort(['fehler' => 'Nicht erlaubt.'], 403);
+    }
+    $body = $anfrage->get_json_params();
+    $geprueft = rgr_pruefe_erzeuger_anfrage(is_array($body) ? $body : []);
+    if (!$geprueft['ok']) {
+        return rgr_antwort(['fehler' => $geprueft['fehler']], 400);
+    }
+    $werte = $geprueft['werte'];
+    $schluessel = rgr_cache_schluessel('erzeuger', $werte);
+    $gespeichert = get_transient($schluessel);
+    if (is_array($gespeichert)) {
+        return rgr_antwort($gespeichert['daten'], (int) $gespeichert['status']);
+    }
+    if (!rgr_im_limit(rgr_besucher_schluessel('erzeuger'), RGR_LIMIT_ERZEUGER_IP_STUNDE, HOUR_IN_SECONDS)) {
+        return rgr_antwort(['fehler' => RGR_MELDUNG_VIEL], 429);
+    }
+    if (!rgr_partner_frei()) {
+        return rgr_antwort(['fehler' => RGR_MELDUNG_VIEL], 503);
+    }
+    $abruf = rgr_partner_abruf('POST', RGR_WSE_BASIS . '/direktvermarktung/calculate-price', [
+        'headers' => ['Content-Type' => 'application/json', 'Accept' => 'application/json'],
+        'body' => wp_json_encode(rgr_erzeuger_nutzlast($werte)),
+    ]);
+    $gefiltert = $abruf['status'] === 200 ? rgr_filtere_erzeuger_antwort($abruf['daten']) : null;
+    // Fehlertexte des Partners gehen nicht an den Browser.
+    $ergebnis = $gefiltert !== null
+        ? ['status' => 200, 'daten' => $gefiltert, 'dauer' => RGR_CACHE_SEKUNDEN]
+        : ['status' => 502, 'daten' => ['fehler' => RGR_MELDUNG_ERZEUGER], 'dauer' => RGR_FEHLER_CACHE_SEKUNDEN];
+    set_transient($schluessel, ['status' => $ergebnis['status'], 'daten' => $ergebnis['daten']], $ergebnis['dauer']);
     return rgr_antwort($ergebnis['daten'], $ergebnis['status']);
 }
 

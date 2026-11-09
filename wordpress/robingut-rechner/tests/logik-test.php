@@ -322,5 +322,67 @@ pruefe('Straßensuche braucht mindestens zwei Zeichen', function () {
     gleich(rgr_suche_lang_genug('Kö'), true);
 });
 
+echo "Erzeuger\n";
+
+$anlage = ['art' => 'pv', 'kwp' => 100, 'kwh' => 66500, 'einspeisung' => 'teil', 'foerderung' => false];
+
+pruefe('gültige Erzeuger-Anfrage wird für den Partner übersetzt', function () use ($anlage) {
+    $g = rgr_pruefe_erzeuger_anfrage($anlage);
+    gleich($g['ok'], true);
+    gleich($g['werte'], ['art' => 'pv', 'kwp' => 100.0, 'kwh' => 66500, 'einspeisung' => 'teil', 'foerderung' => false]);
+    gleich(rgr_erzeuger_nutzlast($g['werte']), [
+        'pricing_model_id' => '77', 'erzeugungsart' => 'pv', 'nennleistung_kwp' => '100',
+        'einspeiseart' => 'teil', 'einspeisemenge_kwh' => '66500', 'foerderung' => '0',
+    ]);
+});
+
+pruefe('Anlagenarten werden auf die Werte des Partners abgebildet', function () use ($anlage) {
+    foreach (['pv' => 'pv', 'wind' => 'wind', 'wasser' => 'water', 'biogas' => 'chp'] as $art => $partner) {
+        $g = rgr_pruefe_erzeuger_anfrage(['art' => $art] + $anlage);
+        gleich(rgr_erzeuger_nutzlast($g['werte'])['erzeugungsart'], $partner, $art);
+    }
+    gleich(rgr_erzeuger_nutzlast(rgr_pruefe_erzeuger_anfrage(['kwp' => 9.8, 'foerderung' => true] + $anlage)['werte'])['nennleistung_kwp'], '9.8');
+    gleich(rgr_erzeuger_nutzlast(rgr_pruefe_erzeuger_anfrage(['foerderung' => true] + $anlage)['werte'])['foerderung'], '1');
+});
+
+pruefe('falsche Erzeuger-Eingaben werden abgelehnt', function () use ($anlage) {
+    $falsch = [
+        ['art' => 'chp'], ['art' => 'PV'], ['art' => ['pv']], ['art' => null],
+        ['kwp' => '100'], ['kwp' => 0.5], ['kwp' => 1000.1], ['kwp' => NAN], ['kwp' => INF], ['kwp' => 9.85], ['kwp' => true],
+        ['kwh' => 66500.5], ['kwh' => '66500'], ['kwh' => 99], ['kwh' => 10000001],
+        ['einspeisung' => 'halb'], ['einspeisung' => ''],
+        ['foerderung' => 'nein'], ['foerderung' => 0],
+    ];
+    foreach ($falsch as $aenderung) {
+        gleich(rgr_pruefe_erzeuger_anfrage($aenderung + $anlage)['ok'], false, var_export($aenderung, true));
+    }
+    gleich(rgr_pruefe_erzeuger_anfrage([])['ok'], false);
+});
+
+$wse = ['success' => true, 'individual_offer' => false, 'data' => [
+    'redispatch_fee' => 20, 'remote_control_fee' => 11, 'forecast_fee' => 15, 'balancing_risk_fee' => 24.38,
+    'feeder_base_price_margin' => 25, 'grundgebuehr_monatlich' => 95.38, 'marketing_fee_ct_kwh' => 0.2, 'setup_fee' => 390,
+]];
+
+pruefe('Erzeuger-Antwort: nur Grundpreis, Vermarktung und Einrichtung', function () use ($wse) {
+    gleich(rgr_filtere_erzeuger_antwort($wse), ['individuell' => false, 'grund_monat' => 95.38, 'vermarktung_ct' => 0.2, 'einrichtung' => 390.0]);
+    gleich(rgr_filtere_erzeuger_antwort(['success' => true, 'individual_offer' => true]), ['individuell' => true]);
+});
+
+pruefe('Erzeuger-Antwort mit fehlenden oder unplausiblen Werten wird verworfen', function () use ($wse) {
+    $kaputt = [
+        null, 'x', [], ['success' => false] + $wse, ['individual_offer' => 'ja'] + $wse, ['individual_offer' => null, 'success' => true, 'data' => $wse['data']],
+        array_replace_recursive($wse, ['data' => ['grundgebuehr_monatlich' => '95,38']]),
+        array_replace_recursive($wse, ['data' => ['grundgebuehr_monatlich' => -1]]),
+        array_replace_recursive($wse, ['data' => ['grundgebuehr_monatlich' => 2001]]),
+        array_replace_recursive($wse, ['data' => ['marketing_fee_ct_kwh' => 5.5]]),
+        array_replace_recursive($wse, ['data' => ['setup_fee' => 10001]]),
+        ['success' => true, 'individual_offer' => false, 'data' => 'kein Feld'],
+    ];
+    foreach ($kaputt as $i => $daten) {
+        gleich(rgr_filtere_erzeuger_antwort($daten), null, "Fall $i");
+    }
+});
+
 echo "\n$bestanden Prüfungen bestanden\n";
 exit($fehler > 0 ? 1 : 0);

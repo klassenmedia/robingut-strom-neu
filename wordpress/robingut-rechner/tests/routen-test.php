@@ -298,5 +298,113 @@ pruefe('Pause nach 429 höchstens 5 Minuten', function () {
     gleich($GLOBALS['rgr_transient_ttl']['rgr_partner_pause'], 300);
 });
 
+echo "Erzeuger-Route\n";
+
+function wse_erzeuger(float $grund = 95.38, bool $individuell = false): array
+{
+    return $individuell ? ['success' => true, 'individual_offer' => true] : ['success' => true, 'individual_offer' => false, 'data' => [
+        'redispatch_fee' => 20, 'remote_control_fee' => 11, 'forecast_fee' => 15, 'balancing_risk_fee' => 24.38,
+        'feeder_base_price_margin' => 25, 'grundgebuehr_monatlich' => $grund, 'marketing_fee_ct_kwh' => 0.2, 'setup_fee' => 390,
+    ]];
+}
+function erzeuger(array $body, array $kopf = []): WP_REST_Response
+{
+    return rgr_route_erzeuger(new WP_REST_Request($body, [], $kopf, '/robingut-rechner/v1/erzeuger'));
+}
+const ANLAGE = ['art' => 'pv', 'kwp' => 100, 'kwh' => 66500, 'einspeisung' => 'teil', 'foerderung' => false];
+
+pruefe('Erzeugerkosten kommen gefiltert und ohne Caching im Browser', function () {
+    $GLOBALS['rgr_partner_antwort'] = fn() => antwort(200, wse_erzeuger());
+    $r = erzeuger(ANLAGE);
+    gleich($r->status, 200);
+    gleich($r->daten, ['individuell' => false, 'grund_monat' => 95.38, 'vermarktung_ct' => 0.2, 'einrichtung' => 390.0]);
+    gleich($r->kopf['Cache-Control'] ?? null, 'no-store');
+});
+
+pruefe('Erzeuger-Anfrage an den Partner: feste URL und festes Preismodell', function () {
+    $GLOBALS['rgr_partner_antwort'] = fn() => antwort(200, wse_erzeuger());
+    erzeuger(['art' => 'biogas'] + ANLAGE);
+    $a = $GLOBALS['rgr_partner_aufrufe'][0];
+    gleich($a['methode'], 'POST');
+    gleich($a['url'], 'https://partner.test/api/direktvermarktung/calculate-price');
+    gleich($a['args']['redirection'], 0);
+    gleich($a['args']['limit_response_size'], 200000);
+    gleich(json_decode($a['args']['body'], true), [
+        'pricing_model_id' => '77', 'erzeugungsart' => 'chp', 'nennleistung_kwp' => '100',
+        'einspeiseart' => 'teil', 'einspeisemenge_kwh' => '66500', 'foerderung' => '0',
+    ]);
+});
+
+pruefe('Erzeuger: fremde Website 403, ungültige Eingabe 400, beides ohne Partner-Aufruf', function () {
+    gleich(erzeuger(ANLAGE, ['origin' => 'https://evil.example'])->status, 403);
+    gleich(erzeuger(ANLAGE, ['sec-fetch-site' => 'cross-site'])->status, 403);
+    gleich(erzeuger(['kwp' => 5000] + ANLAGE)->status, 400);
+    gleich(erzeuger(['art' => '<script>'] + ANLAGE)->status, 400);
+    gleich(aufrufe(), 0);
+});
+
+pruefe('Erzeuger: gleiche Anfrage fragt den Partner nur einmal', function () {
+    $GLOBALS['rgr_partner_antwort'] = fn() => antwort(200, wse_erzeuger());
+    erzeuger(ANLAGE);
+    gleich(erzeuger(ANLAGE)->status, 200);
+    gleich(aufrufe(), 1);
+});
+
+pruefe('Erzeuger: Limit je IP, danach 429 ohne Partner-Aufruf', function () {
+    set_transient(rgr_besucher_schluessel('erzeuger'), ['n' => RGR_LIMIT_ERZEUGER_IP_STUNDE, 'bis' => time() + 3600], 3600);
+    gleich(erzeuger(ANLAGE)->status, 429);
+    gleich(aufrufe(), 0);
+});
+
+pruefe('Erzeuger: teilt den Partner-Takt mit dem Verbraucherpreis', function () {
+    $GLOBALS['rgr_partner_antwort'] = fn() => antwort(200, wse_erzeuger());
+    $status = [];
+    for ($i = 0; $i < RGR_PARTNER_VORRAT + 2; $i++) {
+        $_SERVER['REMOTE_ADDR'] = '203.0.113.' . (60 + $i);
+        $status[] = erzeuger(['kwh' => 60000 + $i] + ANLAGE)->status;
+    }
+    gleich(array_slice($status, -2), [503, 503]);
+    gleich(aufrufe(), 5);
+});
+
+pruefe('Erzeuger: individuelles Angebot wird durchgereicht', function () {
+    $GLOBALS['rgr_partner_antwort'] = fn() => antwort(200, wse_erzeuger(0, true));
+    gleich(erzeuger(['kwp' => 1000] + ANLAGE)->daten, ['individuell' => true]);
+});
+
+pruefe('Erzeuger: Partnerfehler und unplausible Antwort ergeben 502', function () {
+    $GLOBALS['rgr_partner_antwort'] = fn() => antwort(500, []);
+    gleich(erzeuger(ANLAGE)->status, 502);
+    $GLOBALS['rgr_partner_antwort'] = fn() => antwort(200, wse_erzeuger(99999));
+    gleich(erzeuger(['kwh' => 70000] + ANLAGE)->status, 502);
+    $GLOBALS['rgr_partner_antwort'] = fn() => antwort(422, ['message' => 'Der gewählte Wert ist ungültig.']);
+    $r = erzeuger(['kwh' => 71000] + ANLAGE);
+    gleich($r->status, 502);
+    gleich(str_contains(json_encode($r->daten), 'gewählte'), false);
+});
+
+pruefe('Erzeuger-Route ist nur per POST registriert und öffentlich', function () {
+    rgr_registriere_routen();
+    gleich($GLOBALS['rgr_routen']['robingut-rechner/v1/erzeuger']['methods'] ?? null, 'POST');
+    gleich($GLOBALS['rgr_routen']['robingut-rechner/v1/erzeuger']['permission_callback'] ?? null, '__return_true');
+});
+
+echo "Shortcode\n";
+
+pruefe('Shortcode: Rolle aus der Liste vorbelegt, sonst Strom beziehen', function () {
+    gleich(str_contains(rgr_shortcode(['rolle' => 'einspeisen']), 'value="einspeisen" checked'), true);
+    gleich(str_contains(rgr_shortcode(['rolle' => 'beides']), 'value="beides" checked'), true);
+    gleich(str_contains(rgr_shortcode([]), 'value="beziehen" checked'), true);
+    $boese = rgr_shortcode(['rolle' => '"><script>alert(1)</script>']);
+    gleich(str_contains($boese, '<script>alert'), false);
+    gleich(str_contains($boese, 'value="beziehen" checked'), true);
+});
+
+pruefe('Shortcode zeigt keine Mailadresse und keinen Pfeil im Anmeldeknopf', function () {
+    $html = rgr_shortcode(['rolle' => 'beides']);
+    gleich(preg_match('/@robingut-strom\.de|@robin-gut\.org/', $html), 0);
+    gleich(str_contains($html, '↗'), false);
+});
+
 echo "\n$bestanden Prüfungen bestanden\n";
 exit($fehler > 0 ? 1 : 0);

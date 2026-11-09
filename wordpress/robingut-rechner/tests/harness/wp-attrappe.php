@@ -60,6 +60,16 @@ function add_action(...$a): void {}
 $GLOBALS['rgr_filter'] = [];
 function add_filter(string $hook, $fn, int $prio = 10, int $args = 1): void { $GLOBALS['rgr_filter'][] = compact('hook', 'fn', 'prio', 'args'); }
 function add_shortcode(...$a): void {}
+// Wie im WordPress-Core: nur bekannte Schlüssel, sonst Standardwert
+function shortcode_atts(array $paare, $atts, string $name = ''): array
+{
+    $atts = (array) $atts;
+    $aus = [];
+    foreach ($paare as $schluessel => $standard) {
+        $aus[$schluessel] = array_key_exists($schluessel, $atts) ? $atts[$schluessel] : $standard;
+    }
+    return $aus;
+}
 $GLOBALS['rgr_routen'] = [];
 function register_rest_route(string $raum, string $route, array $args): void { $GLOBALS['rgr_routen']["$raum$route"] = $args; }
 // Regex wörtlich aus dem WordPress-Core (wp-includes/formatting.php)

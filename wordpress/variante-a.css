@@ -24,7 +24,8 @@ body h1, body h2, body h3, body h4, body p, body li, body summary, body .wp-bloc
 .rgb-karte h3 { font-size: clamp(19px, 1.3vw, 22px) !important; line-height: 1.3; font-weight: 400; color: #003D00; margin: 0; }
 .rgb-karte p, .rgb-karte li { font-size: clamp(17px, 1vw, 19px); line-height: 1.7; }
 .rgb-karte.rgb-dunkel h1, .rgb-karte.rgb-dunkel h2, .rgb-karte.rgb-dunkel h3, .rgb-karte.rgb-dunkel p, .rgb-karte.rgb-dunkel li { color: #fff; }
-.rgb-karte > p, .rgb-karte > .rgb-faq, .rgb-karte .wp-block-column > p { max-width: 80ch; }
+/* Andreas 09.11.: Fließtext direkt in den Abschnitten über die volle Breite; nur Aufklapper und Spaltentext bleiben schmal */
+.rgb-karte > .rgb-faq, .rgb-karte .wp-block-column > p { max-width: 80ch; }
 .rgb-karte > p.has-text-align-center { margin-left: auto !important; margin-right: auto !important; }
 .rgb-karte .has-small-font-size { font-size: clamp(15px, 0.9vw, 17px) !important; }
 .rgb-merkmale { color: #0E670E !important; font-size: clamp(15px, 0.85vw, 17px) !important; }
@@ -252,7 +253,7 @@ p.rg-ki-hinweis { position: absolute !important; width: 1px; height: 1px; paddin
    Preisformel und Tabelle als weiße Karten */
 .rgb-kosten-flaeche { background: #EAF4D4; border-radius: 24px; padding: clamp(20px, 3vw, 44px) !important; }
 .rgb-kosten-flaeche > * + * { margin-block-start: 22px !important; }
-.rgb-kosten-flaeche > p { max-width: 80ch; }
+.rgb-kosten-flaeche > p { max-width: none; }
 .rgb-kosten-flaeche .rgb-preisteile { background: #fff; border-radius: 18px; padding: clamp(18px, 2.4vw, 32px) clamp(12px, 2vw, 24px) !important; gap: clamp(28px, 4vw, 56px) !important; box-shadow: 0 1px 2px rgba(0, 61, 0, 0.05), 0 12px 30px rgba(0, 61, 0, 0.08); }
 .rgb-kosten-flaeche .rgb-preisteile > .wp-block-column { position: relative; text-align: center; }
 .rgb-kosten-flaeche .rgb-preisteile > .wp-block-column > * + * { margin-block-start: 6px !important; }

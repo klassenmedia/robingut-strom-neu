@@ -291,4 +291,16 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
   Überschrift in Gruppe `rgb-kosten-flaeche` (einfarbig #EAF4D4, rund), Preisteile-Spalten mit
   Klasse `rgb-preisteile` als weiße Karte mit „+“-Zeichen, Tabelle und Rechner als weiße Karten.
 - 09.11.2026 Über uns: Zitat-Band mit Dieter unter dem Kopfbereich entfernt.
-- 09.11.2026 SVG 1423 geprüft wie im Review empfohlen (siehe unten).
+- 09.11.2026 SVG 1423 gegen Original 204 geprüft: einziger Unterschied `fill:#fff` → `fill:#1d2b22`,
+  keine Skripte, Ereignis-Attribute, foreignObject, externen Verweise, DOCTYPE/ENTITY.
+- 09.11.2026 Fließtext direkt in den Bändern (`.rgb-karte > p`) und im Kostenbereich ohne 80ch-Grenze,
+  läuft so breit wie die Karten (Andreas). Aufklapper und Spaltentext bleiben schmal.
+- 09.11.2026 **Neues Titelbild Energy Sharing** (Medien-ID 1431, `energy-sharing-netzwerk-hof.webp`,
+  1749 × 1130): erzeugt mit Gemini `gemini-3.1-flash-image` über Vertex AI (Projekt eskotomic-demo,
+  Dienstkonto mathe-voice), Stil wie das Startseitenbild (Luftbild, leuchtende Lime-Bögen von einer
+  Solarscheune zu Dorf, Schule, Gewerbe). Imagen 4 ist im Projekt nicht freigeschaltet (404).
+  Verworfener Erstentwurf „Nachbarn am Zaun“ liegt als Medien-ID 1429 in der Mediathek.
+  KI-Kennzeichnung „AI“ greift (Absatz `rg-ki-hinweis` bleibt). Knopf „So funktioniert's“ zeigte auf
+  das entfernte `#prinzip`, jetzt `#so-funktionierts` am Band „Teilen lohnt sich“.
+- 09.11.2026 **Rechner zeigt „nicht erreichbar“**: weshareenergy.de antwortete 17:4x Uhr überhaupt nicht
+  (Startseite, Anmeldeseite, API: Zeitüberschreitung nach 20 s, auch vom Mac). Kein Fehler bei uns.

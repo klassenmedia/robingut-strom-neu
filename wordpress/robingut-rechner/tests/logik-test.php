@@ -77,6 +77,7 @@ pruefe('falsche Typen und Werte werden abgelehnt', function () {
         ['plz' => '41747', 'kwh' => 2500.5],
         ['plz' => '41747', 'kwh' => 499],
         ['plz' => '41747', 'kwh' => 100001],
+        ['plz' => '41747', 'kwh' => 100000],
         ['plz' => '41747', 'kwh' => 2500, 'strasse' => ['x']],
         ['plz' => '41747', 'kwh' => 2500, 'hausnummer' => 7],
     ];
@@ -364,6 +365,13 @@ $wse = ['success' => true, 'individual_offer' => false, 'data' => [
     'feeder_base_price_margin' => 25, 'grundgebuehr_monatlich' => 95.38, 'marketing_fee_ct_kwh' => 0.2, 'setup_fee' => 390,
 ]];
 
+pruefe('Erzeuger-Antwort: Einzelposten ergeben den Grundpreis (echte Werte 10/30 kWp)', function () {
+    $klein = ['success' => true, 'individual_offer' => false, 'data' => ['redispatch_fee' => 0, 'remote_control_fee' => 0, 'forecast_fee' => 5, 'balancing_risk_fee' => 1, 'feeder_base_price_margin' => 25, 'grundgebuehr_monatlich' => 31, 'marketing_fee_ct_kwh' => 0.2, 'setup_fee' => 390]];
+    gleich(rgr_filtere_erzeuger_antwort($klein)['grund_monat'], 31.0);
+    $mittel = ['success' => true, 'individual_offer' => false, 'data' => ['redispatch_fee' => 0, 'remote_control_fee' => 11, 'forecast_fee' => 5.1, 'balancing_risk_fee' => 24.38, 'feeder_base_price_margin' => 25, 'grundgebuehr_monatlich' => 65.48, 'marketing_fee_ct_kwh' => 0.2, 'setup_fee' => 390]];
+    gleich(rgr_filtere_erzeuger_antwort($mittel)['grund_monat'], 65.48);
+});
+
 pruefe('Erzeuger-Antwort: nur Grundpreis, Vermarktung und Einrichtung', function () use ($wse) {
     gleich(rgr_filtere_erzeuger_antwort($wse), ['individuell' => false, 'grund_monat' => 95.38, 'vermarktung_ct' => 0.2, 'einrichtung' => 390.0]);
     gleich(rgr_filtere_erzeuger_antwort(['success' => true, 'individual_offer' => true]), ['individuell' => true]);
@@ -378,6 +386,15 @@ pruefe('Erzeuger-Antwort mit fehlenden oder unplausiblen Werten wird verworfen',
         array_replace_recursive($wse, ['data' => ['marketing_fee_ct_kwh' => 5.5]]),
         array_replace_recursive($wse, ['data' => ['setup_fee' => 10001]]),
         ['success' => true, 'individual_offer' => false, 'data' => 'kein Feld'],
+        // Einzelposten ergeben nicht den Grundpreis (z. B. anderes Preismodell oder geändertes Feld)
+        array_replace_recursive($wse, ['data' => ['grundgebuehr_monatlich' => 31.0]]),
+        array_replace_recursive($wse, ['data' => ['balancing_risk_fee' => 0]]),
+        (function () use ($wse) { $k = $wse; unset($k['data']['forecast_fee']); return $k; })(),
+        array_replace_recursive($wse, ['data' => ['redispatch_fee' => '20']]),
+        // Untergrenzen über 0
+        array_replace_recursive($wse, ['data' => ['grundgebuehr_monatlich' => 0, 'redispatch_fee' => 0, 'remote_control_fee' => 0, 'forecast_fee' => 0, 'balancing_risk_fee' => 0, 'feeder_base_price_margin' => 0]]),
+        array_replace_recursive($wse, ['data' => ['setup_fee' => 0]]),
+        array_replace_recursive($wse, ['data' => ['marketing_fee_ct_kwh' => 0]]),
     ];
     foreach ($kaputt as $i => $daten) {
         gleich(rgr_filtere_erzeuger_antwort($daten), null, "Fall $i");

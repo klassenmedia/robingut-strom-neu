@@ -64,6 +64,7 @@
   const WUNSCHPREIS_VORBELEGUNG = 10;
   const ANSCHLUSS_CT = 4.5;              // Jahresmarktwert Solar 2025 gerundet, Anschlussvergütung liegt darunter
   const FERNWIRK_AB_KW = 25;
+  const ANSCHLUSS_BIS_KWP = 100;
   const KWP_MUSTER = /^([1-9]\d*|[1-9]\d{0,2}(\.\d{3})+)(,\d)?$/;
 
   function kwpAusEingabe(roh) {
@@ -96,11 +97,19 @@
     if (daten.individuell === true) return { individuell: true };
     if (daten.individuell !== false) return null;
     const { grund_monat, vermarktung_ct, einrichtung } = daten;
-    if (!zahlIn(grund_monat, 0, 2000) || !zahlIn(vermarktung_ct, 0, 5) || !zahlIn(einrichtung, 0, 10000)) return null;
+    // Untergrenzen über 0: Ein fehlender Posten des Partners darf nicht als „kostet nichts“ erscheinen.
+    if (!zahlIn(grund_monat, 1, 2000) || !zahlIn(vermarktung_ct, 0.01, 5) || !zahlIn(einrichtung, 1, 10000)) return null;
     return { individuell: false, grundMonat: grund_monat, vermarktungCt: vermarktung_ct, einrichtung };
   }
 
-  function berechneErzeuger(kwh, wunschCt, kosten) {
+  // Anschlussvergütung nur für ausgeförderte Solaranlagen bis 100 kW (§§ 21, 23b EEG); sonst kein Vergleich.
+  function anschlussVergleich(kwh, anlage) {
+    if (!anlage || anlage.art !== "pv" || anlage.foerderung !== false) return null;
+    if (!Number.isFinite(anlage.kwp) || anlage.kwp > ANSCHLUSS_BIS_KWP) return null;
+    return (kwh * ANSCHLUSS_CT) / 100;
+  }
+
+  function berechneErzeuger(kwh, wunschCt, kosten, anlage) {
     if (!kosten || kosten.individuell !== false || !Number.isFinite(kwh) || !Number.isFinite(wunschCt)) return null;
     const erloes = (kwh * wunschCt) / 100;
     const grundJahr = kosten.grundMonat * 12;
@@ -110,7 +119,7 @@
       grundJahr,
       vermarktung,
       bleibt: erloes - grundJahr - vermarktung,
-      anschluss: (kwh * ANSCHLUSS_CT) / 100,
+      anschluss: anschlussVergleich(kwh, anlage),
       einrichtung: kosten.einrichtung,
     };
   }

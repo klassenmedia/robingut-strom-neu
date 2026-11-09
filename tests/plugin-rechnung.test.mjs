@@ -267,13 +267,17 @@ pruefe("Erzeugerkosten: nur vollständige, plausible Werte", () => {
   assert.deepEqual(R.pruefeErzeugerKosten({ individuell: true }), { individuell: true });
   for (const kaputt of [null, "x", {}, { ...ERZEUGER_100, grund_monat: "95" }, { ...ERZEUGER_100, grund_monat: -1 },
     { ...ERZEUGER_100, grund_monat: 2001 }, { ...ERZEUGER_100, vermarktung_ct: 5.1 }, { ...ERZEUGER_100, einrichtung: NaN },
-    { ...ERZEUGER_100, einrichtung: 10001 }, { ...ERZEUGER_100, individuell: "nein" }]) {
+    { ...ERZEUGER_100, einrichtung: 10001 }, { ...ERZEUGER_100, individuell: "nein" },
+    { ...ERZEUGER_100, grund_monat: 0 }, { ...ERZEUGER_100, grund_monat: 0.99 }, { ...ERZEUGER_100, einrichtung: 0 },
+    { ...ERZEUGER_100, vermarktung_ct: 0 }]) {
     assert.equal(R.pruefeErzeugerKosten(kaputt), null, JSON.stringify(kaputt));
   }
 });
 
+const PV_U20 = { art: "pv", foerderung: false, kwp: 100 };
+
 pruefe("Rechenbeispiel Landwirte: 100 kWp, 66.500 kWh, 10 ct", () => {
-  const e = R.berechneErzeuger(66500, 10, R.pruefeErzeugerKosten(ERZEUGER_100));
+  const e = R.berechneErzeuger(66500, 10, R.pruefeErzeugerKosten(ERZEUGER_100), PV_U20);
   nahe(e.erloes, 6650);
   nahe(e.grundJahr, 1144.56);
   nahe(e.vermarktung, 133);
@@ -285,10 +289,22 @@ pruefe("Rechenbeispiel Landwirte: 100 kWp, 66.500 kWh, 10 ct", () => {
 });
 
 pruefe("Erzeugerrechnung ohne Kosten oder mit ungültigen Werten liefert nichts", () => {
-  assert.equal(R.berechneErzeuger(66500, 10, null), null);
-  assert.equal(R.berechneErzeuger(66500, null, R.pruefeErzeugerKosten(ERZEUGER_100)), null);
-  assert.equal(R.berechneErzeuger(null, 10, R.pruefeErzeugerKosten(ERZEUGER_100)), null);
-  assert.equal(R.berechneErzeuger(66500, 10, { individuell: true }), null);
+  assert.equal(R.berechneErzeuger(66500, 10, null, PV_U20), null);
+  assert.equal(R.berechneErzeuger(66500, null, R.pruefeErzeugerKosten(ERZEUGER_100), PV_U20), null);
+  assert.equal(R.berechneErzeuger(null, 10, R.pruefeErzeugerKosten(ERZEUGER_100), PV_U20), null);
+  assert.equal(R.berechneErzeuger(66500, 10, { individuell: true }, PV_U20), null);
+});
+
+// Anschlussvergütung gibt es nur für ausgeförderte Solaranlagen bis 100 kW (§§ 21, 23b EEG);
+// sonst wäre der „höchstens“-Vergleich falsch und schönte das Ergebnis.
+pruefe("Vergleich mit der Anschlussvergütung nur für ausgeförderte PV bis 100 kWp", () => {
+  const kosten = R.pruefeErzeugerKosten(ERZEUGER_100);
+  nahe(R.berechneErzeuger(66500, 10, kosten, PV_U20).anschluss, 2992.5);
+  nahe(R.berechneErzeuger(5000, 10, kosten, { art: "pv", foerderung: false, kwp: 9.8 }).anschluss, 225);
+  for (const anlage of [{ ...PV_U20, art: "wind" }, { ...PV_U20, art: "wasser" }, { ...PV_U20, art: "biogas" },
+    { ...PV_U20, foerderung: true }, { ...PV_U20, kwp: 100.1 }, { ...PV_U20, art: "x" }, undefined]) {
+    assert.equal(R.berechneErzeuger(66500, 10, kosten, anlage).anschluss, null, JSON.stringify(anlage));
+  }
 });
 
 pruefe("Fernwirktechnik ab 25 kW", () => {

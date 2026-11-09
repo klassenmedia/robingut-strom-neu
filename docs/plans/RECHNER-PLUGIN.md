@@ -190,3 +190,36 @@ dem WSE-Standard (ohne Slug); Bedeutung mit Timo bestätigen.
   `docs/texte/datenschutz-preisrechner.md`) rechtlich prüfen lassen; Plugin-Upload ins
   Live-WordPress und Einbau in die Entwürfe nur nach Freigabe. Der Harness-Ordner gehört nicht
   ins ZIP für WordPress.
+
+## Version 1.1.0: Klickstrecke (09.11.2026, Übergabe vom 08.11.2026)
+
+- Shortcode `[robingut_rechner rolle="beziehen|einspeisen|beides" anrede="du|sie"]`. Beide
+  Attribute laufen über eine Whitelist, Standard ist `beziehen` / `du`. Aufbau in drei Schritten:
+  Rolle → Daten → Ergebnis. Die Verbraucherfelder sind unverändert, damit der bisherige Ablauf
+  (Ort, Straße, Abschlag) bleibt.
+- **Erzeuger:** Grundpreis, Vermarktungsentgelt und Einrichtung kommen vom öffentlichen
+  Angebotsrechner Direktvermarktung des Partners: `POST /api/direktvermarktung/calculate-price`,
+  `pricing_model_id` 77, Felder `erzeugungsart` (pv|wind|water|chp), `nennleistung_kwp`,
+  `einspeiseart` (voll|teil), `einspeisemenge_kwh`, `foerderung` (0|1). Ein CSRF-Token ist nicht
+  nötig. Eine feste Tabelle geht nicht: Der Grundpreis hängt auch von der Menge ab. Beispiel
+  30 kWp: 42,93 € bei 5.000 kWh, aber 65,48 € bei 66.500 kWh. Die Übergabe nennt 48,43 €.
+- **Antworten des Partners:** Über 1.000 kWp meldet er `individual_offer: true`. Die Förderung
+  ändert den Preis nicht, ist aber Pflichtfeld. „Biogas“ kennt er nicht, es läuft als `chp`
+  (BHKW).
+- **Kontrolle:** 100 kWp / 66.500 kWh ergibt 95,38 €, genau wie im Rechenbeispiel der
+  Landwirte-Seite (live geprüft am 09.11.).
+- Neue Route `POST /robingut-rechner/v1/erzeuger` mit denselben Schutzmaßnahmen wie `/preis`.
+  Das IP-Limit liegt bei 40 je Stunde (eigener Schlüssel), der Partner-Takt wird geteilt, der
+  Cache hält 6 h. Fehlertexte des Partners gehen nicht an den Browser.
+- **Rechnung im Browser:** Erlös = Überschuss × Wunschpreis (7–11 ct in halben Cent,
+  vorbelegt 10). Abgezogen werden Grundpreis × 12 und das Vermarktungsentgelt. Zum Vergleich
+  dient die Anschlussvergütung mit höchstens 4,5 ct. Ab 25 kW erscheint der Hinweis auf
+  Fernwirktechnik.
+- **Bewusste Änderung:** Ab 100.000 kWh Verbrauch gibt es jetzt ein individuelles Angebot,
+  vorher galt das erst über 100.000. Die Mailadresse in dieser Meldung ist entfernt, denn
+  Kontaktdaten stehen nur im Impressum. Im Anmeldeknopf steht kein Pfeil mehr.
+- **Tests:** Rechnung 33, Logik 34, Routen 39, Browser 29, Paralleltest grün. Semgrep 0 Funde,
+  gitleaks sauber.
+- **Offen bei WSE:** Gibt es einen Parameter, mit dem die Anmeldestrecke die Rolle vorbelegt?
+  Bis das geklärt ist, führen alle drei Rollen auf dieselbe Anmelde-URL, nur der Knopftext
+  unterscheidet sich. Außerdem ist offen, wohin „individuelles Angebot“ führen soll.

@@ -389,7 +389,49 @@ pruefe('Erzeuger-Route ist nur per POST registriert und öffentlich', function (
     gleich($GLOBALS['rgr_routen']['robingut-rechner/v1/erzeuger']['permission_callback'] ?? null, '__return_true');
 });
 
+pruefe('Erzeuger: IP-Limit liegt bei 40 je Stunde', function () {
+    gleich(RGR_LIMIT_ERZEUGER_IP_STUNDE, 40);
+});
+
+pruefe('Erzeuger: Fehler wird nur 60 s gespeichert, Erfolg 6 h', function () {
+    $GLOBALS['rgr_partner_antwort'] = fn() => antwort(500, wse_erzeuger());
+    erzeuger(ANLAGE);
+    $fehler_schluessel = rgr_cache_schluessel('erzeuger', rgr_pruefe_erzeuger_anfrage(ANLAGE)['werte']);
+    gleich($GLOBALS['rgr_transient_ttl'][$fehler_schluessel], 60);
+    $GLOBALS['rgr_partner_antwort'] = fn() => antwort(200, wse_erzeuger());
+    $ok = ['kwh' => 50000] + ANLAGE;
+    erzeuger($ok);
+    gleich($GLOBALS['rgr_transient_ttl'][rgr_cache_schluessel('erzeuger', rgr_pruefe_erzeuger_anfrage($ok)['werte'])], 6 * 3600);
+});
+
+pruefe('Erzeuger: Status 500 mit gültigem Body ergibt 502', function () {
+    $GLOBALS['rgr_partner_antwort'] = fn() => antwort(500, wse_erzeuger());
+    gleich(erzeuger(ANLAGE)->status, 502);
+});
+
+pruefe('Erzeuger: Voll- und Teileinspeisung haben eigene Einträge im Zwischenspeicher', function () {
+    $GLOBALS['rgr_partner_antwort'] = fn() => antwort(200, wse_erzeuger());
+    erzeuger(ANLAGE);
+    erzeuger(['einspeisung' => 'voll'] + ANLAGE);
+    erzeuger(['foerderung' => true] + ANLAGE);
+    erzeuger(['art' => 'wind'] + ANLAGE);
+    gleich(aufrufe(), 4);
+});
+
+pruefe('Preis: ab 100.000 kWh lehnt der Server ab (individuelles Angebot)', function () {
+    $GLOBALS['rgr_partner_antwort'] = partner_kwh_aus_anfrage();
+    gleich(preis(['plz' => '41747', 'kwh' => 100000])->status, 400);
+    gleich(aufrufe(), 0);
+    gleich(preis(['plz' => '41747', 'kwh' => 99999])->status, 200);
+});
+
 echo "Shortcode\n";
+
+pruefe('Shortcode: unbekannte Anrede fällt auf du zurück', function () {
+    gleich(str_contains(rgr_shortcode(['anrede' => 'sie']), 'Was möchten Sie?'), true);
+    gleich(str_contains(rgr_shortcode(['anrede' => 'Sie']), 'Was möchtest du?'), true);
+    gleich(str_contains(rgr_shortcode(['anrede' => '<b>']), 'Was möchtest du?'), true);
+});
 
 pruefe('Shortcode: Rolle aus der Liste vorbelegt, sonst Strom beziehen', function () {
     gleich(str_contains(rgr_shortcode(['rolle' => 'einspeisen']), 'value="einspeisen" checked'), true);

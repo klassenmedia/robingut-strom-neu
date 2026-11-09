@@ -61,8 +61,9 @@ function rgr_pruefe_preis_anfrage(array $body): array
     if (!rgr_ist_plz($plz)) {
         return ['ok' => false, 'fehler' => 'Bitte eine 5-stellige Postleitzahl eingeben.'];
     }
-    if (!is_int($kwh) || $kwh < RGR_VERBRAUCH_MIN || $kwh > RGR_VERBRAUCH_MAX) {
-        return ['ok' => false, 'fehler' => 'Bitte einen Jahresverbrauch zwischen 500 und 100.000 kWh eingeben.'];
+    // Ab 100.000 kWh gibt es ein individuelles Angebot statt eines Rechnerpreises.
+    if (!is_int($kwh) || $kwh < RGR_VERBRAUCH_MIN || $kwh >= RGR_VERBRAUCH_MAX) {
+        return ['ok' => false, 'fehler' => 'Der Rechner gilt für 500 bis 99.999 kWh im Jahr. Ab 100.000 kWh gibt es ein individuelles Angebot.'];
     }
     $ort = rgr_optionaler_text($body, 'ort', RGR_STADT_MAX);
     $strasse = rgr_optionaler_text($body, 'strasse', RGR_STRASSE_MAX);
@@ -167,9 +168,13 @@ const RGR_EINSPEISUNG = ['voll', 'teil'];
 const RGR_KWP = [1.0, 1000.0];
 const RGR_UEBERSCHUSS = [100, 10000000];
 const RGR_WSE_PREISMODELL = '77';   // öffentlicher Angebotsrechner Direktvermarktung, Stand 09.11.2026
-const RGR_ERZEUGER_GRUND_MONAT = [0.0, 2000.0];
-const RGR_ERZEUGER_VERMARKTUNG_CT = [0.0, 5.0];
-const RGR_ERZEUGER_EINRICHTUNG = [0.0, 10000.0];
+// Untergrenzen über 0: Ein fehlender Posten darf beim Kunden nicht als „kostet nichts“ erscheinen.
+const RGR_ERZEUGER_GRUND_MONAT = [1.0, 2000.0];
+const RGR_ERZEUGER_VERMARKTUNG_CT = [0.01, 5.0];
+const RGR_ERZEUGER_EINRICHTUNG = [1.0, 10000.0];
+// Diese Posten ergeben beim Partner zusammen den monatlichen Grundpreis (geprüft 09.11.2026).
+const RGR_ERZEUGER_GRUND_POSTEN = ['redispatch_fee', 'remote_control_fee', 'forecast_fee', 'balancing_risk_fee', 'feeder_base_price_margin'];
+const RGR_ERZEUGER_SUMME_TOLERANZ = 0.01;
 
 function rgr_pruefe_erzeuger_anfrage(array $body): array
 {
@@ -235,6 +240,18 @@ function rgr_filtere_erzeuger_antwort($daten): ?array
             return null;
         }
         $antwort[$name] = (float) $wert;
+    }
+    // Passt die Summe nicht, hat der Partner Modell oder Felder geändert: lieber keine Zahl zeigen.
+    $summe = 0.0;
+    foreach (RGR_ERZEUGER_GRUND_POSTEN as $posten) {
+        $wert = $daten['data'][$posten] ?? null;
+        if (!rgr_ist_endliche_zahl($wert) || $wert < 0) {
+            return null;
+        }
+        $summe += (float) $wert;
+    }
+    if (abs($summe - $antwort['grund_monat']) > RGR_ERZEUGER_SUMME_TOLERANZ) {
+        return null;
     }
     return $antwort;
 }

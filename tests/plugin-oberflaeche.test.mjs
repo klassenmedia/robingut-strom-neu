@@ -356,7 +356,10 @@ async function pruefeRolle(name, atts, fn) {
     if (url.pathname.endsWith("/erzeuger")) {
       z.erzeuger++;
       z.erzeugerBodies.push(body);
-      return route.fulfill({ contentType: "application/json", body: JSON.stringify(ERZEUGER) });
+      const verzoegerung = z.verzoegerung ? z.verzoegerung(body) : 0;
+      if (verzoegerung) await new Promise((r) => setTimeout(r, verzoegerung));
+      const { status = 200, daten = ERZEUGER } = z.antwort ? z.antwort(body) : {};
+      return route.fulfill({ status, contentType: "application/json", body: JSON.stringify(daten) }).catch(() => {});
     }
     if (url.pathname.endsWith("/preis")) {
       z.preis++;
@@ -441,7 +444,7 @@ await pruefeRolle("Rollenwechsel blendet die passenden Felder ein", {}, async (p
 
 await pruefeRolle("über 1.000 kWp: individuelles Angebot ohne Anfrage", { rolle: "einspeisen" }, async (page, z) => {
   await anlageEingeben(page, "1.200", "900.000");
-  await page.waitForFunction(() => /individuelles Angebot/.test(document.querySelector(".rgr-status").textContent));
+  await page.waitForFunction(() => /individuelles Angebot/.test(document.querySelector(".rgr-status-erzeugung").textContent));
   assert.equal(z.erzeuger, 0);
   assert.equal(await zuSehen(page, ".rgr-ergebnis-erzeuger"), false);
 });
@@ -458,6 +461,105 @@ await pruefeRolle("ab 100.000 kWh Verbrauch: individuelles Angebot ohne Mailadre
 await pruefeRolle("unbekannte Rolle im Shortcode fällt auf Strom beziehen zurück", { rolle: "x\" onfocus=\"alert(1)" }, async (page) => {
   assert.equal(await page.$eval("[name=rolle][value=beziehen]", (r) => r.checked), true);
   assert.equal(await page.$$eval("[onfocus]", (l) => l.length), 0);
+});
+
+const ergebnisDa = (page) => page.waitForSelector(".rgr-ergebnis-erzeuger:not([hidden]):not(.rgr-laedt)");
+const statusErzeugung = (page) => page.textContent(".rgr-status-erzeugung");
+
+await pruefeRolle("Anlagenart, Einspeisung und Förderung gehen mit in die Anfrage", { rolle: "einspeisen" }, async (page, z) => {
+  await page.selectOption("[name=art]", "biogas");
+  await page.check("[name=einspeisung][value=voll]");
+  await page.check("[name=foerderung][value=ja]");
+  await anlageEingeben(page, "80", "300.000");
+  await ergebnisDa(page);
+  assert.deepEqual(z.erzeugerBodies.at(-1), { art: "biogas", kwp: 80, kwh: 300000, einspeisung: "voll", foerderung: true });
+});
+
+await pruefeRolle("keine Vergleichszeile bei Wind, Förderung oder über 100 kWp", { rolle: "einspeisen" }, async (page) => {
+  const zeile = () => page.$eval('[data-feld="anschluss"]', (dd) => !dd.closest("div").hidden);
+  await anlageEingeben(page);
+  await ergebnisDa(page);
+  assert.equal(await zeile(), true);
+  await page.selectOption("[name=art]", "wind");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await ergebnisDa(page);
+  assert.equal(await zeile(), false);
+  await page.selectOption("[name=art]", "pv");
+  await page.check("[name=foerderung][value=ja]");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await ergebnisDa(page);
+  assert.equal(await zeile(), false);
+  assert.match(await page.textContent(".rgr-ergebnis-erzeuger"), /Einspeisevergütung/);
+  await page.check("[name=foerderung][value=nein]");
+  await page.fill("[name=kwp]", "150");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await ergebnisDa(page);
+  assert.equal(await zeile(), false);
+});
+
+await pruefeRolle("neue Leistung fragt neu und zeigt die neuen Kosten", { rolle: "einspeisen" }, async (page, z) => {
+  z.antwort = (b) => ({ daten: b.kwp === 10 ? { individuell: false, grund_monat: 31, vermarktung_ct: 0.2, einrichtung: 390 } : ERZEUGER });
+  await anlageEingeben(page);
+  await ergebnisDa(page);
+  await anlageEingeben(page, "10", "5.000");
+  await page.waitForFunction(() => /12 × 31,00 €/.test(document.querySelector('[data-feld="grund-rechnung"]').textContent));
+  assert.equal(await feldText(page, "grund"), "− 372 €");
+  assert.equal(z.erzeuger, 2);
+});
+
+await pruefeRolle("veraltete Antwort überschreibt das neue Ergebnis nicht", { rolle: "einspeisen" }, async (page, z) => {
+  z.verzoegerung = (b) => (b.kwp === 100 ? 1500 : 0);
+  z.antwort = (b) => ({ daten: b.kwp === 10 ? { individuell: false, grund_monat: 31, vermarktung_ct: 0.2, einrichtung: 390 } : ERZEUGER });
+  await anlageEingeben(page);
+  await anlageEingeben(page, "10", "5.000");
+  await ergebnisDa(page);
+  await page.waitForTimeout(1800);
+  assert.equal(await feldText(page, "grund"), "− 372 €");
+});
+
+await pruefeRolle("während einer laufenden Anfrage ist das alte Ergebnis abgeblendet", { rolle: "einspeisen" }, async (page, z) => {
+  await anlageEingeben(page);
+  await ergebnisDa(page);
+  z.verzoegerung = () => 1500;
+  await page.fill("[name=kwp]", "10");
+  await page.fill("[name=ueberschuss]", "5.000");
+  await page.$eval("[name=wunschpreis]", (r) => { r.value = "8"; r.dispatchEvent(new Event("input", { bubbles: true })); });
+  assert.equal(await page.$eval(".rgr-ergebnis-erzeuger", (e) => e.hidden || e.classList.contains("rgr-laedt")), true);
+});
+
+await pruefeRolle("Partnerfehler: Meldung, kein altes Ergebnis", { rolle: "einspeisen" }, async (page, z) => {
+  await anlageEingeben(page);
+  await ergebnisDa(page);
+  z.antwort = () => ({ status: 502, daten: { fehler: "x" } });
+  await anlageEingeben(page, "50", "40.000");
+  await page.waitForFunction(() => /nicht erreichbar/.test(document.querySelector(".rgr-status-erzeugung").textContent));
+  assert.equal(await page.$eval(".rgr-ergebnis-erzeuger", (e) => e.hidden), true);
+});
+
+await pruefeRolle("individuelles Angebot vom Server wird als Hinweis gezeigt", { rolle: "einspeisen" }, async (page, z) => {
+  z.antwort = () => ({ daten: { individuell: true } });
+  await anlageEingeben(page, "900", "800.000");
+  await page.waitForFunction(() => /individuelles Angebot/.test(document.querySelector(".rgr-status-erzeugung").textContent));
+  assert.equal(await page.$eval(".rgr-ergebnis-erzeuger", (e) => e.hidden), true);
+});
+
+await pruefeRolle("Rollenwechsel während der Anfrage zeigt kein Erzeuger-Ergebnis", { rolle: "beides" }, async (page, z) => {
+  z.verzoegerung = () => 1200;
+  await page.fill("[name=kwp]", "100");
+  await page.fill("[name=ueberschuss]", "66.500");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await page.click("label:has([name=rolle][value=beziehen])");
+  await page.waitForTimeout(1600);
+  assert.equal(await page.$eval(".rgr-ergebnis-erzeuger", (e) => e.hidden), true);
+});
+
+await pruefeRolle("Beides mit 100.000 kWh: Hinweis zum Verbrauch bleibt neben dem Erzeuger-Ergebnis", { rolle: "beides" }, async (page) => {
+  await page.fill("[name=plz]", "41747");
+  await page.fill("[name=kwh]", "100.000");
+  await anlageEingeben(page);
+  await ergebnisDa(page);
+  assert.match(await page.textContent(".rgr-status-bezug"), /individuelles Angebot/);
+  assert.equal(await statusErzeugung(page), "");
 });
 
 console.log(`\n${bestanden} Prüfungen bestanden`);

@@ -177,7 +177,8 @@ function rgr_shortcode($atts = []): string
 
       <div class="rgr-schritt rgr-schritt-3">
         <p class="rgr-schritt-titel"><span class="rgr-nr" aria-hidden="true">3</span> <?php echo esc_html($t['schritt3']); ?></p>
-        <p class="rgr-status" role="status" aria-live="polite"></p>
+        <p class="rgr-status rgr-status-bezug" role="status" aria-live="polite"></p>
+        <p class="rgr-status rgr-status-erzeugung" role="status" aria-live="polite"></p>
         <p class="rgr-leer rgr-klein"><?php echo esc_html($t['leer']); ?></p>
         <div class="rgr-ergebnis" hidden>
           <p class="rgr-label"><?php echo esc_html($t['monat']); ?></p>
@@ -201,8 +202,9 @@ function rgr_shortcode($atts = []): string
             <div><dt>Grundpreis <span data-feld="grund-rechnung"></span></dt><dd data-feld="grund"></dd></div>
             <div><dt>Vermarktungsentgelt <span data-feld="vermarktung-rechnung"></span></dt><dd data-feld="vermarktung"></dd></div>
             <div class="rgr-summe"><dt><?php echo esc_html($t['bleibt']); ?></dt><dd data-feld="bleibt"></dd></div>
-            <div><dt>Zum Vergleich: Anschlussvergütung</dt><dd data-feld="anschluss"></dd></div>
+            <div class="rgr-anschluss"><dt>Zum Vergleich: Anschlussvergütung</dt><dd data-feld="anschluss"></dd></div>
           </dl>
+          <p class="rgr-klein rgr-hinweis-foerderung" hidden>Läuft die feste Einspeisevergütung noch, bleibt sie meist bis zum Förderende die bessere Wahl.</p>
           <p class="rgr-klein">Einmalig <span data-feld="einrichtung"></span> Einrichtung.<span class="rgr-fernwirk" hidden> <?php echo esc_html($t['eigene']); ?></span> Alle Preise netto, unverbindliche Beispielrechnung, verbindlich ist der Preis bei der Anmeldung.</p>
         </div>
         <p><a class="rgr-knopf rgr-knopf-haupt rgr-anmelden" href="<?php echo esc_url(RGR_ANMELDE_URL); ?>" rel="noopener noreferrer"><?php echo esc_html(RGR_ANMELDE_TEXT[$rolle]); ?></a></p>

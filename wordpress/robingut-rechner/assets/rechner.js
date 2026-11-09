@@ -55,7 +55,8 @@
     const form = wurzel.querySelector(".rgr-form");
     const feld = (name) => form.elements.namedItem(name);
     const teil = (name) => wurzel.querySelector(`[data-feld="${name}"]`);
-    const status = wurzel.querySelector(".rgr-status");
+    const status = wurzel.querySelector(".rgr-status-bezug");
+    const statusErzeugung = wurzel.querySelector(".rgr-status-erzeugung");
     const ergebnis = wurzel.querySelector(".rgr-ergebnis");
     const vergleichBox = wurzel.querySelector(".rgr-vergleich");
     const ortBox = wurzel.querySelector(".rgr-ort");
@@ -337,67 +338,78 @@
     });
 
     // Erzeuger: Kosten kommen vom Plugin (Partnerwerte), der Erlös wird hier gerechnet.
+    // Angezeigt wird nur, was zu den Eingaben der letzten Antwort gehört (erzeugerFuer).
     let kosten = null;
     let erzeugerNr = 0;
     let erzeugerWarten = null;
     let erzeugerFuer = "";
     const zahl1 = (wert) => wert.toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
     const teilE = (name) => erzeugerBox.querySelector(`[data-feld="${name}"]`);
-    const versteckeErzeuger = () => { erzeugerBox.hidden = true; aktualisiereLeer(); };
+    const meldeE = (inhalt) => { statusErzeugung.textContent = inhalt || ""; };
+    const blendeAb = (ja) => { erzeugerBox.classList.toggle("rgr-laedt", ja); erzeugerBox.setAttribute("aria-busy", String(ja)); };
+    const versteckeErzeuger = () => { erzeugerBox.hidden = true; blendeAb(false); aktualisiereLeer(); };
     const wunsch = () => R.wunschpreisAusWert(feld("wunschpreis").value) ?? R.WUNSCHPREIS_VORBELEGUNG;
-    const meldeErzeuger = (schluessel) => { versteckeErzeuger(); melde(MELDUNG_ERZEUGER[schluessel]); };
+    const meldeErzeuger = (schluessel) => { kosten = null; erzeugerFuer = ""; versteckeErzeuger(); meldeE(MELDUNG_ERZEUGER[schluessel]); };
+
+    function anlageAusFormular() {
+      return {
+        art: feld("art").value,
+        kwp: R.kwpAusEingabe(feld("kwp").value),
+        kwh: R.kwhAusEingabe(feld("ueberschuss").value),
+        einspeisung: form.querySelector("[name=einspeisung]:checked")?.value === "voll" ? "voll" : "teil",
+        foerderung: form.querySelector("[name=foerderung]:checked")?.value === "ja",
+      };
+    }
 
     function zeigeErzeuger() {
-      const kwh = R.kwhAusEingabe(feld("ueberschuss").value);
-      const kwp = R.kwpAusEingabe(feld("kwp").value);
       const ct = wunsch();
       wurzel.querySelector(".rgr-wunschpreis-wert").textContent = `${zahl1(ct)} ct/kWh`;
-      const e = R.berechneErzeuger(kwh, ct, kosten);
+      if (!kosten) return;
+      // Geänderte Eingaben ohne neue Antwort: altes Ergebnis nur abgeblendet stehen lassen.
+      if (JSON.stringify(anlageAusFormular()) !== erzeugerFuer) return blendeAb(true);
+      const anlage = JSON.parse(erzeugerFuer);
+      const e = R.berechneErzeuger(anlage.kwh, ct, kosten, anlage);
       if (!e) return versteckeErzeuger();
-      teilE("erloes-rechnung").textContent = `${kwh.toLocaleString("de-DE")} kWh × ${zahl1(ct)} ct`;
+      teilE("erloes-rechnung").textContent = `${anlage.kwh.toLocaleString("de-DE")} kWh × ${zahl1(ct)} ct`;
       teilE("erloes").textContent = R.euro(e.erloes);
       teilE("grund-rechnung").textContent = `12 × ${R.euro(kosten.grundMonat, 2)}`;
       teilE("grund").textContent = `− ${R.euro(e.grundJahr)}`;
       teilE("vermarktung-rechnung").textContent = `${R.cent(kosten.vermarktungCt)}/kWh`;
       teilE("vermarktung").textContent = `− ${R.euro(e.vermarktung)}`;
       teilE("bleibt").textContent = `rund ${R.euro(e.bleibt)}`;
-      teilE("anschluss").textContent = `höchstens ${R.euro(e.anschluss)}`;
+      erzeugerBox.querySelector(".rgr-anschluss").hidden = e.anschluss === null;
+      teilE("anschluss").textContent = e.anschluss === null ? "" : `höchstens ${R.euro(e.anschluss)}`;
+      erzeugerBox.querySelector(".rgr-hinweis-foerderung").hidden = !anlage.foerderung;
       teilE("einrichtung").textContent = R.euro(e.einrichtung);
-      erzeugerBox.querySelector(".rgr-fernwirk").hidden = !R.brauchtFernwirktechnik(kwp);
+      erzeugerBox.querySelector(".rgr-fernwirk").hidden = !R.brauchtFernwirktechnik(anlage.kwp);
+      blendeAb(false);
       erzeugerBox.hidden = false;
       aktualisiereLeer();
     }
 
     async function rechneErzeuger() {
       if (teilErzeugung.hidden) return;
-      const kwp = R.kwpAusEingabe(feld("kwp").value);
-      const kwh = R.kwhAusEingabe(feld("ueberschuss").value);
-      const pruefung = R.pruefeAnlage(kwp, kwh);
-      if (pruefung !== "ok") { erzeugerNr++; erzeugerFuer = ""; kosten = null; return meldeErzeuger(pruefung); }
-      const body = {
-        art: feld("art").value,
-        kwp,
-        kwh,
-        einspeisung: form.querySelector("[name=einspeisung]:checked")?.value === "voll" ? "voll" : "teil",
-        foerderung: form.querySelector("[name=foerderung]:checked")?.value === "ja",
-      };
+      const body = anlageAusFormular();
+      const pruefung = R.pruefeAnlage(body.kwp, body.kwh);
+      if (pruefung !== "ok") { erzeugerNr++; return meldeErzeuger(pruefung); }
       const schluessel = JSON.stringify(body);
-      if (kosten && schluessel === erzeugerFuer) return zeigeErzeuger();
+      if (kosten && schluessel === erzeugerFuer) { meldeE(""); return zeigeErzeuger(); }
       const nr = ++erzeugerNr;
-      melde(MELDUNG_ERZEUGER.laden);
+      blendeAb(true);
+      meldeE(MELDUNG_ERZEUGER.laden);
       try {
         const antwort = await sende("erzeuger", body);
         const daten = await antwort.json().catch(() => null);
-        if (nr !== erzeugerNr) return;
+        if (nr !== erzeugerNr || teilErzeugung.hidden) return;
         const geprueft = antwort.ok ? R.pruefeErzeugerKosten(daten) : null;
-        if (!geprueft) { kosten = null; return meldeErzeuger("fehler"); }
-        if (geprueft.individuell) { kosten = null; return meldeErzeuger("individuell"); }
+        if (!geprueft) return meldeErzeuger("fehler");
+        if (geprueft.individuell) return meldeErzeuger("individuell");
         kosten = geprueft;
         erzeugerFuer = schluessel;
-        melde("");
+        meldeE("");
         zeigeErzeuger();
       } catch {
-        if (nr === erzeugerNr) { kosten = null; meldeErzeuger("fehler"); }
+        if (nr === erzeugerNr) meldeErzeuger("fehler");
       }
     }
 
@@ -406,7 +418,7 @@
       teilErzeugung.hidden = rolle === "beziehen";
       anmelden.textContent = ANMELDE_TEXT[rolle];
       if (teilBezug.hidden) { verwerfeLaufende(); versteckeErgebnis(); }
-      if (teilErzeugung.hidden) { erzeugerNr++; versteckeErzeuger(); }
+      if (teilErzeugung.hidden) { erzeugerNr++; versteckeErzeuger(); meldeE(""); }
       melde("");
     }
 
@@ -426,6 +438,7 @@
       if (name === "rolle") return;
       if (name === "wunschpreis") return zeigeErzeuger();
       if (ERZEUGER_FELDER.includes(name)) {
+        if (kosten && !erzeugerBox.hidden) blendeAb(true);
         clearTimeout(erzeugerWarten);
         erzeugerWarten = setTimeout(rechneErzeuger, VERZOEGERUNG_MS);
         return;

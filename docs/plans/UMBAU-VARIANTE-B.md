@@ -32,29 +32,63 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
 7. Weiterleitungen, Yoast-Titel und -Beschreibungen aus den IT-Hinweisen, Checkliste aus
    README §8.
 
-## Threat Model (Rechner-Klickstrecke)
+## Threat Model (Rechner-Klickstrecke, Plugin 1.1.0)
 
-(a) Angreifer: Massenabfragen über die REST-Route, um das WSE-Kontingent zu verbrauchen.
-Manipulierte Eingaben (Rolle, kWp, Überschuss, Wunschpreis, EEG-Status), um falsche Zahlen
-anzuzeigen oder Fehler auszulösen. XSS über Antwortfelder. Ein offener Weiterleiter über einen
-frei wählbaren Anmelde-Link.
+(a) Angreifer und Fehlerquellen:
+- **Massenabfragen** über `/preis` und `/erzeuger`, um das Kontingent des Partners zu
+  verbrauchen.
+- **Manipulierte Eingaben:** Rolle, Anrede, Anlagenart, kWp, Überschuss, Einspeiseart,
+  EEG-Status, Wunschpreis.
+- **XSS** über Shortcode-Attribute oder Antwortfelder.
+- **Offener Weiterleiter** über den Anmelde-Link.
+- **Cache-Vergiftung.**
+- **Partner ändert Preismodell oder Felder**, sodass falsche oder fehlende Kosten angezeigt
+  werden.
+- **Veraltete oder gemischte Zahlen** im Browser.
 
-(b) Untrusted Inputs: bisherige Felder (PLZ, kWh, Ort, Straße, Hausnummer). Neu kommen Rolle
-(Enum), Anlagenart (Enum), kWp (Zahl), Überschuss kWh (Zahl), EEG-Förderung (bool) und
-Wunschpreis (Zahl) dazu, außerdem der Parameter `?q=` für Kampagnen.
+(b) Untrusted Inputs:
+- **Shortcode:** `rolle`, `anrede`.
+- **REST `/erzeuger` (JSON):** `art`, `kwp`, `kwh`, `einspeisung`, `foerderung`.
+- **Antwort des Partners:** `success`, `individual_offer`, `data.*`.
+- **Browser:** Wunschpreis-Regler.
+- **Unverändert aus 1.0.x:** alle Eingaben von `/preis` und `/strassen`.
 
-(c) Worst Case: ein falscher Preis oder ein falscher Erlös beim Kunden (Zusage, UWG), XSS,
-Weiterleitung auf eine fremde Seite.
+(c) Worst Case:
+- Ein falscher Erlös oder Preis beim Kunden (Zusage, UWG). Ein Beispiel ist ein Vergleich mit
+  der Anschlussvergütung, wo es keine gibt.
+- XSS.
+- Kontingent des Partners gesperrt.
 
-(d) Gegenmaßnahmen:
-- Enums nur per Whitelist.
-- Zahlen mit festen Grenzen: kWp 0,5–1.000, Überschuss 100–2.000.000 kWh, Wunschpreis 7–11 ct.
-  Über 1.000 kWp oder ab 100.000 kWh zeigt der Rechner nur „individuelles Angebot“.
-- Die Erzeugerrechnung läuft rein lokal mit festen Konstanten (Stand 08.11.2026), ohne neuen
-  API-Aufruf.
-- Die Anmelde-Ziel-URL ist eine feste Konstante, die Rolle wird nur als Whitelist-Wert angehängt.
-- Ausgabe nur über `textContent`.
-- Rate-Limits und Cache bleiben wie in 1.0.2.
+(d) Gegenmaßnahmen je Input:
+- **`rolle`, `anrede`:** Whitelist in `rgr_shortcode_werte()`, sonst `beziehen` / `du`. Ausgabe
+  über `esc_attr` / `esc_html`.
+- **`art`:** Whitelist pv/wind/wasser/biogas → pv/wind/water/chp.
+- **`kwp`:** endliche Zahl von 1 bis 1.000 mit einer Nachkommastelle. Darüber kommt
+  „individuelles Angebot“, ohne Anfrage.
+- **`kwh`:** ganze Zahl von 100 bis 10.000.000.
+- **`einspeisung`:** voll/teil.
+- **`foerderung`:** nur bool.
+- **Partner-Antwort:**
+  - Nur `success: true` wird angenommen.
+  - `individual_offer` muss bool sein.
+  - Whitelist auf drei Werte mit Untergrenzen über 0.
+  - Die fünf Einzelposten müssen den Grundpreis ergeben (±0,01).
+  - Sonst 502 ohne Fehlertext des Partners, 60 s gespeichert.
+- **Wunschpreis:** 7–11 ct in halben Cent, sonst Vorbelegung 10.
+- **Vergleich Anschlussvergütung:** nur bei PV ohne Förderung bis 100 kWp (§§ 21, 23b EEG).
+  Bei Förderung erscheint ein Hinweis statt einer Zahl.
+- **Browser:**
+  - Ausgabe nur über `textContent`.
+  - Laufnummer gegen veraltete Antworten.
+  - Gerechnet wird nur mit den Eingaben der letzten Antwort, sonst ist das Ergebnis
+    abgeblendet.
+  - Getrennte Statuszeilen für Verbrauch und Erzeugung.
+- **Limits:**
+  - IP-Limit 40 je Stunde und Route, nur über `REMOTE_ADDR`.
+  - Gemeinsamer Partner-Takt mit Token-Bucket und `GET_LOCK`.
+  - Cache nach allen geprüften Werten.
+  - Origin, Sec-Fetch-Site und `_jsonp` werden abgewiesen.
+- **Anmelde-URL:** feste Konstante, nur der Knopftext hängt von der Rolle ab.
 
 ## Offen (von ROBIN GUT oder WSE)
 

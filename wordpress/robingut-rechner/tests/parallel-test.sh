@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Schickt 100 parallele Preisanfragen mit verschiedenen Verbräuchen an die Testumgebung
+# Schickt 100 parallele Anfragen (50 Preis, 50 Erzeuger) mit verschiedenen Werten an die Testumgebung
 # (16 PHP-Prozesse) und prüft, dass höchstens der Vorrat beim Partner ankommt.
 #
 #   bash wordpress/robingut-rechner/tests/parallel-test.sh
@@ -38,9 +38,13 @@ PHP_CLI_SERVER_WORKERS=16 RGR_ATTRAPPE_ORDNER="$ARBEIT/transients" RGR_PARTNER_U
 PID_PLUGIN=$!
 sleep 1
 
-seq 1000 1099 | xargs -P 50 -I{} curl -s -o /dev/null -w "%{http_code}\n" \
-  -X POST -H "Content-Type: application/json" -d '{"plz":"41747","kwh":{}}' \
-  "http://127.0.0.1:$PORT_PLUGIN/wp-json/robingut-rechner/v1/preis" > "$ARBEIT/status"
+# Verbraucherpreis und Erzeugerkosten gemischt: beide teilen sich den Partner-Takt.
+# Nutzlasten als Dateien, weil xargs Anführungszeichen im JSON verschlucken würde.
+mkdir -p "$ARBEIT/anfragen"
+for n in $(seq 1000 1049); do printf '{"plz":"41747","kwh":%s}' "$n" > "$ARBEIT/anfragen/preis_$n.json"; done
+for n in $(seq 60000 60049); do printf '{"art":"pv","kwp":100,"kwh":%s,"einspeisung":"teil","foerderung":false}' "$n" > "$ARBEIT/anfragen/erzeuger_$n.json"; done
+find "$ARBEIT/anfragen" -name '*.json' | xargs -P 50 -I{} sh -c \
+  'route=$(basename "$1" | cut -d_ -f1); curl -s -o /dev/null -w "%{http_code}\n" -X POST -H "Content-Type: application/json" --data-binary @"$1" "http://127.0.0.1:$2/wp-json/robingut-rechner/v1/$route"' _ {} "$PORT_PLUGIN" > "$ARBEIT/status"
 
 AUFRUFE=$(wc -l < "$ARBEIT/zaehler" 2>/dev/null | tr -d ' ' || echo 0)
 OK=$(grep -c '^200$' "$ARBEIT/status" || true)

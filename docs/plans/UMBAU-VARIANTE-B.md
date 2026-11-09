@@ -261,8 +261,11 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
   Sharing) nachgetragen; Titelbild 733 (Über uns) weiter ungeklärt.
 - 09.11.2026 **Fußzeile** aus der Live-Fassung (Revision vom 08.05.2026) wiederhergestellt: Copyright,
   Fußmenü, Logos ROBIN GUT Strom und WeShare Energy, Siegel Renewable Plus und TÜV. Darunter der
-  HTML-Block mit der Video-Sperre. „Kontakt“ fehlt im Fußmenü 4, weil /kontakt/ laut Übergabe zur
-  FAQ weiterleitet und die FAQ keinen Kontaktbereich hat → Entscheidung Andreas offen.
+  HTML-Block mit der Video-Sperre.
+- 09.11.2026 **Kontakt zurück** (Andreas: „das brauchen wir“): Kontaktseite 71 veröffentlicht,
+  Weiterleitung 5 (/kontakt/ → FAQ) in Redirection deaktiviert (nicht gelöscht), „Kontakt“ im
+  Fußmenü 4. /kontakt/ liefert 200 mit Kontaktdaten und CF7-Formular. Formular nicht abgeschickt
+  (würde eine Mail auslösen). Offen: Seite ist noch im alten Look, nicht in Bändern.
 - 09.11.2026 **Dieter alleiniger Gründer** (Andreas): Nadine Büscher von Startseite, Privathaushalte,
   Über uns entfernt (Text und Team-Karte). Unterschriften ohne „Gründer/Mitgründer“
   („Dieter Könnes, ROBIN GUT Stiftung“, „Journalist und TV-Moderator.“), im Fließtext

@@ -208,3 +208,30 @@ p.rg-ki-hinweis { position: absolute !important; width: 1px; height: 1px; paddin
 .rgb-karte .is-style-outline > .wp-block-button__link:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0, 61, 0, 0.14), 0 12px 22px rgba(0, 61, 0, 0.12); }
 .rgb-karte .wp-block-button__link:active, .rgb-kopf .wp-block-button__link:active, .rgr .rgr-knopf-haupt:active { transform: translateY(0) scale(0.98); }
 @media (prefers-reduced-motion: reduce) { .rgb-karte .wp-block-button__link, .rgb-kopf .wp-block-button__link, .rgr .rgr-knopf-haupt, .yt-facade-t .play-btn { transition: none; } }
+
+/* Kopfbereich (Andreas 09.11.): Titelbild nimmt deutlich mehr Platz ein, mehr Breite und mehr Höhe */
+@media (min-width: 782px) {
+  .wp-block-post-content > .rgb-karte:first-child > .wp-block-columns > .wp-block-column:has(figure img) { flex: 0 0 55% !important; }
+  .wp-block-post-content > .rgb-karte:first-child > .wp-block-columns > .wp-block-column:not(:has(figure img)) { flex: 1 1 0 !important; min-width: 0; }
+}
+@media (min-width: 1200px) {
+  .wp-block-post-content > .rgb-karte:first-child > .wp-block-columns > .wp-block-column:has(figure img) { flex-basis: 56% !important; }
+}
+/* Bild in voller Proportion, nichts abgeschnitten; Kopfbereich näher am Rand, damit die Überschrift breiter läuft */
+.wp-block-post-content > .rgb-karte:first-child .wp-block-column:has(figure img) .wp-block-image img { width: 100%; height: auto !important; max-height: none !important; aspect-ratio: auto !important; object-fit: contain !important; }
+.wp-block-post-content > .rgb-karte:first-child { padding-left: max(24px, 3vw, calc((100% - 1600px) / 2)) !important; padding-right: max(24px, 3vw, calc((100% - 1600px) / 2)) !important; }
+.wp-block-post-content > .rgb-karte:first-child > .wp-block-columns { align-items: center !important; }
+.wp-block-post-content > .rgb-karte:first-child h1 { font-size: clamp(34px, 3.3vw, 54px) !important; }
+@media (max-width: 781px) {
+  .wp-block-post-content > .rgb-karte:first-child { padding-left: 16px !important; padding-right: 16px !important; }
+}
+
+/* Einzelne Personenkarte (Über uns, nur Dieter): Foto links, Text mittig rechts statt einer leeren breiten Karte */
+@media (min-width: 782px) {
+  .rgb-karte .wp-block-columns:has(> .wp-block-column:only-child) > .wp-block-column > .rgb-spalte:has(> figure:not(.rgb-icon)) { display: grid; grid-template-columns: minmax(220px, 340px) 1fr; grid-template-rows: 1fr auto auto auto 1fr; column-gap: clamp(24px, 3vw, 48px); }
+  .rgb-karte .wp-block-columns:has(> .wp-block-column:only-child) > .wp-block-column > .rgb-spalte:has(> figure:not(.rgb-icon)) > figure { grid-column: 1; grid-row: 1 / -1; margin: 0 !important; }
+  .rgb-karte .wp-block-columns:has(> .wp-block-column:only-child) > .wp-block-column > .rgb-spalte:has(> figure:not(.rgb-icon)) > :not(figure) { grid-column: 2; margin-block-start: 8px !important; }
+  .rgb-karte .wp-block-columns:has(> .wp-block-column:only-child) > .wp-block-column > .rgb-spalte:has(> figure:not(.rgb-icon)) > h3 { grid-row: 2; margin-block-start: 0 !important; }
+  .rgb-karte .wp-block-columns:has(> .wp-block-column:only-child) > .wp-block-column > .rgb-spalte:has(> figure:not(.rgb-icon)) > p:nth-of-type(1) { grid-row: 3; }
+  .rgb-karte .wp-block-columns:has(> .wp-block-column:only-child) > .wp-block-column > .rgb-spalte:has(> figure:not(.rgb-icon)) > p:nth-of-type(2) { grid-row: 4; }
+}

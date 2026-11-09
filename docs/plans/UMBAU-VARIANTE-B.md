@@ -250,3 +250,23 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
 - 09.11.2026 Weitere Wünsche: Menüpunkt „So geht's“ heißt „Energy Sharing“; KI-Kennzeichnung als
   „AI“ im Kreis unten rechts im Bild (Satz bleibt für Screenreader); 3D-Play-Knöpfe auch bei den
   Kundenstimmen (unten rechts, nicht übers Gesicht); grüne Knöpfe mit Tiefe, auch im Rechner.
+- 09.11.2026 Re-Review Video-Sperre: FREIGABE. Offen (MITTEL, vor dem nächsten Player-/Plugin-Update):
+  Netz prüft nur iframes mit „youtube“ im `src` (nicht script/link, nicht youtu.be,
+  nicht `contentWindow.location`); Tests fangen Touch-Weg und Leertaste nicht getrennt ab, nur
+  Chromium getestet. NIEDRIG: weitere Ereignisse (pointerup, mouseover …), `passive` für touchstart,
+  Auto-Start bis 5 min, toter Knopf ohne CCM, Button in `role=button`, keine package.json.
+- 09.11.2026 **Kopfbereich**: Titelbild 55 % (ab 1.200 px 56 %) der Breite, volle Proportion ohne
+  Beschnitt (Seitenformat aus dem Bildblock aufgehoben), Kopfband näher am Rand (max. 1.600 px),
+  H1 dort clamp(34px, 3,3vw, 54px). KI-Kennzeichnung für das Titelbild 1237 (Startseite, Energy
+  Sharing) nachgetragen; Titelbild 733 (Über uns) weiter ungeklärt.
+- 09.11.2026 **Fußzeile** aus der Live-Fassung (Revision vom 08.05.2026) wiederhergestellt: Copyright,
+  Fußmenü, Logos ROBIN GUT Strom und WeShare Energy, Siegel Renewable Plus und TÜV. Darunter der
+  HTML-Block mit der Video-Sperre. „Kontakt“ fehlt im Fußmenü 4, weil /kontakt/ laut Übergabe zur
+  FAQ weiterleitet und die FAQ keinen Kontaktbereich hat → Entscheidung Andreas offen.
+- 09.11.2026 **Dieter alleiniger Gründer** (Andreas): Nadine Büscher von Startseite, Privathaushalte,
+  Über uns entfernt (Text und Team-Karte). Unterschriften ohne „Gründer/Mitgründer“
+  („Dieter Könnes, ROBIN GUT Stiftung“, „Journalist und TV-Moderator.“), im Fließtext
+  „gegründet von TV-Moderator Dieter Könnes“. Entwürfe 1244 und 25 nicht geändert.
+  Dieter-Karte als Querkarte (Foto links, Text rechts). Besseres Foto: Mediathek hat nur 1242
+  (480 × 480); auf robin-gut.org gibt es ein Porträt (dieter-koennes-wdr-02.jpg, 1.200 × 800,
+  vermutlich WDR-Rechte) und ein Aktionsfoto Müsch (1.920 × 1.280, © Jan Odenthal) → Rechte klären.

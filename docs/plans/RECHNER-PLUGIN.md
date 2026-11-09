@@ -254,3 +254,9 @@ dem WSE-Standard (ohne Slug); Bedeutung mit Timo bestätigen.
   Unternehmen durch den Rechner ersetzt. Live geprüft: 100 kWp / 66.500 kWh → rund 5.372 €
   (wie Rechenbeispiel), Verbraucher 49152 → ca. 103 €/Monat, Rolle „Beides“ zeigt beide Teile,
   Handy 375 px ohne Überlauf. Datenschutz-Abschnitt auf Erzeuger erweitert.
+- **1.1.1 (09.11., viertes Review FREIGABE, Kurzumfang):** Zeitlimit über `AbortController` +
+  `setTimeout`, weil `AbortSignal.timeout` erst ab Safari/iOS 16 existiert (sonst auf iOS 14/15 kein
+  Ergebnis). Neue Tests: Browser ohne `AbortSignal.timeout`, ungültige kWp bzw. Wasserkraft
+  während der Anfrage und zurück, Personen-Knöpfe bei 320 px. Browser 49 grün; die vorher
+  überlebende Mutation (Sperre bei ungültiger Eingabe) wird jetzt erkannt. Offen (NIEDRIG):
+  kein Test, der das 15-s-Limit selbst abwartet.

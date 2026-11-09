@@ -7,6 +7,12 @@
   const VERZOEGERUNG_MS = 450;
   const STRASSEN_VERZOEGERUNG_MS = 250;
   const ZEITLIMIT_MS = 15000;
+  // AbortController statt AbortSignal.timeout: Das gibt es erst ab Safari/iOS 16.
+  const zeitlimit = () => {
+    const abbruch = new AbortController();
+    setTimeout(() => abbruch.abort(), ZEITLIMIT_MS);
+    return abbruch.signal;
+  };
   const ANMELDE_TEXT = { beziehen: "Jetzt anmelden", einspeisen: "Als Erzeuger anmelden", beides: "Weiter zur Anmeldung" };
   const MELDUNG_ERZEUGER = {
     "kwp-ungueltig": "Bitte die Leistung der Anlage in kWp eingeben, zum Beispiel 100 oder 9,8.",
@@ -87,7 +93,7 @@
       // Ohne REST-Nonce behandelt WordPress die Anfrage trotz Cookie als nicht angemeldet.
       credentials: "same-origin",
       // Ohne Zeitlimit bliebe eine im Netz hängende Anfrage für immer „unterwegs“ und sperrte Weiter.
-      signal: AbortSignal.timeout(ZEITLIMIT_MS),
+      signal: zeitlimit(),
     });
     const sie = wurzel.dataset.anrede === "sie";
     const text = (schluessel) => (sie && MELDUNG_SIE[schluessel]) || MELDUNG[schluessel];

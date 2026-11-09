@@ -335,7 +335,7 @@ console.log("Klickstrecke mit Rollen");
 const ERZEUGER = { individuell: false, grund_monat: 95.38, vermarktung_ct: 0.2, einrichtung: 390 };
 const PREIS_VIERSEN = { ...PREIS, city: "Viersen" };
 
-async function pruefeRolle(name, atts, fn) {
+async function pruefeRolle(name, atts, fn, { altBrowser = false, breite = 0 } = {}) {
   const html = execFileSync("php", ["-r", `
     require '${PLUGIN}/tests/harness/wp-attrappe.php';
     require '${PLUGIN}/robingut-rechner.php';
@@ -343,7 +343,9 @@ async function pruefeRolle(name, atts, fn) {
   `], { encoding: "utf8" });
   const rollenSeite = seite.replace(shortcode, html);
   const browser = await chromium.launch({ channel: process.env.RGR_BROWSER_CHANNEL || "chrome" });
-  const page = await browser.newPage();
+  const page = await browser.newPage(breite ? { viewport: { width: breite, height: 800 } } : {});
+  // Safari/iOS bis 15 kennt AbortSignal.timeout nicht.
+  if (altBrowser) await page.addInitScript(() => { AbortSignal.timeout = undefined; });
   const z = { preis: 0, erzeuger: 0, erzeugerBodies: [] };
   await page.route(`${BASIS}/**`, async (route) => {
     const url = new URL(route.request().url());
@@ -650,5 +652,35 @@ await pruefeRolle("Rollenwechsel weg und zurück, dann Weiter mit gleichen Einga
   await ergebnisDa(page);
   assert.equal(await feldText(page, "bleibt"), "rund 5.372 €");
 });
+
+await pruefeRolle("Browser ohne AbortSignal.timeout (iOS 15): Erlös kommt trotzdem", { rolle: "einspeisen" }, async (page, z) => {
+  await anlageEingeben(page);
+  await ergebnisDa(page);
+  assert.equal(await feldText(page, "bleibt"), "rund 5.372 €");
+}, { altBrowser: true });
+
+for (const [was, weg, zurueck] of [
+  ["kWp kurz ungültig", (p) => p.fill("[name=kwp]", "0"), (p) => p.fill("[name=kwp]", "100")],
+  ["Art kurz Wasserkraft", (p) => p.selectOption("[name=art]", "wasser"), (p) => p.selectOption("[name=art]", "pv")],
+]) {
+  await pruefeRolle(`${was} während der Anfrage, dann gleiche Eingaben: Ergebnis kommt`, { rolle: "einspeisen" }, async (page, z) => {
+    z.verzoegerung = () => 800;
+    await page.fill("[name=kwp]", "100");
+    await page.fill("[name=ueberschuss]", "66.500");
+    await page.click(".rgr-schritt-2 button[type=submit]");
+    await weg(page);
+    await page.click(".rgr-schritt-2 button[type=submit]");
+    await zurueck(page);
+    await page.click(".rgr-schritt-2 button[type=submit]");
+    await ergebnisDa(page);
+    assert.equal(await feldText(page, "bleibt"), "rund 5.372 €");
+  });
+}
+
+await pruefeRolle("320 px: Personen-Knöpfe in einer Reihe, Text nicht abgeschnitten", {}, async (page) => {
+  const knoepfe = await page.$$eval(".rgr-person", (alle) => alle.map((k) => ({ oben: Math.round(k.getBoundingClientRect().top), passt: k.scrollWidth <= k.clientWidth })));
+  assert.equal(new Set(knoepfe.map((k) => k.oben)).size, 1);
+  assert.ok(knoepfe.every((k) => k.passt), JSON.stringify(knoepfe));
+}, { breite: 320 });
 
 console.log(`\n${bestanden} Prüfungen bestanden`);

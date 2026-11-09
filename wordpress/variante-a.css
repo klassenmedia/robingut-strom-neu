@@ -247,3 +247,22 @@ p.rg-ki-hinweis { position: absolute !important; width: 1px; height: 1px; paddin
 /* Partner-Logos im hellgrünen Kasten „Das macht wer“ (Über uns, Andreas 09.11.); WeShare-Logo in heller Fassung (Medien-ID 1423) */
 .rgb-beispiel > .rgb-logos { margin-block-start: 20px !important; padding-top: 18px; border-top: 1px solid rgba(0, 61, 0, 0.12); gap: 24px !important; }
 .rgb-beispiel > .rgb-logos figure { margin: 0 !important; }
+
+/* Energy Sharing, „Was kostet Strom …“ (Andreas 09.11.): alles auf einer einfarbigen grünen Fläche,
+   Preisformel und Tabelle als weiße Karten */
+.rgb-kosten-flaeche { background: #EAF4D4; border-radius: 24px; padding: clamp(20px, 3vw, 44px) !important; }
+.rgb-kosten-flaeche > * + * { margin-block-start: 22px !important; }
+.rgb-kosten-flaeche > p { max-width: 80ch; }
+.rgb-kosten-flaeche .rgb-preisteile { background: #fff; border-radius: 18px; padding: clamp(18px, 2.4vw, 32px) clamp(12px, 2vw, 24px) !important; gap: clamp(28px, 4vw, 56px) !important; box-shadow: 0 1px 2px rgba(0, 61, 0, 0.05), 0 12px 30px rgba(0, 61, 0, 0.08); }
+.rgb-kosten-flaeche .rgb-preisteile > .wp-block-column { position: relative; text-align: center; }
+.rgb-kosten-flaeche .rgb-preisteile > .wp-block-column > * + * { margin-block-start: 6px !important; }
+.rgb-kosten-flaeche .rgb-preisteile h3 { font-size: clamp(24px, 2.1vw, 34px) !important; font-weight: 700 !important; line-height: 1.15; }
+.rgb-kosten-flaeche .rgb-preisteile p:not(.rgb-fussnote) { font-weight: 600; color: #003D00; }
+.rgb-kosten-flaeche .rgb-preisteile > .wp-block-column + .wp-block-column::before { content: "+"; position: absolute; left: calc(clamp(28px, 4vw, 56px) / -2); top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(180deg, #C6E872 0%, #A4D235 55%, #8CBA26 100%); color: #003D00; font-size: 24px; font-weight: 700; line-height: 1; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 3px 8px rgba(0, 61, 0, 0.2); }
+.rgb-kosten-flaeche .rgb-tabelle { background: #fff; border-radius: 18px; padding: 6px clamp(16px, 2vw, 28px) !important; box-shadow: 0 1px 2px rgba(0, 61, 0, 0.05), 0 12px 30px rgba(0, 61, 0, 0.08); }
+.rgb-kosten-flaeche .rgb-tabelle tr:last-child td { border-bottom: 0 !important; }
+.rgb-kosten-flaeche .rgr { border: 0; box-shadow: 0 1px 2px rgba(0, 61, 0, 0.05), 0 12px 30px rgba(0, 61, 0, 0.08); border-radius: 18px; }
+@media (max-width: 781px) {
+  .rgb-kosten-flaeche .rgb-preisteile > .wp-block-column + .wp-block-column { padding-top: 28px; }
+  .rgb-kosten-flaeche .rgb-preisteile > .wp-block-column + .wp-block-column::before { left: 50%; top: calc(clamp(28px, 4vw, 56px) / -2 + 4px); }
+}

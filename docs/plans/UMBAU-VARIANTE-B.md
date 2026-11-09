@@ -286,3 +286,9 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
   verschoben (Klasse nur noch `rgb-logos`, Trennlinie oben). Neue helle Fassung des WeShare-Logos
   (Medien-ID 1423, `weshare-energy-logo-positiv.svg`): Kopie von 204, nur die weiße Schrift auf
   #1d2b22, Gelb unverändert. Geprüft bei 390/1024/1440, Logos im Kasten, kein Überlauf.
+- 09.11.2026 Energy Sharing: Abschnitt „Das Prinzip“ (inkl. Video, das auf der Startseite steht)
+  entfernt, nach dem Kopfbereich folgt „Teilen lohnt sich“. „Was kostet Strom …“: Inhalt unter der
+  Überschrift in Gruppe `rgb-kosten-flaeche` (einfarbig #EAF4D4, rund), Preisteile-Spalten mit
+  Klasse `rgb-preisteile` als weiße Karte mit „+“-Zeichen, Tabelle und Rechner als weiße Karten.
+- 09.11.2026 Über uns: Zitat-Band mit Dieter unter dem Kopfbereich entfernt.
+- 09.11.2026 SVG 1423 geprüft wie im Review empfohlen (siehe unten).

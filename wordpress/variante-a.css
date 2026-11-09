@@ -159,8 +159,10 @@ body h1, body h2, body h3, body h4, body p, body li, body summary, body .wp-bloc
 .eb-av-yt-facade { cursor: pointer; }
 .eb-av-yt-facade .eb-av-yt-play { position: absolute !important; inset: 0; width: auto !important; height: auto !important; display: flex !important; align-items: center; justify-content: center; pointer-events: none; }
 .eb-av-yt-facade .eb-av-yt-play img { display: none !important; }
-.eb-av-yt-facade .eb-av-yt-play::before { content: ""; width: clamp(64px, 8vw, 92px); aspect-ratio: 1; border-radius: 50%; background: #A4D235 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8 5.5v13l10.5-6.5z' fill='%23003D00'/%3E%3C/svg%3E") no-repeat 56% 50% / 42%; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35); transition: transform 0.15s ease-out; }
-.eb-av-yt-facade:hover .eb-av-yt-play::before, .eb-av-yt-facade:focus-visible .eb-av-yt-play::before { transform: scale(1.08); }
+.eb-av-yt-facade .eb-av-yt-play::before { content: ""; width: clamp(64px, 8vw, 92px); aspect-ratio: 1; border-radius: 50%; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6.8 6v12l10.4-6z' fill='%23ffffff' fill-opacity='.45' transform='translate(0 .7)'/%3E%3Cpath d='M6.8 6v12l10.4-6z' fill='%23003D00'/%3E%3C/svg%3E") no-repeat 50% 50% / 44%, radial-gradient(circle at 34% 28%, #E2F59A 0%, #B9E04A 30%, #A4D235 55%, #6E9C18 100%); box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.7), inset 0 -6px 12px rgba(0, 50, 0, 0.35), 0 4px 8px rgba(0, 0, 0, 0.25), 0 14px 30px rgba(0, 0, 0, 0.35); transition: transform 0.15s ease-out, box-shadow 0.15s ease-out; }
+/* Dreieck: Begrenzungsrahmen x 6,8–17,2 und y 6–18 im 24er-Raster, also exakt mittig */
+.eb-av-yt-facade:hover .eb-av-yt-play::before, .eb-av-yt-facade:focus-visible .eb-av-yt-play::before { transform: translateY(-2px) scale(1.06); box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.7), inset 0 -6px 12px rgba(0, 50, 0, 0.35), 0 6px 12px rgba(0, 0, 0, 0.28), 0 20px 38px rgba(0, 0, 0, 0.38); }
+.eb-av-yt-facade:active .eb-av-yt-play::before { transform: scale(0.97); }
 @media (prefers-reduced-motion: reduce) { .eb-av-yt-facade .eb-av-yt-play::before { transition: none; } }
 
 /* Review 09.11.: Fokusrahmen am Play-Knopf, helle Links in Kacheln auf dunklem Grund */

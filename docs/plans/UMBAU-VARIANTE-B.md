@@ -337,8 +337,7 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
   vom Hallendach zu Bürogebäude, Solarfeld und Dorfdächern (Andreas: „von Dächern zu Dächern, nicht in
   die Wiese“). Zuschnitt 1743:1126 von links direkt im Bild, die CSS-Regel für 1229/1239 greift nicht mehr.
   Verworfene erste Fassungen (Bögen ins Feld): 1451, 1453.
-- 09.11.2026 **Landwirte offen**: Kopfbild 1456 `landwirte-hof-daecher.webp` (Bögen vom Scheunendach zu
-  Dorfdächern) ist hochgeladen, aber noch nicht eingesetzt: Guido hat parallel im Editor gespeichert und
-  dabei den ersten Bildtausch überschrieben. Ebenso offen: in „Drei Wege für Ihren Strom“ Kachel 2
-  („Erst selbst nutzen“) nach vorne, Kachel 1 („Eigene Betriebsstätten versorgen“) in die Mitte.
-  Erst ausführen, wenn Guido den Editor geschlossen hat.
+- 09.11.2026 Landwirte (nach Guidos Speichern 20:43, Seite frei): Kopfbild 1456 `landwirte-hof-daecher.webp`
+  eingesetzt (Bögen vom Scheunendach zu Dorfdächern, Zuschnitt im Bild); „Drei Wege für Ihren Strom“ jetzt
+  „Erst selbst nutzen“ · „Eigene Betriebsstätten versorgen“ · „Überschuss vermarkten“. Live geprüft.
+  Hinweis: Guido sah um 20:4x „Aktualisierung fehlgeschlagen“ im Editor; ob danach etwas von ihm fehlt, prüft er.

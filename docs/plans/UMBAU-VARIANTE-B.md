@@ -175,3 +175,10 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
     da, er fällt beim Go-Live per Migration weg. In der Font-Bibliothek (Familie 75) steht die
     alte Adresse noch, das betrifft nur die Schriftverwaltung im Editor.
   - **Geprüft:** Laptop 1.440 px und Handy 390 px, kein Überlauf.
+- 09.11.2026 **Abgestufter Preisrechner eingebaut** (Plugin 1.1.0, Klickstrecke in 3 Schritten):
+  - Startseite, Energy Sharing, Privathaushalte: Standard (Strom beziehen, du).
+  - Landwirte: `[robingut_rechner rolle="einspeisen" anrede="sie"]`.
+  - Unternehmen: `[robingut_rechner rolle="beides" anrede="sie"]`.
+  - Personen-Knöpfe klein in einer Reihe, kein Pfeil mehr im Anmelde-Knopf.
+  - Offen bei WSE/Timo: Rolle in der Anmelde-URL, Ziel für „individuelles Angebot“, Wasserkraft
+    und Biogas fehlen im öffentlichen Preismodell (die Landwirte-Seite nennt Biogas).

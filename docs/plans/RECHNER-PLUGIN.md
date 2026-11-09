@@ -246,3 +246,11 @@ dem WSE-Standard (ohne Slug); Bedeutung mit Timo bestätigen.
 - **Offen bei WSE:** Gibt es einen Parameter, mit dem die Anmeldestrecke die Rolle vorbelegt?
   Bis das geklärt ist, führen alle drei Rollen auf dieselbe Anmelde-URL, nur der Knopftext
   unterscheidet sich. Außerdem ist offen, wohin „individuelles Angebot“ führen soll.
+- **Restpunkte drittes Review (09.11.):** Anfragen brechen nach 15 s ab (`AbortSignal.timeout`),
+  damit eine hängende Anfrage die Sperre nicht festhält. Neue Browser-Tests: Weiter nach
+  Partnerfehler, A → B (langsam) → A → B, Rollenwechsel während der Anfrage, Förderhinweis aus.
+  Browser 45 grün.
+- **Release 09.11.2026:** 1.1.0 installiert (ersetzt 1.0.2). Platzhalter auf Landwirte und
+  Unternehmen durch den Rechner ersetzt. Live geprüft: 100 kWp / 66.500 kWh → rund 5.372 €
+  (wie Rechenbeispiel), Verbraucher 49152 → ca. 103 €/Monat, Rolle „Beides“ zeigt beide Teile,
+  Handy 375 px ohne Überlauf. Datenschutz-Abschnitt auf Erzeuger erweitert.

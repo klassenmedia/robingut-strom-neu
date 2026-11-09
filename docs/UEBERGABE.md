@@ -27,10 +27,12 @@ hat. Keine Zugangsdaten ins Repo.
 
 ## Stand auf release.robingut-strom.de
 
-Neue Startseite (ID 1241), Menü So geht's / Preise / Organisationen / Landwirte /
-Privathaushalte / Über uns / FAQ, Seiten Landwirte (1230), Privathaushalte (1243),
-Organisationen (1110), So geht's (1045), Preise (19). Konzept (17) und Community (21) sind
-Entwurf. Rechner-Plugin 1.0.2 aktiv. Einzelheiten und Rückweg: `WORDPRESS-UMBAU.md`.
+Seit 09.11.2026 im Design **Variante A** aus der Übergabe vom 08.11. (Startseite 1241, Energy
+Sharing 1355, Privathaushalte 1243, Landwirte 1230, Unternehmen 1110, Über uns 154, FAQ 23).
+Stand und offene Punkte: `docs/plans/UMBAU-VARIANTE-B.md`. Rechner-Plugin **1.1.0** aktiv
+(Klickstrecke): Landwirte mit `rolle="einspeisen" anrede="sie"`, Unternehmen mit
+`rolle="beides" anrede="sie"`, sonst Standard (beziehen, du). Älterer Umbau und Rückweg:
+`WORDPRESS-UMBAU.md`.
 
 **Ab jetzt nur noch auf Release arbeiten.** Änderungen fließen nicht automatisch zur Live-Seite.
 Go-Live später: Release als Ganzes auf die Live-Domain übertragen (All-in-One WP Migration),
@@ -44,6 +46,10 @@ Auf der Live-Seite liegen die neuen Seiten nur als Entwürfe, dort läuft noch P
   `POST https://weshareenergy.de/api/calculate-price` (Slug `robin-gut-strom`, Provision ist im
   Preis). Die API lässt Browser-Aufrufe fremder Domains nicht zu, deshalb fragt das Plugin
   serverseitig an.
+- Erzeuger (ab 1.1.0): Grundpreis, Vermarktung und Einrichtung aus
+  `POST https://weshareenergy.de/api/direktvermarktung/calculate-price` (Preismodell 77, nur PV
+  und Wind; Wasserkraft und Biogas zeigen „individuelles Angebot“). Der Erlös aus Überschuss ×
+  Wunschpreis rechnet der Browser.
 - Sonderfälle der API: `requires_city_selection` (Ort wählen, z. B. 54636) und
   `requires_district_selection` (Straße + Hausnummer, z. B. 41812), mit eigenem Straßen-Dropdown.
 - Tests:
@@ -87,7 +93,7 @@ Auf der Live-Seite liegen die neuen Seiten nur als Entwürfe, dort läuft noch P
 
 ## Offen
 
-- Datenschutzerklärung: Der Abschnitt „Preisrechner“ steht seit 05.11. auf Release (Text in
+- Datenschutzerklärung: Der Abschnitt „Preisrechner“ steht seit 05.11. auf Release (für 1.1.0 ergänzt am 09.11.) (Text in
   `docs/texte/datenschutz-preisrechner.md`). Vor dem Go-Live rechtlich prüfen lassen und
   entscheiden, ob der Partner dort mit Namen steht (markiert).
 - „Über uns“ (154) nennt den Partner noch mit Namen, das gehört zu den Markierungen.

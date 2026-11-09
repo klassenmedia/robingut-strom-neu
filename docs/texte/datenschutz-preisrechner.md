@@ -1,8 +1,8 @@
 # Datenschutzerklärung: Abschnitt Preisrechner (05.11.2026, ergänzt 09.11.2026 für Rechner 1.1.0)
 
 Seit 05.11.2026 eingebaut in Seite 66 (Datenschutzerklärung) auf release.robingut-strom.de,
-direkt nach dem Abschnitt „Webhosting“. Sie-Form wie der Rest der Erklärung. Grundlage ist der Code von Plugin
-1.0.2 (`wordpress/robingut-rechner/`), Stand der Fakten siehe unten.
+direkt nach dem Abschnitt „Webhosting“. Sie-Form wie der Rest der Erklärung. Fassung für Plugin
+1.1.0 (Erzeuger) steht seit 09.11.2026 auf Release. Belege im Code siehe unten.
 
 Vor dem Go-Live rechtlich prüfen lassen (Datenschutzbeauftragter oder Anwalt). Die zwei
 markierten Stellen hängen an der Frage, ob der Partner genannt werden darf (§ 5b UWG).
@@ -68,11 +68,13 @@ Maßnahmen auf Ihre Anfrage (Art. 6 Abs. 1 lit. b DSGVO).
 
 ---
 
-## Belege im Code (Plugin 1.0.2)
+## Belege im Code (Plugin 1.1.0)
 
 | Aussage | Stelle |
 |---|---|
 | Gesendet werden nur PLZ, kWh, Ort, Straße, Hausnummer | `includes/logik.php` `rgr_pruefe_preis_anfrage` |
+| Erzeuger: nur Art, kWp, kWh, Einspeiseart, Förderung | `includes/logik.php` `rgr_pruefe_erzeuger_anfrage`, `rgr_erzeuger_nutzlast` |
+| Wunschpreis bleibt im Browser | `assets/rechnung.js` `berechneErzeuger`, nicht im REST-Body |
 | Abschlag bleibt im Browser | `assets/rechnung.js`, nicht im REST-Body |
 | Keine Cookies, kein localStorage | `assets/rechner.js` |
 | Anfrage serverseitig, ohne Besucher-IP | `includes/rest.php` `rgr_partner_abruf` (nur Content-Type/Accept) |

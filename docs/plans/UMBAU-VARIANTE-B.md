@@ -330,3 +330,15 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
   Review FREIGABE; dessen Bedingung geprüft: Karten sind `is-layout-flow` (nicht constrained), Kinder voll breit.
   Nebenbei gesehen: In den Vorher-nachher-Kästen bricht „Anschlussvergütung“ bei 1024 px ohne
   Trennstrich mitten im Wort um („Anschlussvergüt|ung“), offen.
+- 09.11.2026 Privathaushalte: Zitat-Band durch die Fassung der Startseite ersetzt (Dieter-Waldfoto rund,
+  neuer Zitattext von Dieter/Guido). Kopfbild neu: Medien-ID 1449 `privathaushalte-kueche-lichtbogen.webp`
+  (Gemini-Bearbeitung des Originals 1238: grüner Lichtbogen von draußen durchs Fenster zum Laptop).
+- 09.11.2026 Unternehmen: Kopfbild neu, Medien-ID 1457 `organisationen-halle-daecher.webp`: Lichtbögen
+  vom Hallendach zu Bürogebäude, Solarfeld und Dorfdächern (Andreas: „von Dächern zu Dächern, nicht in
+  die Wiese“). Zuschnitt 1743:1126 von links direkt im Bild, die CSS-Regel für 1229/1239 greift nicht mehr.
+  Verworfene erste Fassungen (Bögen ins Feld): 1451, 1453.
+- 09.11.2026 **Landwirte offen**: Kopfbild 1456 `landwirte-hof-daecher.webp` (Bögen vom Scheunendach zu
+  Dorfdächern) ist hochgeladen, aber noch nicht eingesetzt: Guido hat parallel im Editor gespeichert und
+  dabei den ersten Bildtausch überschrieben. Ebenso offen: in „Drei Wege für Ihren Strom“ Kachel 2
+  („Erst selbst nutzen“) nach vorne, Kachel 1 („Eigene Betriebsstätten versorgen“) in die Mitte.
+  Erst ausführen, wenn Guido den Editor geschlossen hat.

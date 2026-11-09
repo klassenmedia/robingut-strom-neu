@@ -155,7 +155,8 @@
 
   // Der Lesekopf gehört zu den Kosten, die heute nicht anfallen; darum zählt er im Vergleich mit.
   // In ganzen Cent rechnen: toLocaleString rundet sonst z. B. 41,714999… (= 500,58 / 12) ab.
-  const inCent = (euroBetrag) => Math.round(euroBetrag * 100);
+  // toFixed(6) glättet Gleitkomma-Reste wie 1,005 × 100 = 100,4999…, damit halbe Cent aufrunden.
+  const inCent = (euroBetrag) => Math.round(Number((euroBetrag * 100).toFixed(6)));
 
   function vergleiche(jahr, abschlagMonat) {
     if (!(abschlagMonat > 0)) return null;

@@ -182,6 +182,19 @@ pruefe("etwa gleich unter 12 € im Jahr Unterschied, mit Lesekopf", () => {
   assert.equal(R.berechne(P, 102).vergleich.art, "mehrkosten");
 });
 
+pruefe("Jahressumme mit halbem Cent wird aufgerundet (1234,565 → 1234,57)", () => {
+  assert.equal(R.berechne({ ...P, jahr: 1234.565 }, null).jahr, 1234.57);
+  assert.equal(R.berechne({ ...P, jahr: 1.005 }, null).jahr, 1.01);
+});
+
+pruefe("genau 12,00 € Unterschied zählt schon als Ersparnis bzw. Mehrkosten", () => {
+  const ersparnis = R.berechne({ ...P, jahr: 1200 }, 104.9).vergleich;
+  assert.deepEqual([ersparnis.art, ersparnis.jahr], ["ersparnis", 12]);
+  const mehr = R.berechne({ ...P, jahr: 1200 }, 102.9).vergleich;
+  assert.deepEqual([mehr.art, mehr.jahr], ["mehrkosten", -12]);
+  assert.equal(R.berechne({ ...P, jahr: 1200.01 }, 104.9).vergleich.art, "gleich");
+});
+
 pruefe("Mehrkosten werden ehrlich ausgewiesen", () => {
   const r = R.berechne(P, 80);
   assert.equal(r.vergleich.art, "mehrkosten");

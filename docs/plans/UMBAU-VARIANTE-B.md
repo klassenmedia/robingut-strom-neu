@@ -192,8 +192,11 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
   - **Behoben:** Datenschutz und Impressum standen auf dem Handy seitlich über (lange Web-Adressen,
     „Verbraucherstreitbeilegung/Universalschlichtungsstelle“). Zwei `overflow-wrap`-Regeln am Ende
     von `variante-a.css` bzw. der globalen Stile; geprüft auf allen Seiten bei 320 und 390 px.
-  - Offen (rechtlich, nicht geändert): Das Impressum verweist noch auf die OS-Plattform der EU.
-    Sie ist laut EU-Kommission seit 20.07.2025 eingestellt (Verordnung (EU) 2024/3228), der Link
-    landet auf einer Umzugsseite. Die Datenschutzerklärung beschreibt Google Analytics,
+  - **Impressum (Freigabe Andreas):** Absatz „EU-Streitschlichtung“ mit Link zur OS-Plattform und
+    der Satz „Unsere E-Mail-Adresse finden Sie oben im Impressum.“ entfernt. Die Plattform ist laut
+    EU-Kommission seit 20.07.2025 eingestellt (Verordnung (EU) 2024/3228). Der Absatz zur
+    Verbraucherschlichtung (§ 36 VSBG) bleibt. Auf der Live-Seite steht der Absatz noch, er fällt
+    beim Go-Live per Migration weg.
+  - Offen (rechtlich, nicht geändert): Die Datenschutzerklärung beschreibt Google Analytics,
     E-Mail-Marketing (rapidmail) und Social-Media-Dienste, die auf der Seite nicht eingebunden
     sind; YouTube ist eingebunden (lädt erst nach Klick).

@@ -218,8 +218,23 @@ dem WSE-Standard (ohne Slug); Bedeutung mit Timo bestätigen.
 - **Bewusste Änderung:** Ab 100.000 kWh Verbrauch gibt es jetzt ein individuelles Angebot,
   vorher galt das erst über 100.000. Die Mailadresse in dieser Meldung ist entfernt, denn
   Kontaktdaten stehen nur im Impressum. Im Anmeldeknopf steht kein Pfeil mehr.
-- **Tests:** Rechnung 33, Logik 34, Routen 39, Browser 29, Paralleltest grün. Semgrep 0 Funde,
-  gitleaks sauber.
+- **Reviews:**
+  - Erstes Review (voll): BLOCKIERT, weil der Vergleich mit der Anschlussvergütung auch bei
+    Wind, Biogas und geförderten Anlagen erschien.
+  - Nach-Review: BLOCKIERT, weil durch eine Lücke ein veralteter Erlös in voller Deckkraft stehen
+    bleiben konnte.
+  - Beides ist behoben, siehe Commits. Behoben sind auch: Summenprüfung der Partnerposten,
+    Untergrenzen über 0, getrennte Statuszeilen, keine Doppelanfragen beim Mehrfachklick.
+- **Anlagenarten:** Wasserkraft und BHKW lehnt das öffentliche Preismodell 77 ab (422, geprüft am
+  09.11.). Der Rechner zeigt für Wasserkraft und Biogas deshalb ohne Anfrage „individuelles
+  Angebot“, der Server nimmt nur PV und Wind an.
+- **Tests:** Rechnung 34, Logik 35, Routen 45, Browser 42, Paralleltest gemischt grün. Semgrep 0
+  Funde, gitleaks sauber.
+- **Akzeptiert mit Begründung:**
+  - Erzeugerkosten bleiben 6 h im Zwischenspeicher. Sie hängen nur von Anlagendaten ab (keine
+    Person) und ändern sich beim Partner selten. Sie werden nur nach Plausibilitäts- und
+    Summenprüfung gespeichert, Fehler nur 60 s.
+  - Die Summenprüfung ist mit echten Antworten für PV (10/30/100 kWp) und Wind (250 kWp) belegt.
 - **Offen bei WSE:** Gibt es einen Parameter, mit dem die Anmeldestrecke die Rolle vorbelegt?
   Bis das geklärt ist, führen alle drei Rollen auf dieselbe Anmelde-URL, nur der Knopftext
   unterscheidet sich. Außerdem ist offen, wohin „individuelles Angebot“ führen soll.

@@ -338,7 +338,10 @@ pruefe('gültige Erzeuger-Anfrage wird für den Partner übersetzt', function ()
 });
 
 pruefe('Anlagenarten werden auf die Werte des Partners abgebildet', function () use ($anlage) {
-    foreach (['pv' => 'pv', 'wind' => 'wind', 'wasser' => 'water', 'biogas' => 'chp'] as $art => $partner) {
+    // Nur PV und Wind kennt das öffentliche Preismodell; Wasser und Biogas bekommen ein individuelles Angebot.
+    gleich(rgr_pruefe_erzeuger_anfrage(['art' => 'wasser'] + $anlage)['ok'], false);
+    gleich(rgr_pruefe_erzeuger_anfrage(['art' => 'biogas'] + $anlage)['ok'], false);
+    foreach (['pv' => 'pv', 'wind' => 'wind'] as $art => $partner) {
         $g = rgr_pruefe_erzeuger_anfrage(['art' => $art] + $anlage);
         gleich(rgr_erzeuger_nutzlast($g['werte'])['erzeugungsart'], $partner, $art);
     }
@@ -370,6 +373,9 @@ pruefe('Erzeuger-Antwort: Einzelposten ergeben den Grundpreis (echte Werte 10/30
     gleich(rgr_filtere_erzeuger_antwort($klein)['grund_monat'], 31.0);
     $mittel = ['success' => true, 'individual_offer' => false, 'data' => ['redispatch_fee' => 0, 'remote_control_fee' => 11, 'forecast_fee' => 5.1, 'balancing_risk_fee' => 24.38, 'feeder_base_price_margin' => 25, 'grundgebuehr_monatlich' => 65.48, 'marketing_fee_ct_kwh' => 0.2, 'setup_fee' => 390]];
     gleich(rgr_filtere_erzeuger_antwort($mittel)['grund_monat'], 65.48);
+    // Wind 250 kWp / 400.000 kWh Volleinspeisung, abgerufen 09.11.2026
+    $wind = ['success' => true, 'individual_offer' => false, 'data' => ['redispatch_fee' => 20, 'remote_control_fee' => 11, 'forecast_fee' => 15, 'balancing_risk_fee' => 66.67, 'feeder_base_price_margin' => 25, 'grundgebuehr_monatlich' => 137.67, 'marketing_fee_ct_kwh' => 0.2, 'setup_fee' => 390]];
+    gleich(rgr_filtere_erzeuger_antwort($wind)['grund_monat'], 137.67);
 });
 
 pruefe('Erzeuger-Antwort: nur Grundpreis, Vermarktung und Einrichtung', function () use ($wse) {
@@ -391,6 +397,9 @@ pruefe('Erzeuger-Antwort mit fehlenden oder unplausiblen Werten wird verworfen',
         array_replace_recursive($wse, ['data' => ['balancing_risk_fee' => 0]]),
         (function () use ($wse) { $k = $wse; unset($k['data']['forecast_fee']); return $k; })(),
         array_replace_recursive($wse, ['data' => ['redispatch_fee' => '20']]),
+        // Summe knapp daneben (0,02 €) und ein negativer Posten bei sonst passender Summe
+        array_replace_recursive($wse, ['data' => ['grundgebuehr_monatlich' => 95.40]]),
+        array_replace_recursive($wse, ['data' => ['redispatch_fee' => -5, 'balancing_risk_fee' => 49.38]]),
         // Untergrenzen über 0
         array_replace_recursive($wse, ['data' => ['grundgebuehr_monatlich' => 0, 'redispatch_fee' => 0, 'remote_control_fee' => 0, 'forecast_fee' => 0, 'balancing_risk_fee' => 0, 'feeder_base_price_margin' => 0]]),
         array_replace_recursive($wse, ['data' => ['setup_fee' => 0]]),

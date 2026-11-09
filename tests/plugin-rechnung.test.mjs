@@ -312,10 +312,13 @@ pruefe("Fernwirktechnik ab 25 kW", () => {
   assert.equal(R.brauchtFernwirktechnik(25), true);
 });
 
-pruefe("Anlagenarten: Biogas läuft beim Partner als BHKW", () => {
+// Das öffentliche Preismodell des Partners kennt nur PV und Wind (geprüft 09.11.2026: water/chp → 422).
+pruefe("Anlagenarten: Wasserkraft und Biogas nur mit individuellem Angebot", () => {
   assert.deepEqual(Object.keys(R.ANLAGENARTEN), ["pv", "wind", "wasser", "biogas"]);
-  assert.equal(R.ANLAGENARTEN.biogas.partner, "chp");
-  assert.equal(R.ANLAGENARTEN.wasser.partner, "water");
+  assert.equal(R.ANLAGENARTEN.pv.individuell, false);
+  assert.equal(R.ANLAGENARTEN.wind.individuell, false);
+  assert.equal(R.ANLAGENARTEN.wasser.individuell, true);
+  assert.equal(R.ANLAGENARTEN.biogas.individuell, true);
 });
 
 pruefe("Rechner zeigt keine Mailadresse von ROBIN GUT", () => {

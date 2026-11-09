@@ -15,6 +15,7 @@
     "ueberschuss-zu-klein": "Der Rechner beginnt bei 100 kWh Überschuss im Jahr.",
     "ueberschuss-zu-gross": "Bei mehr als 10 Millionen kWh im Jahr erstellen wir ein individuelles Angebot.",
     individuell: "Für diese Anlage erstellen wir ein individuelles Angebot.",
+    "art-individuell": "Für Wasserkraft und Biogas erstellen wir ein individuelles Angebot.",
     laden: "Ertrag wird berechnet …",
     fehler: "Die Kosten für Erzeuger sind gerade nicht erreichbar. Bitte gleich noch einmal versuchen.",
   };
@@ -343,6 +344,7 @@
     let erzeugerNr = 0;
     let erzeugerWarten = null;
     let erzeugerFuer = "";
+    let erzeugerLaeuft = "";   // Anfrage, die gerade unterwegs ist; gleiche nicht doppelt schicken
     const zahl1 = (wert) => wert.toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
     const teilE = (name) => erzeugerBox.querySelector(`[data-feld="${name}"]`);
     const meldeE = (inhalt) => { statusErzeugung.textContent = inhalt || ""; };
@@ -391,10 +393,14 @@
       if (teilErzeugung.hidden) return;
       const body = anlageAusFormular();
       const pruefung = R.pruefeAnlage(body.kwp, body.kwh);
-      if (pruefung !== "ok") { erzeugerNr++; return meldeErzeuger(pruefung); }
+      if (pruefung !== "ok") { erzeugerNr++; erzeugerLaeuft = ""; return meldeErzeuger(pruefung); }
+      if (R.ANLAGENARTEN[body.art]?.individuell !== false) { erzeugerNr++; erzeugerLaeuft = ""; return meldeErzeuger("art-individuell"); }
       const schluessel = JSON.stringify(body);
-      if (kosten && schluessel === erzeugerFuer) { meldeE(""); return zeigeErzeuger(); }
+      if (schluessel === erzeugerLaeuft) return;
+      // Zurück auf die Eingaben der letzten Antwort: eine noch laufende andere Anfrage verfällt.
+      if (kosten && schluessel === erzeugerFuer) { erzeugerNr++; erzeugerLaeuft = ""; meldeE(""); return zeigeErzeuger(); }
       const nr = ++erzeugerNr;
+      erzeugerLaeuft = schluessel;
       blendeAb(true);
       meldeE(MELDUNG_ERZEUGER.laden);
       try {
@@ -410,6 +416,8 @@
         zeigeErzeuger();
       } catch {
         if (nr === erzeugerNr) meldeErzeuger("fehler");
+      } finally {
+        if (nr === erzeugerNr) erzeugerLaeuft = "";
       }
     }
 
@@ -418,7 +426,7 @@
       teilErzeugung.hidden = rolle === "beziehen";
       anmelden.textContent = ANMELDE_TEXT[rolle];
       if (teilBezug.hidden) { verwerfeLaufende(); versteckeErgebnis(); }
-      if (teilErzeugung.hidden) { erzeugerNr++; versteckeErzeuger(); meldeE(""); }
+      if (teilErzeugung.hidden) { erzeugerNr++; erzeugerLaeuft = ""; versteckeErzeuger(); meldeE(""); }
       melde("");
     }
 

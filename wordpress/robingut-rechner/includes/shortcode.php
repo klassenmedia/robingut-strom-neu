@@ -17,7 +17,7 @@ const RGR_ROLLEN = [
     'beides' => ['Beides', 'Ich erzeuge und verbrauche'],
 ];
 const RGR_ANMELDE_TEXT = ['beziehen' => 'Jetzt anmelden', 'einspeisen' => 'Als Erzeuger anmelden', 'beides' => 'Weiter zur Anmeldung'];
-const RGR_ANLAGEN_NAMEN = ['pv' => 'Photovoltaik', 'wind' => 'Wind', 'wasser' => 'Wasserkraft', 'biogas' => 'Biogas (BHKW)'];
+const RGR_ANLAGEN_NAMEN = ['pv' => 'Photovoltaik', 'wind' => 'Wind', 'wasser' => 'Wasserkraft', 'biogas' => 'Biogas'];
 const RGR_TEXTE = [
     'du' => [
         'schritt1' => 'Was möchtest du?', 'schritt2' => 'Deine Daten', 'schritt3' => 'Dein Ergebnis',

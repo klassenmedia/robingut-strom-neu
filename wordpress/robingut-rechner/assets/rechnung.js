@@ -48,12 +48,13 @@
   const ROLLEN = Object.freeze(["beziehen", "einspeisen", "beides"]);
   const rolleAusWert = (wert) => (ROLLEN.includes(wert) ? wert : "beziehen");
 
-  // Werte des Partners (Direktvermarktung, Stand 09.11.2026); Biogas läuft dort als BHKW.
+  // Das öffentliche Preismodell des Partners kennt nur PV und Wind (geprüft 09.11.2026);
+  // Wasserkraft und Biogas bekommen ein individuelles Angebot.
   const ANLAGENARTEN = Object.freeze({
-    pv: Object.freeze({ name: "Photovoltaik", partner: "pv" }),
-    wind: Object.freeze({ name: "Wind", partner: "wind" }),
-    wasser: Object.freeze({ name: "Wasserkraft", partner: "water" }),
-    biogas: Object.freeze({ name: "Biogas (BHKW)", partner: "chp" }),
+    pv: Object.freeze({ name: "Photovoltaik", individuell: false }),
+    wind: Object.freeze({ name: "Wind", individuell: false }),
+    wasser: Object.freeze({ name: "Wasserkraft", individuell: true }),
+    biogas: Object.freeze({ name: "Biogas", individuell: true }),
   });
   const KWP_MIN = 1;
   const KWP_MAX = 1000;                  // darüber individuelles Angebot beim Partner

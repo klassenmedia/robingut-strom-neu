@@ -323,14 +323,14 @@ pruefe('Erzeugerkosten kommen gefiltert und ohne Caching im Browser', function (
 
 pruefe('Erzeuger-Anfrage an den Partner: feste URL und festes Preismodell', function () {
     $GLOBALS['rgr_partner_antwort'] = fn() => antwort(200, wse_erzeuger());
-    erzeuger(['art' => 'biogas'] + ANLAGE);
+    erzeuger(['art' => 'wind'] + ANLAGE);
     $a = $GLOBALS['rgr_partner_aufrufe'][0];
     gleich($a['methode'], 'POST');
     gleich($a['url'], 'https://partner.test/api/direktvermarktung/calculate-price');
     gleich($a['args']['redirection'], 0);
     gleich($a['args']['limit_response_size'], 200000);
     gleich(json_decode($a['args']['body'], true), [
-        'pricing_model_id' => '77', 'erzeugungsart' => 'chp', 'nennleistung_kwp' => '100',
+        'pricing_model_id' => '77', 'erzeugungsart' => 'wind', 'nennleistung_kwp' => '100',
         'einspeiseart' => 'teil', 'einspeisemenge_kwh' => '66500', 'foerderung' => '0',
     ]);
 });

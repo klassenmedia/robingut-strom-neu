@@ -162,8 +162,9 @@ function rgr_preise_plausibel(array $p, int $kwh): bool
     return abs($p['annual_total'] - $erwartet) <= $toleranz;
 }
 
-// Erzeuger: Anlagenart bei uns → Wert des Partners (Biogas läuft dort als BHKW).
-const RGR_ANLAGENARTEN = ['pv' => 'pv', 'wind' => 'wind', 'wasser' => 'water', 'biogas' => 'chp'];
+// Erzeuger: Anlagenart bei uns → Wert des Partners. Das öffentliche Preismodell kennt nur PV und
+// Wind (geprüft 09.11.2026); Wasserkraft und Biogas zeigt der Browser als individuelles Angebot.
+const RGR_ANLAGENARTEN = ['pv' => 'pv', 'wind' => 'wind'];
 const RGR_EINSPEISUNG = ['voll', 'teil'];
 const RGR_KWP = [1.0, 1000.0];
 const RGR_UEBERSCHUSS = [100, 10000000];

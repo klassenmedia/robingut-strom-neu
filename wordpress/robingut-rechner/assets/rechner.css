@@ -1,12 +1,12 @@
-/* Preisrechner als Klickstrecke in drei Schritten (Variante B); alles unter .rgr, damit das Theme unberührt bleibt. */
+/* Preisrechner als Klickstrecke in drei Schritten (Farben Variante A); alles unter .rgr, damit das Theme unberührt bleibt. */
 .rgr {
-  --rgr-gruen: #0e4d36;
-  --rgr-mittel: #3f8f2a;
-  --rgr-lime: #a3d237;
-  --rgr-hell: #eef6da;
-  --rgr-rand: #d5ddcf;
+  --rgr-gruen: #003d00;
+  --rgr-mittel: #0e670e;
+  --rgr-lime: #a4d235;
+  --rgr-hell: #f2f8e1;
+  --rgr-rand: #dce3d6;
   --rgr-linie: #e1e7dc;
-  --rgr-text: #22302a;
+  --rgr-text: #3c3c3c;
   --rgr-grau: #5b6b5f;
   padding: clamp(14px, 2vw, 22px);
   background: #fff;
@@ -66,7 +66,7 @@ legend.rgr-schritt-titel + * { clear: both; }
   transition: transform 0.1s ease-out, background-color 0.15s ease;
 }
 .rgr-knopf:active { transform: scale(0.98); }
-.rgr-knopf-haupt { background: var(--rgr-lime); color: #0e2a12 !important; }
+.rgr-knopf-haupt { background: var(--rgr-lime); color: var(--rgr-gruen) !important; font-weight: 400; }
 .rgr-knopf-haupt:hover { background: #b5e04a; }
 .rgr-schritt-2 > .rgr-knopf, .rgr-anmelden { width: 100%; box-sizing: border-box; }
 .rgr-knopf:focus-visible, .rgr-person:focus-visible, .rgr-heute summary:focus-visible { outline: 3px solid var(--rgr-gruen); outline-offset: 2px; }
@@ -99,7 +99,7 @@ legend.rgr-schritt-titel + * { clear: both; }
   background: #fff;
   border: 1.5px solid var(--rgr-rand);
   border-radius: 12px;
-  box-shadow: 0 12px 32px rgba(14, 77, 54, 0.16);
+  box-shadow: 0 12px 32px rgba(0, 61, 0, 0.16);
 }
 .rgr-vorschlaege li {
   display: flex;
@@ -145,7 +145,7 @@ legend.rgr-schritt-titel + * { clear: both; }
 .rgr-status:empty { display: none; }
 .rgr-leer { margin: 0; }
 .rgr-ergebnis, .rgr-ergebnis-erzeuger { padding: 14px; background: var(--rgr-hell); border-radius: 12px; }
-.rgr-ergebnis.rgr-laedt { opacity: 0.45; transition: opacity 0.15s ease; }
+.rgr-ergebnis.rgr-laedt, .rgr-ergebnis-erzeuger.rgr-laedt { opacity: 0.45; transition: opacity 0.15s ease; }
 .rgr-label { margin: 0; font-weight: 700; color: var(--rgr-gruen); }
 .rgr-betrag { margin: 4px 0 0; font-size: 20px; color: var(--rgr-gruen); }
 .rgr-betrag strong { font-size: clamp(36px, 3vw, 48px); line-height: 1.05; letter-spacing: -0.02em; }

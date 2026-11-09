@@ -211,3 +211,13 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
   - `.rgb-beispiel` hebt sich je nach Hintergrund ab (hell auf Weiß, weiß auf Grün).
   - Geprüft auf 7 Seiten bei 390 und 1.440 px: nie zwei gleiche Hintergründe hintereinander, alle
     Abschnittsüberschriften mit Strich, kein Überlauf. CSS am Ende von `variante-a.css`.
+- 09.11.2026 **Nachschliff nach Andreas' Rückmeldungen** (alles CSS am Ende von `variante-a.css`):
+  - Review-Funde zum Rhythmus umgesetzt: `@supports` für `:nth-child(… of S)`, Bänder mit
+    Editor-Hintergrund (`has-background`) bleiben unberührt, kein Lime-Strich in Kästen.
+  - Vorher-nachher-Karten (`rgb-vn`) nebeneinander gleich hoch; Überschrift und Kästen beider
+    Karten auf gemeinsamer Linie per CSS-Subgrid (ab 782 px), geprüft 800–1.440 px.
+  - Textspalten (`rgb-spalte` ohne Foto, z. B. „1. Erzeugen / 2. Teilen / 3. Nutzen“) als gleich
+    hohe Kacheln: weiß mit Schatten auf Grün-Bändern, hellgrün auf weißen, durchscheinend auf dunklen.
+  - Video: Der Play-Knopf des Essential-Blocks-Players war 0 × 0 px groß. Jetzt Lime-Kreis mit
+    Dreieck mittig auf dem Vorschaubild.
+  - Offen: YouTube ist in CCM19 nicht als Dienst eingetragen und wird deshalb nicht blockiert.

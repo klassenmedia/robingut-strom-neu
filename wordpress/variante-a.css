@@ -1,7 +1,8 @@
 /* Variante A (Übergabe 08.11.2026, Freigabe Andreas 09.11.): Design der Release-Seite. Kopie aus
    WordPress (Release): Website-Editor → Stile → Zusätzliches CSS, liegt dort als letzter Block.
    Gleiche Klassen wie zuvor in Variante B, andere Optik: rgb-karte = Band über die volle Breite
-   (weiß), rgb-hell = hellgrünes Band, rgb-dunkel = dunkelgrünes Band; der Inhalt steht mittig
+   (weiß), rgb-hell = hellgrünes Band (im Seiteninhalt seit 09.11. durch den automatischen Wechsel
+   unten ersetzt), rgb-dunkel = dunkelgrünes Band; der Inhalt steht mittig
    und ist höchstens 1.320 px breit. rgb-spalte = Spalte ohne Rahmen (mit Bild: gerahmte Kachel),
    rgb-kopf / rgb-fuss = Kopf- und Fußzeile, rgb-faq = Aufklapper, rgb-vn = Vorher-nachher. */
 
@@ -112,17 +113,51 @@ body h1, body h2, body h3, body h4, body p, body li, body summary, body .wp-bloc
 .wp-block-post-content :is(p, li, td, h2, h3) { overflow-wrap: break-word; }
 .wp-block-post-content :is(p, li, td) > a:not(.rgr-knopf) { overflow-wrap: anywhere; }
 
-/* Rhythmus (Andreas 09.11.): helle Abschnitte wechseln automatisch Weiß / zarter Grün-Verlauf, dunkle sind Akzente. */
-.wp-block-post-content > .rgb-karte:not(.rgb-dunkel) { background: #fff !important; }
-.wp-block-post-content > .rgb-karte:not(.rgb-dunkel):nth-child(even of .rgb-karte:not(.rgb-dunkel)) {
-  background: radial-gradient(1100px 420px at 88% 0%, rgba(164, 210, 53, 0.22), transparent 62%), linear-gradient(180deg, #F6FAEC 0%, #EAF4D4 100%) !important;
+/* Rhythmus (Andreas 09.11.): helle Abschnitte wechseln automatisch Weiß / zarter Grün-Verlauf, dunkle sind Akzente.
+   Bandfarben nur über rgb-dunkel steuern; eine im Editor gesetzte Hintergrundfarbe (has-background) bleibt unberührt. */
+@supports selector(:nth-child(1 of .x)) {
+  .wp-block-post-content > .rgb-karte:not(.rgb-dunkel, .has-background) { background: #fff !important; }
+  .wp-block-post-content > .rgb-karte:not(.rgb-dunkel, .has-background):nth-child(even of .rgb-karte:not(.rgb-dunkel, .has-background)) {
+    background: radial-gradient(1100px 420px at 88% 0%, rgba(164, 210, 53, 0.22), transparent 62%), linear-gradient(180deg, #F6FAEC 0%, #EAF4D4 100%) !important;
+  }
+  /* Kästen innen heben sich vom jeweiligen Hintergrund ab */
+  .wp-block-post-content > .rgb-karte:nth-child(odd of .rgb-karte:not(.rgb-dunkel, .has-background)) .rgb-beispiel { background: #F2F8E1 !important; }
+  .wp-block-post-content > .rgb-karte:nth-child(even of .rgb-karte:not(.rgb-dunkel, .has-background)) .rgb-beispiel { background: #fff !important; }
 }
-.wp-block-post-content > .rgb-karte.rgb-dunkel {
+.wp-block-post-content > .rgb-karte.rgb-dunkel:not(.has-background) {
   background: radial-gradient(900px 480px at 8% 0%, rgba(164, 210, 53, 0.20), transparent 60%), linear-gradient(135deg, #003D00 0%, #0B5A0B 100%) !important;
 }
-/* Kästen innen heben sich vom jeweiligen Hintergrund ab */
-.wp-block-post-content > .rgb-karte:nth-child(odd of .rgb-karte:not(.rgb-dunkel)) .rgb-beispiel { background: #F2F8E1 !important; }
-.wp-block-post-content > .rgb-karte:nth-child(even of .rgb-karte:not(.rgb-dunkel)) .rgb-beispiel { background: #fff !important; }
-/* Roter Faden: kurzer Lime-Strich unter jeder Abschnittsüberschrift */
-.rgb-karte > h2::after, .rgb-karte > .wp-block-group > h2::after, .rgb-karte > .wp-block-template-part > * > h2::after { content: ""; display: block; width: 56px; height: 4px; margin-top: 14px; border-radius: 2px; background: #A4D235; }
-.rgb-karte > h2.has-text-align-center::after, .rgb-karte > .wp-block-group > h2.has-text-align-center::after, .rgb-karte > .wp-block-template-part > * > h2.has-text-align-center::after { margin-left: auto; margin-right: auto; }
+/* Roter Faden: kurzer Lime-Strich unter jeder Abschnittsüberschrift (nicht in Kästen) */
+.rgb-karte > h2::after, .rgb-karte > .wp-block-group:not(.rgb-beispiel, .rgb-kachel) > h2::after, .rgb-karte > .wp-block-template-part > * > h2::after { content: ""; display: block; width: 56px; height: 4px; margin-top: 14px; border-radius: 2px; background: #A4D235; }
+.rgb-karte > h2.has-text-align-center::after, .rgb-karte > .wp-block-group:not(.rgb-beispiel, .rgb-kachel) > h2.has-text-align-center::after, .rgb-karte > .wp-block-template-part > * > h2.has-text-align-center::after { margin-left: auto; margin-right: auto; }
+
+/* Vorher-nachher-Karten nebeneinander gleich hoch, auch wenn ein Text umbricht (Andreas 09.11.) */
+.wp-block-column:has(> .rgb-vn) { display: flex; flex-direction: column; }
+.wp-block-column > .rgb-vn { flex: 1 1 auto; display: flex; flex-direction: column; }
+.rgb-vn > .wp-block-columns { flex: 1 1 auto; align-items: stretch !important; }
+.rgb-vn > .wp-block-columns > .wp-block-column:has(> .rgb-vn-vorher, > .rgb-vn-nachher) { display: flex; flex-direction: column; align-self: stretch !important; }
+.rgb-vn-vorher, .rgb-vn-nachher { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; }
+.rgb-vn > .wp-block-columns > .wp-block-column:has(> .rgb-vn-pfeil) { align-self: center !important; }
+/* Zwei Karten nebeneinander: Überschrift und Kästen auf gemeinsamer Linie, auch wenn eine Überschrift umbricht */
+@media (min-width: 782px) {
+  .wp-block-columns:has(> .wp-block-column:first-child > .rgb-vn):has(> .wp-block-column:nth-child(2):last-child > .rgb-vn) { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: auto 1fr; row-gap: 0 !important; }
+  .wp-block-columns:has(> .wp-block-column:first-child > .rgb-vn):has(> .wp-block-column:nth-child(2):last-child > .rgb-vn) > .wp-block-column { display: grid; grid-row: span 2; grid-template-rows: subgrid; }
+  .wp-block-columns:has(> .wp-block-column:first-child > .rgb-vn):has(> .wp-block-column:nth-child(2):last-child > .rgb-vn) > .wp-block-column > .rgb-vn { display: grid; grid-row: span 2; grid-template-rows: subgrid; row-gap: 16px; }
+}
+
+/* Textspalten (Schritte, Vorteile) als gleich hohe Kacheln (Andreas 09.11.); Spalten mit Foto haben eigene Kachel oben */
+.rgb-karte .wp-block-column:has(> .rgb-spalte) { display: flex; flex-direction: column; }
+.rgb-spalte:not(:has(> figure:not(.rgb-icon))) { flex: 1 1 auto; height: auto; background: #fff; border: 1px solid #DCE3D6; border-radius: 16px; padding: clamp(22px, 2vw, 30px) !important; box-shadow: 0 1px 2px rgba(0, 61, 0, 0.04), 0 10px 28px rgba(0, 61, 0, 0.07); }
+.rgb-spalte:not(:has(> figure:not(.rgb-icon))) > h3 { font-weight: 600 !important; }
+@supports selector(:nth-child(1 of .x)) {
+  .wp-block-post-content > .rgb-karte:nth-child(odd of .rgb-karte:not(.rgb-dunkel, .has-background)) .rgb-spalte:not(:has(> figure:not(.rgb-icon))) { background: #F6FAEC; border-color: #E1ECCB; box-shadow: none; }
+}
+.rgb-dunkel .rgb-spalte:not(:has(> figure:not(.rgb-icon))) { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.18); box-shadow: none; }
+
+/* Video: sichtbarer Play-Knopf auf dem Vorschaubild (der Knopf des Video-Blocks war 0 × 0 px groß) */
+.eb-av-yt-facade { cursor: pointer; }
+.eb-av-yt-facade .eb-av-yt-play { position: absolute !important; inset: 0; width: auto !important; height: auto !important; display: flex !important; align-items: center; justify-content: center; pointer-events: none; }
+.eb-av-yt-facade .eb-av-yt-play img { display: none !important; }
+.eb-av-yt-facade .eb-av-yt-play::before { content: ""; width: clamp(64px, 8vw, 92px); aspect-ratio: 1; border-radius: 50%; background: #A4D235 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8 5.5v13l10.5-6.5z' fill='%23003D00'/%3E%3C/svg%3E") no-repeat 56% 50% / 42%; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35); transition: transform 0.15s ease-out; }
+.eb-av-yt-facade:hover .eb-av-yt-play::before, .eb-av-yt-facade:focus-visible .eb-av-yt-play::before { transform: scale(1.08); }
+@media (prefers-reduced-motion: reduce) { .eb-av-yt-facade .eb-av-yt-play::before { transition: none; } }

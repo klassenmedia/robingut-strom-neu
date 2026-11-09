@@ -1,0 +1,77 @@
+/* Variante B (Übergabe 08.11.2026): Karten auf hellem Grund. Kopie aus WordPress (Release):
+   Website-Editor → Stile → Zusätzliches CSS. Klassen werden an Core-Blöcken gesetzt:
+   rgb-karte (weiße Karte), rgb-hell (hellgrüne Karte), rgb-dunkel (dunkelgrüne Karte),
+   rgb-spalte (kleine Karte in Spalten), rgb-kopf / rgb-fuss (Kopf- und Fußzeile),
+   rgb-faq (Aufklapper), rgb-vn (Vorher-nachher), rgb-link (unterstrichener Textlink),
+   rgb-merkmale (kleine grüne Zeile unter dem Einstieg), rgb-fussnote (Kleingedrucktes). */
+
+body { background: #F6F8F3; color: #22302A; font-family: Arial, Helvetica, sans-serif; }
+body h1, body h2, body h3, body h4, body p, body li, body summary, body .wp-block-button__link, body .wp-block-navigation { font-family: Arial, Helvetica, sans-serif; }
+.wp-site-blocks > main, .wp-site-blocks > .wp-block-group { background: transparent; }
+
+.rgb-karte { background: #fff; border: 1px solid #D5DDCF; border-radius: 16px; padding: 30px 34px !important; max-width: 1100px; margin-left: auto !important; margin-right: auto !important; box-sizing: border-box; }
+.rgb-karte.rgb-hell { background: #EEF6DA; border-color: #DCE9BD; }
+.rgb-karte.rgb-dunkel { background: #0E4D36; border-color: #0E4D36; color: #fff; }
+.rgb-karte + .rgb-karte, .rgb-karte + * + .rgb-karte { margin-top: 18px !important; }
+.wp-block-post-content > .rgb-karte:first-child { margin-top: 18px !important; }
+.wp-block-post-content > .rgb-karte:last-child { margin-bottom: 18px !important; }
+
+.rgb-karte h1 { font-size: clamp(32px, 4vw, 44px) !important; line-height: 1.07; font-weight: 800; color: #0E4D36; margin: 0; }
+.rgb-karte h1 mark { color: #3F8F2A !important; background: none !important; }
+.rgb-karte h2 { font-size: clamp(22px, 2.4vw, 27px) !important; line-height: 1.2; font-weight: 800; color: #0E4D36; margin: 0; }
+.rgb-karte h3 { font-size: 16px !important; line-height: 1.3; font-weight: 700; color: #0E4D36; margin: 0; }
+.rgb-karte p, .rgb-karte li { font-size: 16px; line-height: 1.55; }
+.rgb-karte.rgb-dunkel h1, .rgb-karte.rgb-dunkel h2, .rgb-karte.rgb-dunkel h3, .rgb-karte.rgb-dunkel p { color: #fff; }
+
+.rgb-spalte { background: #fff; border: 1px solid #E1E7DC; border-radius: 12px; padding: 16px !important; height: 100%; box-sizing: border-box; }
+.rgb-hell .rgb-spalte { border-color: #D9E6C0; }
+.rgb-spalte p, .rgb-spalte li { font-size: 14px !important; line-height: 1.5; }
+.rgb-spalte .wp-block-image img { border-radius: 10px; }
+.rgb-icon img { width: 28px !important; height: 28px !important; }
+.rgb-karte .wp-block-image img { border-radius: 10px; }
+
+.rgb-karte .wp-block-button__link { padding: 11px 20px !important; border-radius: 999px !important; font-size: 15px !important; font-weight: 700; line-height: 1.2; background: #A3D237 !important; color: #0E2A12 !important; border: 0; }
+.rgb-karte .is-style-outline .wp-block-button__link { padding: 10px 18px !important; background: #fff !important; color: #0E4D36 !important; border: 1.5px solid #0E4D36 !important; }
+.rgb-dunkel .is-style-outline .wp-block-button__link { background: transparent !important; color: #fff !important; border-color: #fff !important; }
+
+.rgb-link a, a.rgb-link { color: #0E4D36 !important; font-weight: 700; font-size: 14px; text-decoration: underline; text-decoration-color: #A3D237; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.rgb-merkmale { color: #3F8F2A !important; font-size: 13px !important; font-weight: 700; }
+.rgb-fussnote, .rgb-karte .rgb-fussnote { font-size: 13px !important; line-height: 1.5; color: #5B6B5F; }
+
+.rgb-vn { background: #fff; border: 1px solid #E1E7DC; border-radius: 12px; padding: 18px !important; }
+.rgb-vn-vorher { background: #EEF0EC; border-radius: 10px; padding: 12px !important; text-align: center; }
+.rgb-vn-nachher { background: #A3D237; border-radius: 10px; padding: 12px !important; text-align: center; }
+.rgb-vn-vorher p, .rgb-vn-nachher p { margin: 0 !important; font-size: 13px !important; }
+.rgb-vn-wert { font-size: 26px !important; font-weight: 800; color: #0E4D36; line-height: 1.2; }
+.rgb-vn-vorher .rgb-vn-wert { color: #5B6B5F; }
+.rgb-vn-pfeil { color: #3F8F2A; font-size: 22px !important; text-align: center; align-self: center; }
+
+.rgb-faq { border-bottom: 1px solid #D9E6C0; padding: 12px 2px !important; margin: 0 !important; max-width: 720px; }
+.rgb-faq summary { font-weight: 700; color: #0E4D36; cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 16px; font-size: 16px; }
+.rgb-faq summary::-webkit-details-marker { display: none; }
+.rgb-faq summary::after { content: "+"; color: #3F8F2A; font-weight: 700; font-size: 20px; line-height: 1; }
+.rgb-faq[open] summary::after { content: "–"; }
+.rgb-faq > *:not(summary) { margin-top: 10px; font-size: 15px; }
+
+.rgb-kopf { background: #fff; border: 1px solid #D5DDCF; border-radius: 16px; max-width: 1100px; margin: 18px auto 0 !important; padding: 10px 22px !important; box-sizing: border-box; }
+.rgb-kopf .wp-block-navigation a { color: #22302A !important; font-size: 15px; }
+.rgb-kopf .wp-block-navigation .current-menu-item > a { color: #0E4D36 !important; font-weight: 700; text-decoration: underline; text-decoration-color: #A3D237; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+.rgb-kopf .wp-block-button__link { background: #A3D237 !important; color: #0E2A12 !important; border-radius: 999px !important; padding: 10px 18px !important; font-weight: 700; font-size: 15px; }
+.rgb-fuss { background: #fff; border: 1px solid #D5DDCF; border-radius: 16px; max-width: 1100px; margin: 0 auto 18px !important; padding: 16px 26px !important; box-sizing: border-box; color: #22302A; font-size: 14px; }
+.rgb-fuss a { color: #0E4D36 !important; text-decoration: underline; }
+
+/* Feinschliff */
+.rgb-karte .is-style-rounded img { border-radius: 9999px !important; aspect-ratio: 1; object-fit: cover; }
+.rgb-vn .rgb-vn-wert { font-size: 26px !important; font-weight: 800; color: #0E4D36; line-height: 1.2; }
+.rgb-vn .rgb-vn-vorher .rgb-vn-wert { color: #5B6B5F; }
+.rgb-karte .wp-block-column > * + * { margin-block-start: 14px !important; }
+.rgb-spalte > * + * { margin-block-start: 8px !important; }
+.rgb-karte .wp-block-buttons, .rgb-kopf .wp-block-buttons { gap: 12px !important; }
+.rgb-karte .wp-block-template-part > .wp-block-column, .rgb-karte .wp-block-template-part > .wp-block-group { padding: 0 !important; margin: 0 !important; background: transparent !important; }
+.rgb-karte .wp-block-template-part h2 { color: #0E4D36 !important; }
+
+@media (max-width: 781px) {
+  .rgb-karte { padding: 22px 18px !important; border-radius: 14px; margin-left: 10px !important; margin-right: 10px !important; }
+  .rgb-kopf, .rgb-fuss { margin-left: 10px !important; margin-right: 10px !important; }
+  .rgb-vn-pfeil { transform: rotate(90deg); }
+}

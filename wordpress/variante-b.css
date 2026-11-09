@@ -1,3 +1,5 @@
+/* NICHT MEHR AKTIV seit 09.11.2026: Andreas hat auf Variante A gewechselt (wordpress/variante-a.css).
+   Bleibt als Rückweg im Repo. */
 /* Variante B (Übergabe 08.11.2026): Karten auf hellem Grund. Kopie aus WordPress (Release):
    Website-Editor → Stile → Zusätzliches CSS. Klassen werden an Core-Blöcken gesetzt:
    rgb-karte (weiße Karte), rgb-hell (hellgrüne Karte), rgb-dunkel (dunkelgrüne Karte),
@@ -95,6 +97,7 @@ body h1, body h2, body h3, body h4, body p, body li, body summary, body .wp-bloc
 .rgb-platzhalter { background: #EEF2EC; border-radius: 10px; padding: 60px 20px !important; text-align: center; color: #5B6B5F; }
 .rgb-karte .has-small-font-size { font-size: clamp(15px, 0.9vw, 17px) !important; }
 .rgb-faq > *:not(summary) { font-size: clamp(16px, 0.95vw, 18px) !important; }
+.rgb-karte .wp-block-essential-blocks-advanced-video { max-width: min(960px, 100%); }
 @media (max-width: 781px) {
   .rgb-karte { padding: 22px 18px !important; border-radius: 14px; margin-left: 16px !important; margin-right: 16px !important; }
   .rgb-kopf, .rgb-fuss { margin-left: 16px !important; margin-right: 16px !important; }

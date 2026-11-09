@@ -159,3 +159,19 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
       gekennzeichnet.
     - Der Knopf „Jetzt wechseln ↗“ im Rechner-Plugin hat noch den Pfeil. Der fällt mit
       dem Umbau des Plugins weg.
+- 09.11.2026 Wechsel auf **Variante A** (Andreas: „das mit den Kästchen ist nicht so cool“):
+  - Das CSS für Variante A ersetzt den Block für Variante B in den globalen Stilen (Kopie
+    `wordpress/variante-a.css`). `variante-b.css` bleibt als Rückweg im Repo und ist als nicht
+    aktiv markiert.
+  - Klassen und Inhalte bleiben gleich. Neu ist nur die Optik: Bänder über die volle Breite,
+    Inhalt mittig auf höchstens 1.320 px, Noto Sans, dunkle Kopfzeile (#353535) und Fußzeile
+    (#003D00). Spalten haben keine Kästen und keine Icons. Gerahmt sind nur Kacheln mit Bild,
+    die Vorher-nachher-Kästen und die Kundenfall-Kacheln.
+  - Die Hintergründe aller Abschnitte auf den 6 Seiten richten sich jetzt nach „Hintergrund:“ in
+    `Texte/*.md` (weiß / hellgrünes Band / dunkelgrünes Band). Alle Blöcke sind gültig.
+  - **Schrift repariert:** Die 18 Noto-Sans-Schnitte zeigten in den globalen Stilen auf
+    `http://wordpress-robingut-strom.p709435.webspaceconfig.de/…`. Jetzt nutzen sie den relativen
+    Pfad `/wp-content/uploads/fonts/…`, die Schrift lädt. Auf der Live-Seite ist der Fehler noch
+    da, er fällt beim Go-Live per Migration weg. In der Font-Bibliothek (Familie 75) steht die
+    alte Adresse noch, das betrifft nur die Schriftverwaltung im Editor.
+  - **Geprüft:** Laptop 1.440 px und Handy 390 px, kein Überlauf.

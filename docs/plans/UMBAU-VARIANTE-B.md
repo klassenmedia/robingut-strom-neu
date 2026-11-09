@@ -186,3 +186,14 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
     Beispiel 30 kWp / 5.000 kWh / 9 ct: 450 € Erlös − 515 € Grundpreis − 10 € Vermarktung = „rund -25 €“.
     Die Rechnung stimmt. Klären: Hinweis oder Mindestmenge zeigen, Minus als „−“ setzen?
   - 1.1.1 auf Release (Zeitlimit auch für iOS 14/15).
+- 09.11.2026 **Prüfdurchgang über alle 9 Seiten** (Release, angemeldet als Andreas):
+  - In Ordnung: je eine H1, alle Bilder mit Alt-Text, keine toten Sprungmarken, alle internen
+    und externen Links erreichbar, keine Testdomain, Noto Sans lädt, Laptop 1.440 px ohne Überlauf.
+  - **Behoben:** Datenschutz und Impressum standen auf dem Handy seitlich über (lange Web-Adressen,
+    „Verbraucherstreitbeilegung/Universalschlichtungsstelle“). Zwei `overflow-wrap`-Regeln am Ende
+    von `variante-a.css` bzw. der globalen Stile; geprüft auf allen Seiten bei 320 und 390 px.
+  - Offen (rechtlich, nicht geändert): Das Impressum verweist noch auf die OS-Plattform der EU.
+    Sie ist laut EU-Kommission seit 20.07.2025 eingestellt (Verordnung (EU) 2024/3228), der Link
+    landet auf einer Umzugsseite. Die Datenschutzerklärung beschreibt Google Analytics,
+    E-Mail-Marketing (rapidmail) und Social-Media-Dienste, die auf der Seite nicht eingebunden
+    sind; YouTube ist eingebunden (lädt erst nach Klick).

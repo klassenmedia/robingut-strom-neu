@@ -107,3 +107,7 @@ body h1, body h2, body h3, body h4, body p, body li, body summary, body .wp-bloc
   .rgb-vn-pfeil { transform: rotate(90deg); }
   .rgb-spalte:has(> figure:not(.rgb-icon)) { padding: 20px !important; }
 }
+
+/* Lange Web-Adressen und Wortketten (Datenschutz, Impressum) dürfen umbrechen, statt auf dem Handy überzustehen. */
+.wp-block-post-content :is(p, li, td, h2, h3) { overflow-wrap: break-word; }
+.wp-block-post-content :is(p, li, td) > a:not(.rgr-knopf) { overflow-wrap: anywhere; }

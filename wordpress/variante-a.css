@@ -111,3 +111,18 @@ body h1, body h2, body h3, body h4, body p, body li, body summary, body .wp-bloc
 /* Lange Web-Adressen und Wortketten (Datenschutz, Impressum) dürfen umbrechen, statt auf dem Handy überzustehen. */
 .wp-block-post-content :is(p, li, td, h2, h3) { overflow-wrap: break-word; }
 .wp-block-post-content :is(p, li, td) > a:not(.rgr-knopf) { overflow-wrap: anywhere; }
+
+/* Rhythmus (Andreas 09.11.): helle Abschnitte wechseln automatisch Weiß / zarter Grün-Verlauf, dunkle sind Akzente. */
+.wp-block-post-content > .rgb-karte:not(.rgb-dunkel) { background: #fff !important; }
+.wp-block-post-content > .rgb-karte:not(.rgb-dunkel):nth-child(even of .rgb-karte:not(.rgb-dunkel)) {
+  background: radial-gradient(1100px 420px at 88% 0%, rgba(164, 210, 53, 0.22), transparent 62%), linear-gradient(180deg, #F6FAEC 0%, #EAF4D4 100%) !important;
+}
+.wp-block-post-content > .rgb-karte.rgb-dunkel {
+  background: radial-gradient(900px 480px at 8% 0%, rgba(164, 210, 53, 0.20), transparent 60%), linear-gradient(135deg, #003D00 0%, #0B5A0B 100%) !important;
+}
+/* Kästen innen heben sich vom jeweiligen Hintergrund ab */
+.wp-block-post-content > .rgb-karte:nth-child(odd of .rgb-karte:not(.rgb-dunkel)) .rgb-beispiel { background: #F2F8E1 !important; }
+.wp-block-post-content > .rgb-karte:nth-child(even of .rgb-karte:not(.rgb-dunkel)) .rgb-beispiel { background: #fff !important; }
+/* Roter Faden: kurzer Lime-Strich unter jeder Abschnittsüberschrift */
+.rgb-karte > h2::after, .rgb-karte > .wp-block-group > h2::after, .rgb-karte > .wp-block-template-part > * > h2::after { content: ""; display: block; width: 56px; height: 4px; margin-top: 14px; border-radius: 2px; background: #A4D235; }
+.rgb-karte > h2.has-text-align-center::after, .rgb-karte > .wp-block-group > h2.has-text-align-center::after, .rgb-karte > .wp-block-template-part > * > h2.has-text-align-center::after { margin-left: auto; margin-right: auto; }

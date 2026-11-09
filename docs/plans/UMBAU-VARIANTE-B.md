@@ -202,3 +202,12 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
     sind; YouTube ist eingebunden (lädt erst nach Klick).
 - 09.11.2026 Rechner 1.1.2: Beträge auf Euro und Cent, „zzgl. Lesekopf“ am Monatsbetrag, Sie-Texte im
   Vergleich. Details in `RECHNER-PLUGIN.md`.
+- 09.11.2026 **Rhythmus und roter Faden** (Andreas: „sieht aus wie Einheitsbrei“):
+  - Helle Abschnitte wechseln automatisch Weiß / zarter Grün-Verlauf (`:nth-child(even of …)`),
+    unabhängig von `rgb-hell` im Inhalt. Neue Abschnitte von Redakteuren reihen sich von selbst ein.
+    Dunkle Bänder (`rgb-dunkel`) bleiben Akzente, jetzt mit Verlauf und leichtem Lime-Schimmer.
+  - Roter Faden: kurzer Lime-Strich (56 × 4 px) unter jeder Abschnittsüberschrift, bei zentrierten
+    Überschriften mittig. Keine Zeile über Überschriften (siehe Regel „keine Eyebrow-Labels“).
+  - `.rgb-beispiel` hebt sich je nach Hintergrund ab (hell auf Weiß, weiß auf Grün).
+  - Geprüft auf 7 Seiten bei 390 und 1.440 px: nie zwei gleiche Hintergründe hintereinander, alle
+    Abschnittsüberschriften mit Strich, kein Überlauf. CSS am Ende von `variante-a.css`.

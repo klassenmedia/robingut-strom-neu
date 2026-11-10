@@ -394,3 +394,7 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
   Dateien im alten Ordner – neue Seite nutzt Yoast-robots.txt, llms.txt fehlt (neu schreiben); WSE bitten,
   ggf. release.… freizugeben, falls wieder eine Testumgebung gebraucht wird; Mittwald fragt nach einer
   Projekt-E-Mail-Adresse (Andreas entscheidet); Google Search Console: Sitemap neu einreichen.
+- 10.11.2026 Mobil (Andreas): Zweier-Knopfgruppen in den Bändern nebeneinander (≤600 px, lange Texte
+  zweizeilig, gleich hoch); aufgeklapptes Hamburger-Menü dunkel #353535 mit weißer Schrift (vorher weiß auf
+  weiß), aktuelle Seite lime, Fokusring lime; Zitat-Band: Dieters Bild mittig zum Zitat (Grid, nur bei rundem
+  Bild + genau zwei Absätzen). Drei Kurz-Reviews FREIGABE, Nachträge eingearbeitet.

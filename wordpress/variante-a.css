@@ -320,3 +320,43 @@ p.rg-ki-hinweis { position: absolute !important; width: 1px; height: 1px; paddin
 .rgb-karte .rg-wse-laden:hover { filter: brightness(1.04); }
 .rgb-karte .rg-wse-laden:focus-visible { outline: 3px solid #003D00; outline-offset: 3px; }
 .rgb-karte .rg-wse-ausweg { margin-top: 10px !important; font-size: 15px !important; }
+
+/* Zwei Knöpfe nebeneinander auch auf dem Handy (Andreas 10.11.) */
+@media (max-width: 600px) {
+  .rgb-karte .wp-block-buttons:has(> .wp-block-button:nth-child(2):last-child) { flex-wrap: nowrap !important; gap: 8px !important; }
+  .rgb-karte .wp-block-buttons:has(> .wp-block-button:nth-child(2):last-child) > .wp-block-button { flex: 1 1 auto; min-width: 0; width: auto !important; margin: 0 !important; }
+  .rgb-karte .wp-block-buttons:has(> .wp-block-button:nth-child(2):last-child) .wp-block-button__link { display: block; width: 100%; box-sizing: border-box; padding: 12px 10px !important; font-size: clamp(13px, 3.8vw, 16px) !important; text-align: center; white-space: nowrap; }
+  .rgb-karte .wp-block-buttons:has(> .wp-block-button:nth-child(2):last-child) > .wp-block-button:not(.is-style-outline) .wp-block-button__link { border: 2px solid transparent !important; }
+}
+
+/* Lange Knopftexte zweizeilig statt abgeschnitten, beide Knöpfe gleich hoch (10.11.) */
+@media (max-width: 600px) {
+  .rgb-karte .wp-block-buttons:has(> .wp-block-button:nth-child(2):last-child) { align-items: stretch !important; }
+  .rgb-karte .wp-block-buttons:has(> .wp-block-button:nth-child(2):last-child) > .wp-block-button { display: flex; }
+  .rgb-karte .wp-block-buttons:has(> .wp-block-button:nth-child(2):last-child) .wp-block-button__link { display: flex; align-items: center; justify-content: center; white-space: normal; line-height: 1.25; }
+}
+
+/* Mobiles Menü: aufgeklappt dunkel wie die Kopfzeile, sonst weiße Schrift auf Weiß (Andreas 10.11.) */
+.rgb-kopf .wp-block-navigation__responsive-container.is-menu-open { background: #353535 !important; color: #fff !important; padding: 24px 24px 40px !important; }
+.rgb-kopf .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-container-content { padding-top: 56px; }
+.rgb-kopf .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__container { gap: 6px !important; }
+.rgb-kopf .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation-item__content { color: #fff !important; font-size: 20px !important; padding: 10px 0 !important; }
+.rgb-kopf .wp-block-navigation__responsive-container.is-menu-open .current-menu-item > .wp-block-navigation-item__content, .rgb-kopf .wp-block-navigation__responsive-container.is-menu-open [aria-current] { color: #A4D235 !important; }
+.rgb-kopf .wp-block-navigation__responsive-container-close { color: #fff !important; }
+
+/* Zitat-Band: Dieters Bild mittig zum Zitat, Namenszeile darunter (Andreas 10.11.) */
+.rgb-karte > .wp-block-columns:has(> .wp-block-column:first-child > figure.is-style-rounded):has(> .wp-block-column:nth-child(2):last-child > p:first-child + p:last-child) { display: grid !important; grid-template-columns: 100px minmax(0, 1fr); column-gap: 20px !important; row-gap: 6px !important; align-items: center; }
+.rgb-karte > .wp-block-columns:has(> .wp-block-column:first-child > figure.is-style-rounded):has(> .wp-block-column:nth-child(2):last-child > p:first-child + p:last-child) > .wp-block-column:first-child { grid-column: 1; grid-row: 1; align-self: center; }
+.rgb-karte > .wp-block-columns:has(> .wp-block-column:first-child > figure.is-style-rounded):has(> .wp-block-column:nth-child(2):last-child > p:first-child + p:last-child) > .wp-block-column:last-child { display: contents; }
+.rgb-karte > .wp-block-columns:has(> .wp-block-column:first-child > figure.is-style-rounded):has(> .wp-block-column:nth-child(2):last-child > p:first-child + p:last-child) > .wp-block-column:last-child > p:first-child { grid-column: 2; grid-row: 1; margin: 0 !important; }
+.rgb-karte > .wp-block-columns:has(> .wp-block-column:first-child > figure.is-style-rounded):has(> .wp-block-column:nth-child(2):last-child > p:first-child + p:last-child) > .wp-block-column:last-child > p:last-child { grid-column: 2; grid-row: 2; margin: 0 !important; align-self: start; }
+
+/* Knöpfe mobil, Nachtrag aus dem Review: lange Wörter trennen, Verlauf auch unter dem transparenten Rand */
+@media (max-width: 600px) {
+  .rgb-karte .wp-block-buttons:has(> .wp-block-button:nth-child(2):last-child) .wp-block-button__link { overflow-wrap: anywhere; hyphens: auto; }
+  .rgb-karte .wp-block-buttons:has(> .wp-block-button:nth-child(2):last-child) > .wp-block-button:not(.is-style-outline) .wp-block-button__link { background-origin: border-box !important; }
+}
+
+/* Nachtrag Review 10.11.: Bild ohne Standardrand (sonst leicht über der Mitte), Fokus im dunklen Menü sichtbar */
+.rgb-karte > .wp-block-columns:has(> .wp-block-column:first-child > figure.is-style-rounded):has(> .wp-block-column:nth-child(2):last-child > p:first-child + p:last-child) > .wp-block-column:first-child > figure { margin: 0 !important; }
+.rgb-kopf .wp-block-navigation a:focus-visible, .rgb-kopf .wp-block-navigation__responsive-container-close:focus-visible { outline: 3px solid #A4D235; outline-offset: 2px; }

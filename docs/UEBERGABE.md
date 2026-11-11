@@ -1,116 +1,138 @@
-# Übergabe: Relaunch robingut-strom.de (Stand 05.11.2026)
+# Übergabe: Relaunch robingut-strom.de (Stand 11.11.2026)
 
-Diese Datei ist der Einstieg für jede neue Sitzung oder einen anderen Account. Details stehen
-in den Plänen unter `docs/plans/`; hier steht, was wo liegt und wie man weitermacht.
+Einstieg für jede neue Sitzung, auch in einem anderen Account. Die Details stehen in den Plänen unter
+`docs/plans/`. Hier steht, was wo liegt, wie man Änderungen einspielt und welche Regeln gelten.
+**Das Repo ist öffentlich** (wegen GitHub Pages): keine Zugangsdaten, Schlüssel oder Kundendaten hinein.
 
-## Worum es geht
+## Kurzstand
 
-ROBIN GUT Strom (Energy-Sharing-Community, Liefer- und Abrechnungspartner WeShareEnergy, „WSE“)
-bekommt eine neue Website. Nach dem Meeting am 03.11.2026 wird die **bestehende WordPress-Seite
-umgebaut** (Team pflegt Texte selbst), der statische Entwurf in `schlank/` ist nur noch Vorlage.
+- Die neue Seite ist **seit 09.11.2026 ~22:45 live** auf https://www.robingut-strom.de. Sie war vorher die
+  Release-Seite. Gebaut ist sie in WordPress 7.1 mit Theme Frost, Design „Variante A“.
+- **Die Wahrheit liegt in WordPress, nicht im Repo.** Seiteninhalte pflegen Dieter, Timo und Guido selbst im
+  Editor. Im Repo liegen nur Kopien:
+  - das globale CSS (`wordpress/variante-a.css`)
+  - die HTML-Blöcke (`wordpress/*.html`)
+  - die Plugins
+  - die Tests
+- Es gibt kein CI/CD. „Deployen“ heißt: Änderung per WordPress-REST im angemeldeten Browser speichern, danach den
+  Cache leeren (siehe „So spielt man Änderungen ein“).
+- Git: Arbeitsbranch `umbau-variante-b` mit PR https://github.com/klassenmedia/robingut-strom-neu/pull/13. Der PR
+  ist **noch nicht gemergt**, `main` hängt hinterher. Jeder Commit ist gepusht und war einzeln im Review.
+- Letzte Änderung (11.11., Commit cda2733): Auf der Landwirte-Seite steht statt des Rechenbeispiels der
+  Flyer-Kasten mit + 7.000 € und + 9.000 €.
 
 ## Wo was liegt
 
 | Was | Wo |
 |---|---|
-| Live-Seite (seit 09.11.2026 neu) | https://www.robingut-strom.de = Mittwald-Ordner `/html/wordpress-release-robingut-strom/` (WordPress 7.1, Theme Frost, Hosting Mittwald, DNS IONOS) |
-| Archiv der alten Seite | Mittwald-Ordner `/html/wordpress-robingut-strom/` (eigene DB, keine Domain mehr), Wiederherstellungspunkt 09.11.2026 22:37 |
-| Release-Seite (neu, umgestellt) | https://release.robingut-strom.de, Basic-Auth-Passwort davor, Kopie per All-in-One WP Migration |
-| Statischer Entwurf (Vorlage) | `schlank/`, als GitHub Page: https://klassenmedia.github.io/robingut-strom-neu/schlank/ |
-| Preisrechner-Plugin | `wordpress/robingut-rechner/` (Shortcode `[robingut_rechner]`) |
-| Pläne und Stand | `docs/plans/WORDPRESS-UMBAU.md`, `docs/plans/RECHNER-PLUGIN.md`, `docs/plans/SCHLANK.md` |
-| Code-Stand | `main` (PR #9 am 05.11.2026 gemergt, 3aeccf9) |
-| Potenzialrechner (Berater-Tool, separat) | privates Repo `klassenmedia/robingut-bepreisung`, läuft auf dem CX33 |
+| Live-Seite | www.robingut-strom.de = Mittwald-Ordner `/html/wordpress-release-robingut-strom/` (Hosting Mittwald, Projekt p709435, alter Kundencenter login.mittwald.de; DNS IONOS) |
+| Archiv alte Seite | Mittwald-Ordner `/html/wordpress-robingut-strom/` (eigene DB, keine Domain), Wiederherstellungspunkt 09.11.2026 22:37 |
+| release.robingut-strom.de | leitet auf www um (Verzeichnisschutz entfernt); nicht mehr zum Arbeiten |
+| Seiten-IDs | Startseite 1241, Energy Sharing 1355, Privathaushalte 1243, Landwirte 1230, Unternehmen & Organisationen 1110, Über uns 154, FAQ 23 |
+| Globales CSS | WordPress → Website-Editor → Stile → Zusätzliches CSS (REST: `/wp-json/wp/v2/global-styles/12`); Kopie ab `/* Variante A` in `wordpress/variante-a.css` |
+| Preisrechner auf den Seiten | Original-iframe von WeShareEnergy als HTML-Block, `wordpress/wse-rechner.html` (Test `tests/wse-rechner.test.mjs`); lädt direkt, ohne Zwei-Klick |
+| Kundenfall Unternehmen | `wordpress/kundenfall-unternehmen.html` (Test `tests/kundenfall-unternehmen.test.mjs`) |
+| Flyer-Kasten Landwirte | `wordpress/landwirte-flyer.html` (Test `tests/landwirte-flyer.test.mjs`) |
+| Strukturdaten + llms.txt | Plugin `wordpress/robingut-geo/` 1.0.0, **aktiv auf Live**; Plan `docs/plans/GEO-STRUKTURDATEN.md`, Test `php wordpress/robingut-geo/tests/geo-test.php` |
+| Eigenes Rechner-Plugin | `wordpress/robingut-rechner/`: 1.1.2 auf Live **deaktiviert**, 1.2.0 im Repo gebaut und getestet, aber **nicht hochgeladen** (geparkt, `docs/plans/RECHNER-PLUGIN.md`) |
+| Pläne und Verlauf | `docs/plans/UMBAU-VARIANTE-B.md` (Hauptplan, Abschnitt „Stand“ = Tagebuch, Go-Live-Block mit Rückweg), `WORDPRESS-UMBAU.md` (älter) |
+| Rechtstexte-Entwürfe | `docs/texte/datenschutz-wse-rechner.md` (aktuell), `datenschutz-preisrechner.md` (veraltet), `yoast-meta.md` |
+| KI-Bilder (Kopfbilder) | `werkzeuge/vertex_bild.py` + `werkzeuge/prompts/`; braucht ein eigenes Google-Vertex-Dienstkonto, Schlüsseldatei nur lokal, nie ins Repo |
+| Statischer Entwurf (nur Vorlage) | `schlank/`, als GitHub Page |
+| Potenzialrechner (separat) | privates Repo `klassenmedia/robingut-bepreisung` |
 
-Zugänge: WordPress-Admin auf Live und Release mit den eigenen Logins (Release ist eine Kopie,
-gleiche Benutzer). Das Basic-Auth-Passwort für Release kennt, wer die Release-Seite eingerichtet
-hat. Keine Zugangsdaten ins Repo.
+Zugänge: WordPress-Admin und Mittwald mit den eigenen Logins. Die Person meldet sich selbst im Browser an,
+Passwörter gibt man nie in Chat oder Repo.
 
-## Stand auf release.robingut-strom.de
+## So spielt man Änderungen ein (bewährter Ablauf)
 
-Seit 09.11.2026 im Design **Variante A** aus der Übergabe vom 08.11. (Startseite 1241, Energy
-Sharing 1355, Privathaushalte 1243, Landwirte 1230, Unternehmen 1110, Über uns 154, FAQ 23).
-Stand und offene Punkte: `docs/plans/UMBAU-VARIANTE-B.md`. Rechner-Plugin **1.1.2** aktiv
-(Klickstrecke): Landwirte mit `rolle="einspeisen" anrede="sie"`, Unternehmen mit
-`rolle="beides" anrede="sie"`, sonst Standard (beziehen, du). Älterer Umbau und Rückweg:
-`WORDPRESS-UMBAU.md`.
+1. **Fragen, ob gerade jemand im Editor arbeitet** (Guido, Dieter, Timo). Speichern sie danach, überschreiben
+   sie per REST gespeicherte Änderungen.
+2. **Im Repo:** Test zuerst, dann die Änderung. HTML-Blöcke als Datei unter `wordpress/`, CSS **nur am Ende** von
+   `wordpress/variante-a.css` anhängen.
+3. **Review** durch einen unabhängigen Prüfer (Subagent oder frische Sitzung, nicht der Kontext, der den Code
+   geschrieben hat). Erst nach FREIGABE live.
+4. **Live per REST** im angemeldeten Browser (Claude in Chrome, WordPress-Login vorhanden):
+   - Nonce holen: `fetch('/wp-admin/admin-ajax.php?action=rest-nonce')`, dann Header `X-WP-Nonce`.
+   - Seite lesen mit `GET /wp-json/wp/v2/pages/<id>?context=edit` (`content.raw`). Gezielt ersetzen und
+     mit `POST /wp-json/wp/v2/pages/<id>` und `{content}` speichern.
+   - Vor dem Speichern prüfen, dass `modified` sich seit dem Lesen nicht geändert hat.
+   - Template-Teile liegen unter `/wp-json/wp/v2/template-parts/frost//<slug>`. Die Schrägstriche nicht
+     kodieren.
+   - CSS: `global-styles/12` lesen. **Vorher prüfen**, dass der Teil ab `/* Variante A` (SHA-256, erste 16
+     Hex-Zeichen) dem Repo-Stand vor der Änderung entspricht. Dann den Zusatz anhängen und den Hash nach dem
+     Speichern mit dem Repo vergleichen.
+   - **Aktueller CSS-Hash: `32baeb78fbb55788`**
+   - Medien hochladen mit FormData an `/wp-json/wp/v2/media`.
+5. **Cache leeren:** Den Link `w3tc_flush_all` aus der Admin-Leiste aufrufen (Plugin W3 Total Cache).
+6. **Live prüfen:** Desktop und Handy (390 px).
+   - Für Vorschauen `?vorschau=x` anhängen, nie `?m=`. Das ist in WordPress der Monatsarchiv-Parameter und
+     führt zu 404.
+   - Handybreite gelingt zuverlässig in einem iframe mit 390 px Breite auf derselben Domain.
+7. Committen, pushen, im Plan unter „Stand“ eintragen. Andreas per Mail benachrichtigen, wenn etwas live ist.
 
-**Ab jetzt nur noch auf Release arbeiten.** Änderungen fließen nicht automatisch zur Live-Seite.
-Go-Live später: Release als Ganzes auf die Live-Domain übertragen (All-in-One WP Migration),
-vorher Vollbackup der Live-Seite.
+## Regeln im Projekt (verbindlich)
 
-Auf der Live-Seite liegen die neuen Seiten nur als Entwürfe, dort läuft noch Plugin 1.0.1.
-
-## Preisrechner-Plugin
-
-- Zeigt den Monatsbetrag genau wie der WSE-Rechner: `annual_total / 12` aus
-  `POST https://weshareenergy.de/api/calculate-price` (Slug `robin-gut-strom`, Provision ist im
-  Preis). Die API lässt Browser-Aufrufe fremder Domains nicht zu, deshalb fragt das Plugin
-  serverseitig an.
-- Erzeuger (ab 1.1.0): Grundpreis, Vermarktung und Einrichtung aus
-  `POST https://weshareenergy.de/api/direktvermarktung/calculate-price` (Preismodell 77, nur PV
-  und Wind; Wasserkraft und Biogas zeigen „individuelles Angebot“). Der Erlös aus Überschuss ×
-  Wunschpreis rechnet der Browser.
-- Sonderfälle der API: `requires_city_selection` (Ort wählen, z. B. 54636) und
-  `requires_district_selection` (Straße + Hausnummer, z. B. 41812), mit eigenem Straßen-Dropdown.
-- Tests:
-  - `node tests/plugin-rechnung.test.mjs`
-  - `node tests/plugin-oberflaeche.test.mjs` (Playwright aus `~/node_modules`, installiertes
-    Chrome; REST wird nachgebaut, kein echter WSE-Aufruf)
-  - `php wordpress/robingut-rechner/tests/logik-test.php`
-  - `php wordpress/robingut-rechner/tests/routen-test.php`
-  - `bash wordpress/robingut-rechner/tests/parallel-test.sh` (100 parallele Anfragen gegen eine
-    WSE-Attrappe)
-- Lokal ausprobieren: `php -S 127.0.0.1:8765 -t wordpress/robingut-rechner
-  wordpress/robingut-rechner/tests/harness/router.php` (spricht die echte WSE-API, sparsam
-  nutzen: WSE erlaubt 50 Anfragen pro Minute für alle seine Rechner zusammen).
-- Upload-ZIP: `bash werkzeuge/rechner-plugin-zip.sh` → `werkzeuge/ausgabe/` (nicht im Repo).
-  Vorher die Version in Plugin-Kopf und `RGR_VERSION` erhöhen. In WordPress: Plugins → Neues
-  Plugin hinzufügen → Plugin hochladen → „Installiertes durch Hochgeladenes ersetzen“.
-- Security-Reviews und angenommene Restrisiken: `RECHNER-PLUGIN.md`, Abschnitt „Stand“.
-
-## Arbeitsweise und Regeln im Projekt
-
+- **Vorhandene Texte nie umformulieren.** Andreas am 10.11. sinngemäß: Die Kunden wollen ihren Wortlaut genau so,
+  auch wenn er gegen etwas verstößt. Bedenken (UWG, Logik) nur als Hinweis an Andreas melden. Neue Texte von
+  Dieter oder Timo (z. B. Flyer) **1:1** übernehmen.
 - Immer „ROBIN GUT“ schreiben, nie Robin Good/Hood.
-- Den Partner auf der Website nur „unser Partner“ nennen, ohne Namen (auch nicht in JSON-LD
-  oder llms.txt), bis die Frage nach § 5b UWG geklärt ist. Im Code und in den Plänen ist
-  der Name in Ordnung.
-- Unbestätigte Aussagen bekommen eine gestrichelte Markierung (`<mark>` mit
-  `border-bottom: 3px dashed #9a5200` und `title` mit der offenen Frage). Vor dem Go-Live
-  klären oder umformulieren, dann die Markierung entfernen.
-- KI-Bilder tragen klein unten rechts direkt unter dem Bild „Mit KI-Unterstützung erstellt“ in 11 px
-  (Vorgabe Andreas, 06.11.2026): Absatz mit Klasse `rg-ki-hinweis`, rechtsbündig. Das CSS dafür steht in den
-  globalen Stilen (Kopie `wordpress/titelbild.css`). Der statische Entwurf in `schlank/` nutzt
-  noch das alte „Symbolbild, KI-generiert“.
-- Texte positiv formulieren, keine kleinen Zeilen über Überschriften (Eyebrows).
-- Seiten in WordPress nur aus Core-Blöcken bauen (keine HTML-Blöcke), damit das Team sie
-  bearbeiten kann. WP 7 speichert die Textausrichtung von Überschriften in
-  `style.typography.textAlign`.
-- Fallen: Das Theme legt unter jedes `<mark>` einen Textmarker (`background-image`), deshalb
-  `background-image:none` und `color:inherit` setzen. Gefüllte Buttons haben im Theme 66 px
-  Innenabstand links/rechts, darum ist er pro Button auf 28 px gesetzt.
-- Code-Änderungen: Test zuerst, danach unabhängiges Security-Review vor Merge oder Upload;
-  Commits klein, Branch und PR.
+- Den Partner (WeShareEnergy) auf der Website nur „unser Partner“ nennen, auch in JSON-LD und llms.txt, bis
+  § 5b UWG geklärt ist. Das iframe-`title` und die Rechtstexte nennen ihn bisher. In Code und Plänen ist der
+  Name in Ordnung.
+- KI-Bilder bekommen darunter „Mit KI-Unterstützung erstellt“: 11 px, rechtsbündig, Klasse `rg-ki-hinweis`.
+- Texte positiv formulieren. Keine kleinen Zeilen über Überschriften (Eyebrows).
+- Sonst nur Core-Blöcke, damit das Team selbst bearbeiten kann. HTML-Blöcke nur für Dinge, die Core nicht
+  kann: Rechner-iframe, Schaubild Kundenfall, Flyer-Kasten.
+- Fallen im Theme:
+  - Jedes `<mark>` bekommt einen Textmarker (`background-image:none` setzen).
+  - Gefüllte Knöpfe haben 66 px Innenabstand (pro Knopf auf 28 px gesetzt).
+  - `.rgb-karte .wp-block-columns` setzt `gap` mit `!important`.
+- Mittwald fragt immer wieder per Fenster nach einer Projekt-E-Mail. Nicht ausfüllen, mit Abbrechen schließen
+  (Andreas entscheidet).
+- Code: Test zuerst. Unabhängiges Review vor Live-Gang. gitleaks auf dem Diff. Kleine Commits, die das Warum
+  beschreiben.
 
 ## Offen
 
-- Datenschutzerklärung: Der Abschnitt „Preisrechner“ steht seit 05.11. auf Release (für 1.1.0 ergänzt am 09.11.) (Text in
-  `docs/texte/datenschutz-preisrechner.md`). Vor dem Go-Live rechtlich prüfen lassen und
-  entscheiden, ob der Partner dort mit Namen steht (markiert).
-- „Über uns“ (154) nennt den Partner noch mit Namen, das gehört zu den Markierungen.
-- Website-Name in Yoast lautet noch „Robin Gut Strom“ statt „ROBIN GUT Strom“ (globale
-  Einstellung, nur nach Rückfrage ändern).
-- Timo: Ist der Aufschlag im ROBIN-GUT-Tarif (+0,90 ct/kWh und +0,21 €/Monat netto gegenüber dem
-  WSE-Standard) die Provision bzw. der Stiftungsanteil? Außerdem Plattformgebühr-Lesart,
-  § 80 EEG (Landwirte-Beispiel 2), Community-Preise 5 ct vs. 10 ct.
-- Dieter: Gutschein-Frage zum Rechner, Freigabe von Zitat und Foto (§ 22 KUG).
-- Guido: Die H1 der Release-Startseite lautet „Die Nr.1 Energy Sharing Plattform“. Das ist eine
-  Spitzenstellungsbehauptung und braucht einen Beleg (UWG).
-- Energy Sharing / § 42c EnWG und „ganz Deutschland“ mit dem Partner klären.
-- Alle gestrichelten Markierungen auflösen; Weiterleitungen für /konzept/ und /community/
-  (Yoast Premium oder Plugin). Yoast-Titel und -Beschreibungen sind seit 05.11. auf Release
-  gesetzt (`docs/texte/yoast-meta.md`).
-- Bekommt die Seite IPv6, braucht der Rechner zusätzlich ein Limit je /48
-  (siehe `RECHNER-PLUGIN.md`).
-- Der Potenzialrechner (`robingut-bepreisung`) kennt den Ort-Fall `requires_city_selection`
-  noch nicht.
+**Inhalt und Recht (Entscheidung ROBIN GUT):**
+- **Rechner lädt direkt** (Entscheidung Andreas). Die IP geht beim Seitenaufruf an den Partner. Der Abschnitt
+  „Preisrechner“ in der Datenschutzerklärung (berechtigtes Interesse) muss rechtlich geprüft werden.
+- **Flyer-Kasten Landwirte:**
+  - „Ihr Plus“ ist vor Kosten gerechnet.
+  - Flyer 5 ct/12 ct, das Band weiter oben 4,5 ct/7–11 ct.
+  - „50 % autark“.
+  - „Marktwert“ und „entgangene Einspeisevergütung“ stehen für dieselben 5 ct.
+  - Ist an Andreas gemeldet, Text bleibt wie vorgegeben.
+- **Kundenfall Unternehmen bestätigen lassen** (viertelstündlich, bilanziell). Andreas wurde gefragt, ob drei
+  selbst formulierte Stellen zurückgesetzt werden sollen; die Antwort steht aus:
+  - Schaubild-Texte („bilanziell“, „weiter vom Stromlieferanten aus dem Netz“, „Ihren Strom kauften die
+    Standorte komplett zu“)
+  - Datenschutz-Abschnitt „Preisrechner“
+  - Theme-Schema/llms.txt, ersetzt durch das Plugin robingut-geo
+- **Partnername** auf Kontakt, FAQ, Datenschutz und im iframe-Titel gegen die „unser Partner“-Regel.
+- **Yoast:** Der Organisationsname lautet „Robin Gut Strom“ (nur nach Rückfrage ändern).
+
+**Technik:**
+- Google Search Console und Bing legen Dieter oder Timo an (Yoast-Verifizierung), danach die Sitemap einreichen.
+- WSE:
+  - Einspeiser-Direktlink und Vorbelegung der Rolle
+  - Einspeiser-Community (2,90 €/Monat) gegenüber den Kosten der Direktvermarktung klären
+  - release.… freigeben, falls je wieder eine Testumgebung nötig ist
+- Unbenutztes CSS `.rg-wse-start`/`.rg-wse-laden` (Zwei-Klick) kann raus.
+- Rechner-Plugin 1.2.0 ist geparkt. Ob es je live geht, entscheidet ROBIN GUT.
+- PR #13 nach `main` mergen, wenn Andreas das will.
+- Browser-Tests (`plugin-oberflaeche`, `video-cookie-sperre`, `wse-rechner`) brauchen Playwright und ein lokales
+  Chrome. Im letzten Review liefen sie nicht durch, Grund ist die Umgebung, nicht der Code.
+
+## Tests (lokal)
+
+```
+node tests/landwirte-flyer.test.mjs
+node tests/kundenfall-unternehmen.test.mjs
+node tests/wse-rechner.test.mjs
+php wordpress/robingut-geo/tests/geo-test.php
+node tests/plugin-rechnung.test.mjs
+php wordpress/robingut-rechner/tests/logik-test.php
+php wordpress/robingut-rechner/tests/routen-test.php
+```

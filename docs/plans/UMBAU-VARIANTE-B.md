@@ -408,3 +408,10 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
   kann“ weiter oben 4,5 ct/7–11 ct; „50 % autark“ trotz Strom über das öffentliche Netz; „Marktwert“ vs.
   „entgangene Einspeisevergütung“. Satz „Ihre eigenen Zahlen rechnet der Rechner unten“ ging mit dem alten
   Beispiel weg.
+- 11.11.2026 Merge PR #13 nach main (Andreas). Scanner auf dem gesamten PR-Diff: gitleaks ohne Funde,
+  pip-audit (werkzeuge/requirements.txt) ohne Funde, semgrep (php/javascript/python/xss/secrets) 10 Funde,
+  alle akzeptiert: 9× `postMessage(..., "*")` in `tests/wse-rechner.test.mjs` und
+  `tests/plugin-oberflaeche.test.mjs` (Testattrappe simuliert das WSE-iframe, läuft nur lokal in Playwright);
+  1× echo in `wordpress/robingut-rechner/tests/harness/router.php` (lokaler Test-Harness, nicht im Plugin-ZIP,
+  ausgegeben wird die Shortcode-Ausgabe, die das Plugin selbst escapt). Alle Änderungen im PR hatten einzeln
+  Security-Review FREIGABE.

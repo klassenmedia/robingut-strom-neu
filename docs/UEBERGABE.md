@@ -16,8 +16,8 @@ Einstieg für jede neue Sitzung, auch in einem anderen Account. Die Details steh
   - die Tests
 - Es gibt kein CI/CD. „Deployen“ heißt: Änderung per WordPress-REST im angemeldeten Browser speichern, danach den
   Cache leeren (siehe „So spielt man Änderungen ein“).
-- Git: Arbeitsbranch `umbau-variante-b` mit PR https://github.com/klassenmedia/robingut-strom-neu/pull/13. Der PR
-  ist **noch nicht gemergt**, `main` hängt hinterher. Jeder Commit ist gepusht und war einzeln im Review.
+- Git: Stand ist `main` (PR #13 `umbau-variante-b` am 11.11.2026 gemergt). Neue Arbeit auf eigenem Branch mit PR;
+  die GitHub Page baut aus `main`, betroffen sind dort nur `schlank/` und die Startdateien im Hauptordner.
 - Letzte Änderung (11.11., Commit cda2733): Auf der Landwirte-Seite steht statt des Rechenbeispiels der
   Flyer-Kasten mit + 7.000 € und + 9.000 €.
 
@@ -121,7 +121,6 @@ Passwörter gibt man nie in Chat oder Repo.
   - release.… freigeben, falls je wieder eine Testumgebung nötig ist
 - Unbenutztes CSS `.rg-wse-start`/`.rg-wse-laden` (Zwei-Klick) kann raus.
 - Rechner-Plugin 1.2.0 ist geparkt. Ob es je live geht, entscheidet ROBIN GUT.
-- PR #13 nach `main` mergen, wenn Andreas das will.
 - Browser-Tests (`plugin-oberflaeche`, `video-cookie-sperre`, `wse-rechner`) brauchen Playwright und ein lokales
   Chrome. Im letzten Review liefen sie nicht durch, Grund ist die Umgebung, nicht der Code.
 

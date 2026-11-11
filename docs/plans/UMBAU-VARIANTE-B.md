@@ -1,0 +1,417 @@
+# Umbau release.robingut-strom.de nach Übergabe vom 08.11.2026 (Variante B)
+
+Quelle ist das Paket `Website_Uebergabe_ROBIN_GUT_2026-11-08` (liegt bei Andreas unter Downloads;
+Artifact-Link in der Mail von Timo). Verbindlich sind die Markdown-Texte im Ordner `Texte/`, darüber
+steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen freigegeben.
+
+## Entscheidungen
+
+- **Ohne Labels:** Variante B zeigt kleine graue Labels in Großbuchstaben über den Überschriften.
+  Die lassen wir weg (Andreas, 09.11.: Regel „keine Eyebrows“).
+- **Rechner:** Das bestehende Plugin `wordpress/robingut-rechner/` wird zur Klickstrecke
+  umgebaut, kein neues Plugin.
+- **Nur Core-Blöcke**, damit das Team die Seiten im Editor bearbeiten kann. Das Aussehen von
+  Variante B kommt über CSS-Klassen an Gruppen (`rgb-…`) und steht im Zusätzlichen CSS der
+  globalen Stile, Kopie in `wordpress/variante-b.css`.
+- **Icons:** Linien-Icons als SVG-Medien (Safe SVG ist aktiv), eingebunden als Bild-Block.
+- **Weiterleitungen:** Plugin „Redirection“ (Andreas, 09.11.). Damit wandern sie beim Go-Live per
+  All-in-One WP Migration mit.
+
+## Reihenfolge
+
+1. Grundgerüst: CSS für Variante B, Kopfzeile (neues Menü und Knopf „Preis berechnen“) und
+   Fußzeile (ohne Kontakt, ohne Partner-Logo und Siegel).
+2. Startseite (1241)
+3. Neue Seite Energy Sharing (`/energy-sharing/`). Sie ersetzt So geht's (1045) und Preise (19).
+4. Privathaushalte (1243), Landwirte (1230), Unternehmen & Organisationen (1110),
+   Über ROBIN GUT (154)
+5. FAQ (23) mit allen Fragen als Aufklapper. Kontakt (71) fällt weg, Impressum (64) wird
+   angepasst, Suchen/Ersetzen nach `08_Kontakt_Impressum_Suchen-Ersetzen.html`.
+6. Rechner-Plugin 1.1 als Klickstrecke (Test zuerst, danach Review „voll“, weil es um Preise
+   geht). Bis dahin bleibt der bisherige Rechner (Verbraucher) eingebaut.
+7. Weiterleitungen, Yoast-Titel und -Beschreibungen aus den IT-Hinweisen, Checkliste aus
+   README §8.
+
+## Threat Model (Rechner-Klickstrecke, Plugin 1.1.0)
+
+(a) Angreifer und Fehlerquellen:
+- **Massenabfragen** über `/preis` und `/erzeuger`, um das Kontingent des Partners zu
+  verbrauchen.
+- **Manipulierte Eingaben:** Rolle, Anrede, Anlagenart, kWp, Überschuss, Einspeiseart,
+  EEG-Status, Wunschpreis.
+- **XSS** über Shortcode-Attribute oder Antwortfelder.
+- **Offener Weiterleiter** über den Anmelde-Link.
+- **Cache-Vergiftung.**
+- **Partner ändert Preismodell oder Felder**, sodass falsche oder fehlende Kosten angezeigt
+  werden.
+- **Veraltete oder gemischte Zahlen** im Browser.
+
+(b) Untrusted Inputs:
+- **Shortcode:** `rolle`, `anrede`.
+- **REST `/erzeuger` (JSON):** `art`, `kwp`, `kwh`, `einspeisung`, `foerderung`.
+- **Antwort des Partners:** `success`, `individual_offer`, `data.*`.
+- **Browser:** Wunschpreis-Regler.
+- **Unverändert aus 1.0.x:** alle Eingaben von `/preis` und `/strassen`.
+
+(c) Worst Case:
+- Ein falscher Erlös oder Preis beim Kunden (Zusage, UWG). Ein Beispiel ist ein Vergleich mit
+  der Anschlussvergütung, wo es keine gibt.
+- XSS.
+- Kontingent des Partners gesperrt.
+
+(d) Gegenmaßnahmen je Input:
+- **`rolle`, `anrede`:** Whitelist in `rgr_shortcode_werte()`, sonst `beziehen` / `du`. Ausgabe
+  über `esc_attr` / `esc_html`.
+- **`art`:** Whitelist pv/wind/wasser/biogas → pv/wind/water/chp.
+- **`kwp`:** endliche Zahl von 1 bis 1.000 mit einer Nachkommastelle. Darüber kommt
+  „individuelles Angebot“, ohne Anfrage.
+- **`kwh`:** ganze Zahl von 100 bis 10.000.000.
+- **`einspeisung`:** voll/teil.
+- **`foerderung`:** nur bool.
+- **Partner-Antwort:**
+  - Nur `success: true` wird angenommen.
+  - `individual_offer` muss bool sein.
+  - Whitelist auf drei Werte mit Untergrenzen über 0.
+  - Die fünf Einzelposten müssen den Grundpreis ergeben (±0,01).
+  - Sonst 502 ohne Fehlertext des Partners, 60 s gespeichert.
+- **Wunschpreis:** 7–11 ct in halben Cent, sonst Vorbelegung 10.
+- **Vergleich Anschlussvergütung:** nur bei PV ohne Förderung bis 100 kWp (§§ 21, 23b EEG).
+  Bei Förderung erscheint ein Hinweis statt einer Zahl.
+- **Browser:**
+  - Ausgabe nur über `textContent`.
+  - Laufnummer gegen veraltete Antworten.
+  - Gerechnet wird nur mit den Eingaben der letzten Antwort, sonst ist das Ergebnis
+    abgeblendet.
+  - Getrennte Statuszeilen für Verbrauch und Erzeugung.
+- **Limits:**
+  - IP-Limit 40 je Stunde und Route, nur über `REMOTE_ADDR`.
+  - Gemeinsamer Partner-Takt mit Token-Bucket und `GET_LOCK`.
+  - Cache nach allen geprüften Werten.
+  - Origin, Sec-Fetch-Site und `_jsonp` werden abgewiesen.
+- **Anmelde-URL:** feste Konstante, nur der Knopftext hängt von der Rolle ab.
+
+## Offen (von ROBIN GUT oder WSE)
+
+- Parameter für die vorbelegte Rolle in der Anmeldestrecke von WSE und Ziel für „individuelles
+  Angebot“.
+- Grundpreis-Formel nach kWp. Bekannt sind nur 4 Stützstellen (10/30/100/250 kWp), deshalb ist
+  zu klären, ob dazwischen interpoliert werden darf.
+- USt-ID im Impressum, Foto Nadine Büscher, Baumzahl „NRW pflanzt“.
+- Netto oder brutto für 7–11 ct, Freigabe des Kundenfalls Bauunternehmen, rechtliche Prüfung.
+
+## Stand
+
+- 09.11.2026: Plan angelegt, Branch `umbau-variante-b`.
+- 09.11.2026 Grundgerüst und Startseite auf Release:
+  - Das CSS für Variante B steht in den globalen Stilen (Kopie `wordpress/variante-b.css`, liegt
+    dort als letzter Block). 14 Linien-Icons aus den Vorlagen liegen als SVG-Medien
+    `rg-icon-*` vor (IDs 1333–1346).
+  - Kopfzeile: weiße Karte mit Logo, Menü 68 und Knopf „Preis berechnen“ (`/#rechner`).
+  - Fußzeile: weiße Karte mit Copyright, Fußmenü und Logo. Partner-Logo und Siegel sind raus,
+    die stecken noch in der Revision des Vorlagenteils `footer`. Im Fußmenü 4 fehlt jetzt
+    „Kontakt“.
+  - Vorlagenteil `unsere-kunden`: ohne Trennlinie und ohne Knopf „Mehr für Privathaushalte“.
+  - Startseite 1241 ist aus `01_Startseite.md` neu gebaut: 11 Karten, 176 Blöcke, alle gültig.
+    Den Yoast-Titel und die Beschreibung habe ich aus dem IT-Hinweis übernommen.
+  - Das Erklärvideo ist der Essential-Blocks-Player aus 1045 (YouTube, lädt erst nach dem
+    Klick).
+  - Der Rechner ist vorerst der bisherige Shortcode.
+  - Das Zitat von Dieter fehlt in der Markdown-Datei. Ich habe es aus der HTML-Vorlage
+    übernommen: „Mit der ROBIN GUT Stromcommunity verbinden wir Menschen.“
+- 09.11.2026 alle Seiten auf Release (Chrome als Andreas):
+  - Plugin „Redirection“ 5.10.1 ist installiert (Freigabe Andreas). Permalink-Überwachung ist
+    an (Gruppe „Geänderte Beiträge“), Protokoll und IP-Speicherung sind aus. Es gibt 5
+    Weiterleitungen (301) nach README §6, alle geprüft. Die alten Seiten So geht's (1045),
+    Preise (19) und Kontakt (71) stehen auf Entwurf.
+  - Neue Seite „Energy Sharing einfach erklärt“ (1355, `/energy-sharing/`) mit Tabelle „Auf
+    einen Blick“.
+  - Neu gebaut sind außerdem Privathaushalte (1243), Landwirte (1230), Unternehmen &
+    Organisationen (1110, mit Kundenfall-Grafik) und Über ROBIN GUT (154, mit Partner-Logo
+    und Siegeln auf dunkler Kachel).
+  - Alle Seiten nutzen jetzt die Vorlage `no-title`, alle Blöcke sind gültig. Die Texte
+    stammen wörtlich aus `Texte/*.md`.
+  - Menü 68: So geht's · Privathaushalte · Landwirte · Unternehmen & Organisationen ·
+    Über ROBIN GUT · FAQ.
+  - FAQ (23): 6 Gruppen mit Sprungmarken und 48 Fragen als Aufklapper. Die Fragen „neu“ und
+    „geändert“ kommen aus `07_FAQ_Aenderungsliste.html`, die Antworten „bleibt“ sind
+    unverändert übernommen, die zwei doppelten Fragen sind gelöscht und der Link `/reise/`
+    ist korrigiert.
+  - Impressum (64) ohne die Zeile zur USt-ID. Impressum und Datenschutzerklärung stehen in je
+    einer Karte.
+  - Andreas wollte die volle Bildschirmbreite: Karten, Kopf- und Fußzeile laufen jetzt mit
+    24 px Rand über die ganze Breite und sind bündig. Die Schrift wächst bis 64 px (H1) mit,
+    Fließtext ist auf 90 Zeichen pro Zeile begrenzt, Bilder auf 560 px Höhe.
+  - Den Pfeil „↗“ in den Knöpfen hat Andreas als hässlich abgelehnt, er ist entfernt. Die
+    Markdown-Texte enthalten ihn noch, das ist bewusst.
+  - Geprüft: keine toten Links und keine fehlenden Anker (25 Ziele). Handy 390 px ohne
+    Überlauf. Die Suche nach „Nr. 1“, „unser Partner“, „Rückruf“, Telefon und Mail außerhalb
+    von Impressum, FAQ und Über uns findet nur die Entwurfsseiten 19 und 71 (die werden
+    umgeleitet).
+  - Platzhalter (gestrichelt markiert): Rechner auf Landwirte und Unternehmen (Klickstrecke
+    folgt), Foto Nadine Büscher, Teamfoto Mitarbeiterstrom. Auf Startseite, Energy Sharing
+    und Privathaushalte läuft vorerst der bisherige Verbraucher-Rechner.
+  - Selbst gesehen, nicht in der Übergabe:
+    - Das Impressum nennt Timo Russell als Gesellschafter. Das ist Pflichtangabe und bleibt,
+      obwohl Timo laut Übergabe nicht als Person genannt wird.
+    - Das Impressum verweist noch auf die OS-Plattform der EU. Die wurde nach meinem
+      Kenntnisstand im Juli 2025 eingestellt, das sollte geprüft werden.
+    - Ob das Bild 733 (Schriftzug aus Bäumen) KI-generiert ist, ist unklar. Es ist nicht
+      gekennzeichnet.
+    - Der Knopf „Jetzt wechseln ↗“ im Rechner-Plugin hat noch den Pfeil. Der fällt mit
+      dem Umbau des Plugins weg.
+- 09.11.2026 Wechsel auf **Variante A** (Andreas: „das mit den Kästchen ist nicht so cool“):
+  - Das CSS für Variante A ersetzt den Block für Variante B in den globalen Stilen (Kopie
+    `wordpress/variante-a.css`). `variante-b.css` bleibt als Rückweg im Repo und ist als nicht
+    aktiv markiert.
+  - Klassen und Inhalte bleiben gleich. Neu ist nur die Optik: Bänder über die volle Breite,
+    Inhalt mittig auf höchstens 1.320 px, Noto Sans, dunkle Kopfzeile (#353535) und Fußzeile
+    (#003D00). Spalten haben keine Kästen und keine Icons. Gerahmt sind nur Kacheln mit Bild,
+    die Vorher-nachher-Kästen und die Kundenfall-Kacheln.
+  - Die Hintergründe aller Abschnitte auf den 6 Seiten richten sich jetzt nach „Hintergrund:“ in
+    `Texte/*.md` (weiß / hellgrünes Band / dunkelgrünes Band). Alle Blöcke sind gültig.
+  - **Schrift repariert:** Die 18 Noto-Sans-Schnitte zeigten in den globalen Stilen auf
+    `http://wordpress-robingut-strom.p709435.webspaceconfig.de/…`. Jetzt nutzen sie den relativen
+    Pfad `/wp-content/uploads/fonts/…`, die Schrift lädt. Auf der Live-Seite ist der Fehler noch
+    da, er fällt beim Go-Live per Migration weg. In der Font-Bibliothek (Familie 75) steht die
+    alte Adresse noch, das betrifft nur die Schriftverwaltung im Editor.
+  - **Geprüft:** Laptop 1.440 px und Handy 390 px, kein Überlauf.
+- 09.11.2026 **Abgestufter Preisrechner eingebaut** (Plugin 1.1.0, Klickstrecke in 3 Schritten):
+  - Startseite, Energy Sharing, Privathaushalte: Standard (Strom beziehen, du).
+  - Landwirte: `[robingut_rechner rolle="einspeisen" anrede="sie"]`.
+  - Unternehmen: `[robingut_rechner rolle="beides" anrede="sie"]`.
+  - Personen-Knöpfe klein in einer Reihe, kein Pfeil mehr im Anmelde-Knopf.
+  - Offen bei WSE/Timo: Rolle in der Anmelde-URL, Ziel für „individuelles Angebot“, Wasserkraft
+    und Biogas fehlen im öffentlichen Preismodell (die Landwirte-Seite nennt Biogas).
+  - Offen (Inhalt): Kleine Anlagen mit wenig Überschuss rechnen sich in der Direktvermarktung nicht.
+    Beispiel 30 kWp / 5.000 kWh / 9 ct: 450 € Erlös − 515 € Grundpreis − 10 € Vermarktung = „rund -25 €“.
+    Die Rechnung stimmt. Klären: Hinweis oder Mindestmenge zeigen, Minus als „−“ setzen?
+  - 1.1.1 auf Release (Zeitlimit auch für iOS 14/15).
+- 09.11.2026 **Prüfdurchgang über alle 9 Seiten** (Release, angemeldet als Andreas):
+  - In Ordnung: je eine H1, alle Bilder mit Alt-Text, keine toten Sprungmarken, alle internen
+    und externen Links erreichbar, keine Testdomain, Noto Sans lädt, Laptop 1.440 px ohne Überlauf.
+  - **Behoben:** Datenschutz und Impressum standen auf dem Handy seitlich über (lange Web-Adressen,
+    „Verbraucherstreitbeilegung/Universalschlichtungsstelle“). Zwei `overflow-wrap`-Regeln am Ende
+    von `variante-a.css` bzw. der globalen Stile; geprüft auf allen Seiten bei 320 und 390 px.
+  - **Impressum (Freigabe Andreas):** Absatz „EU-Streitschlichtung“ mit Link zur OS-Plattform und
+    der Satz „Unsere E-Mail-Adresse finden Sie oben im Impressum.“ entfernt. Die Plattform ist laut
+    EU-Kommission seit 20.07.2025 eingestellt (Verordnung (EU) 2024/3228). Der Absatz zur
+    Verbraucherschlichtung (§ 36 VSBG) bleibt. Auf der Live-Seite steht der Absatz noch, er fällt
+    beim Go-Live per Migration weg.
+  - Offen (rechtlich, nicht geändert): Die Datenschutzerklärung beschreibt Google Analytics,
+    E-Mail-Marketing (rapidmail) und Social-Media-Dienste, die auf der Seite nicht eingebunden
+    sind; YouTube ist eingebunden (lädt erst nach Klick).
+- 09.11.2026 Rechner 1.1.2: Beträge auf Euro und Cent, „zzgl. Lesekopf“ am Monatsbetrag, Sie-Texte im
+  Vergleich. Details in `RECHNER-PLUGIN.md`.
+- 09.11.2026 **Rhythmus und roter Faden** (Andreas: „sieht aus wie Einheitsbrei“):
+  - Helle Abschnitte wechseln automatisch Weiß / zarter Grün-Verlauf (`:nth-child(even of …)`),
+    unabhängig von `rgb-hell` im Inhalt. Neue Abschnitte von Redakteuren reihen sich von selbst ein.
+    Dunkle Bänder (`rgb-dunkel`) bleiben Akzente, jetzt mit Verlauf und leichtem Lime-Schimmer.
+  - Roter Faden: kurzer Lime-Strich (56 × 4 px) unter jeder Abschnittsüberschrift, bei zentrierten
+    Überschriften mittig. Keine Zeile über Überschriften (siehe Regel „keine Eyebrow-Labels“).
+  - `.rgb-beispiel` hebt sich je nach Hintergrund ab (hell auf Weiß, weiß auf Grün).
+  - Geprüft auf 7 Seiten bei 390 und 1.440 px: nie zwei gleiche Hintergründe hintereinander, alle
+    Abschnittsüberschriften mit Strich, kein Überlauf. CSS am Ende von `variante-a.css`.
+- 09.11.2026 **Nachschliff nach Andreas' Rückmeldungen** (alles CSS am Ende von `variante-a.css`):
+  - Review-Funde zum Rhythmus umgesetzt: `@supports` für `:nth-child(… of S)`, Bänder mit
+    Editor-Hintergrund (`has-background`) bleiben unberührt, kein Lime-Strich in Kästen.
+  - Vorher-nachher-Karten (`rgb-vn`) nebeneinander gleich hoch; Überschrift und Kästen beider
+    Karten auf gemeinsamer Linie per CSS-Subgrid (ab 782 px), geprüft 800–1.440 px.
+  - Textspalten (`rgb-spalte` ohne Foto, z. B. „1. Erzeugen / 2. Teilen / 3. Nutzen“) als gleich
+    hohe Kacheln: weiß mit Schatten auf Grün-Bändern, hellgrün auf weißen, durchscheinend auf dunklen.
+  - Video: Der Play-Knopf des Essential-Blocks-Players war 0 × 0 px groß. Jetzt Lime-Kreis mit
+    Dreieck mittig auf dem Vorschaubild.
+  - Video-Cookies: CCM19 kennt den Dienst „YouTube Video“ (Social Media), blockiert aber den
+    Essential-Blocks-Player nicht von selbst. Darum hängt hinter dem Video auf Startseite (1241) und
+    Energy Sharing (1355) ein HTML-Block mit `wordpress/video-cookie-sperre.js` (Kopie im Repo):
+    Ohne Zustimmung fängt es den Klick ab, zeigt einen Hinweis mit „Cookie-Einstellungen öffnen“
+    und startet das Video, sobald „YouTube Video“ erlaubt ist. Das Vorschaubild liegt lokal, vor dem
+    Klick geht nichts an Google. Live getestet (ohne/mit Zustimmung, Attrappe für CCM).
+  - Über dem Video fett „Alles Wichtige in diesem Video“ (Absatz `rg-video-titel`), Text direkt vor
+    einer Kachelreihe so breit wie die Reihe.
+  - Review-Punkte: Fokusrahmen am Play-Knopf, Kachelregeln nur in `.rgb-karte`, helle Links in
+    Kacheln auf dunklem Grund. Bewusst offen: Vorher-nachher-Karte hat im Raster genau zwei Teile.
+- 09.11.2026 **Video-Sperre überarbeitet** (Review BLOCKIERT → Fix), Kundenstimmen eingeschlossen:
+  - Liegt jetzt einmal in der Fußzeile (Vorlagenteil `footer`, HTML-Block), die Kopien auf 1241/1355
+    sind entfernt. Kopie: `wordpress/video-cookie-sperre.js`, Test: `tests/video-cookie-sperre.test.mjs`
+    (13 Fälle, Playwright, CCM und Player als Attrappen, jeder YouTube-Abruf wird gezählt).
+  - Fängt click, keydown/keyup/keypress, pointerdown, mousedown, touchstart in der Capture-Phase auf
+    `window` ab; Hinweis nur bei Klick, Enter, Leertaste. Netz darunter: MutationObserver entfernt
+    jedes YouTube-iframe ohne Zustimmung (auch bei nachträglich gesetztem `src`).
+  - Freigabe nur bei Dienstname genau „YouTube Video“ (am echten CCM19 abgelesen). Zustimmung über
+    das Banner wird erkannt (Prüfung alle 0,5 s ab Hinweis), danach Start nach 0,6 s, weil CCM19 das
+    blockierte Skript der Kundenstimmen erst freischaltet.
+  - Live geprüft (echtes CCM19, YouTube nicht erlaubt): Hinweis bei Video und Kundenstimme, kein
+    iframe, 0 Abrufe bei YouTube/ytimg/googlevideo, auch nicht beim Laden und Scrollen.
+    Datenschutzerklärung hat einen Abschnitt „YouTube“ (Einwilligung).
+  - Threat Model Video-Sperre: (a) Player lädt über anderen Eingabeweg, Player-Update ändert den Weg,
+    Dienst mit ähnlichem Namen gibt frei; (b) Eingaben: Nutzerereignisse, CCM-Zustand, DOM-Änderungen
+    durch Plugins; (c) Worst Case: IP-Übertragung an Google ohne Einwilligung (§ 25 TDDDG);
+    (d) Abfangen aller Eingabewege + MutationObserver + exakter Dienstname; fail-closed ohne CCM.
+- 09.11.2026 Weitere Wünsche: Menüpunkt „So geht's“ heißt „Energy Sharing“; KI-Kennzeichnung als
+  „AI“ im Kreis unten rechts im Bild (Satz bleibt für Screenreader); 3D-Play-Knöpfe auch bei den
+  Kundenstimmen (unten rechts, nicht übers Gesicht); grüne Knöpfe mit Tiefe, auch im Rechner.
+- 09.11.2026 Re-Review Video-Sperre: FREIGABE. Offen (MITTEL, vor dem nächsten Player-/Plugin-Update):
+  Netz prüft nur iframes mit „youtube“ im `src` (nicht script/link, nicht youtu.be,
+  nicht `contentWindow.location`); Tests fangen Touch-Weg und Leertaste nicht getrennt ab, nur
+  Chromium getestet. NIEDRIG: weitere Ereignisse (pointerup, mouseover …), `passive` für touchstart,
+  Auto-Start bis 5 min, toter Knopf ohne CCM, Button in `role=button`, keine package.json.
+- 09.11.2026 **Kopfbereich**: Titelbild 55 % (ab 1.200 px 56 %) der Breite, volle Proportion ohne
+  Beschnitt (Seitenformat aus dem Bildblock aufgehoben), Kopfband näher am Rand (max. 1.600 px),
+  H1 dort clamp(34px, 3,3vw, 54px). KI-Kennzeichnung für das Titelbild 1237 (Startseite, Energy
+  Sharing) nachgetragen; Titelbild 733 (Über uns) weiter ungeklärt.
+- 09.11.2026 **Fußzeile** aus der Live-Fassung (Revision vom 08.05.2026) wiederhergestellt: Copyright,
+  Fußmenü, Logos ROBIN GUT Strom und WeShare Energy, Siegel Renewable Plus und TÜV. Darunter der
+  HTML-Block mit der Video-Sperre.
+- 09.11.2026 **Kontakt zurück** (Andreas: „das brauchen wir“): Kontaktseite 71 veröffentlicht,
+  Weiterleitung 5 (/kontakt/ → FAQ) in Redirection deaktiviert (nicht gelöscht), „Kontakt“ im
+  Fußmenü 4. /kontakt/ liefert 200 mit Kontaktdaten und CF7-Formular. Formular nicht abgeschickt
+  (würde eine Mail auslösen). Offen: Seite ist noch im alten Look, nicht in Bändern.
+- 09.11.2026 **Dieter alleiniger Gründer** (Andreas): Nadine Büscher von Startseite, Privathaushalte,
+  Über uns entfernt (Text und Team-Karte). Korrektur Andreas: „Gründer“ bleibt, nur „Mit-“ fällt
+  weg → „Dieter Könnes, Gründer der ROBIN GUT Stiftung“ (Startseite, Privathaushalte, Über uns),
+  Team-Karte „Journalist und TV-Moderator, Gründer der ROBIN GUT Stiftung.“, im Fließtext
+  „gegründet von TV-Moderator Dieter Könnes“. Entwürfe 1244 und 25 nicht geändert.
+  Dieter-Karte als Querkarte (Foto links, Text rechts). Besseres Foto: Mediathek hat nur 1242
+  (480 × 480); auf robin-gut.org gibt es ein Porträt (dieter-koennes-wdr-02.jpg, 1.200 × 800,
+  vermutlich WDR-Rechte) und ein Aktionsfoto Müsch (1.920 × 1.280, © Jan Odenthal) → Rechte klären.
+- 09.11.2026 Kurz-Review Kopfbild/Personenkarte: FREIGABE; Härtung umgesetzt (Kopfbild-Regel nur für
+  das Bild direkt in der Spalte, Spalte darf schrumpfen, Höhengrenze min(80vh, 760px), runde Bilder
+  ausgenommen; Personenkarte zählt Absätze ohne `rg-ki-hinweis`, Foto vertikal mittig). Regel: Jede
+  Seite beginnt mit dem Kopfband (`:first-child`). Vorher-nachher-Kästen mit Tiefe wie die Knöpfe.
+- 09.11.2026 Kopfbilder Landwirte (1229) und Unternehmen (1239) per CSS auf das Format der Startseite
+  (1743:1126 ≈ 1,55) gebracht, links beschnitten (`object-position: right`). Privathaushalte bleibt
+  1,34 (4:3, Andreas nannte es mit der Startseite als Vorbild).
+  Hinweis aus dem Review: Die Regel hängt an den Bild-IDs 1229/1239; bei Bildtausch IDs nachziehen.
+- 09.11.2026 Über uns, Partner-Abschnitt: Logo-Kachel (dunkel) in den hellgrünen Kasten „Das macht wer“
+  verschoben (Klasse nur noch `rgb-logos`, Trennlinie oben). Neue helle Fassung des WeShare-Logos
+  (Medien-ID 1423, `weshare-energy-logo-positiv.svg`): Kopie von 204, nur die weiße Schrift auf
+  #1d2b22, Gelb unverändert. Geprüft bei 390/1024/1440, Logos im Kasten, kein Überlauf.
+- 09.11.2026 Energy Sharing: Abschnitt „Das Prinzip“ (inkl. Video, das auf der Startseite steht)
+  entfernt, nach dem Kopfbereich folgt „Teilen lohnt sich“. „Was kostet Strom …“: Inhalt unter der
+  Überschrift in Gruppe `rgb-kosten-flaeche` (einfarbig #EAF4D4, rund), Preisteile-Spalten mit
+  Klasse `rgb-preisteile` als weiße Karte mit „+“-Zeichen, Tabelle und Rechner als weiße Karten.
+- 09.11.2026 Über uns: Zitat-Band mit Dieter unter dem Kopfbereich entfernt.
+- 09.11.2026 SVG 1423 gegen Original 204 geprüft: einziger Unterschied `fill:#fff` → `fill:#1d2b22`,
+  keine Skripte, Ereignis-Attribute, foreignObject, externen Verweise, DOCTYPE/ENTITY.
+- 09.11.2026 Fließtext direkt in den Bändern (`.rgb-karte > p`) und im Kostenbereich ohne 80ch-Grenze,
+  läuft so breit wie die Karten (Andreas). Aufklapper und Spaltentext bleiben schmal.
+- 09.11.2026 **Neues Titelbild Energy Sharing** (Medien-ID 1431, `energy-sharing-netzwerk-hof.webp`,
+  1749 × 1130): erzeugt mit Gemini `gemini-3.1-flash-image` über Vertex AI (Projekt eskotomic-demo,
+  Dienstkonto mathe-voice), Stil wie das Startseitenbild (Luftbild, leuchtende Lime-Bögen von einer
+  Solarscheune zu Dorf, Schule, Gewerbe). Imagen 4 ist im Projekt nicht freigeschaltet (404).
+  Verworfener Erstentwurf „Nachbarn am Zaun“ liegt als Medien-ID 1429 in der Mediathek.
+  KI-Kennzeichnung „AI“ greift (Absatz `rg-ki-hinweis` bleibt). Knopf „So funktioniert's“ zeigte auf
+  das entfernte `#prinzip`, jetzt `#so-funktionierts` am Band „Teilen lohnt sich“.
+- 09.11.2026 **Rechner zeigt „nicht erreichbar“**: weshareenergy.de antwortete 17:4x Uhr überhaupt nicht
+  (Startseite, Anmeldeseite, API: Zeitüberschreitung nach 20 s, auch vom Mac). Kein Fehler bei uns.
+- 09.11.2026 **Kästen global gleich hoch und mit Tiefe** (Andreas): Zahlen-Kacheln (`rgb-kachel`) füllen
+  ihre Spalte (gleich hoch, betraf „Was bisher gewachsen ist“ auf Über uns), weiß→hellgrüner Verlauf
+  mit Schatten; grüne/dunkle Kachel wie die Vorher-nachher-Kästen. Bildkarten, `rgb-beispiel`, getönte
+  und dunkle `rgb-spalte` bekommen ebenfalls Schatten. Alle Spaltenreihen aller Seiten per Skript bei
+  1440/1024/800 px gemessen.
+- 09.11.2026 Frage Go-Live bei Mittwald: machbar per All-in-One WP Migration im Browser (vorher
+  Vollsicherung Live = Archiv, ggf. Mittwald-Backup). Andreas loggt sich selbst ein, Umstellung nur
+  nach ausdrücklichem „Go“; Go-Live-Punkte aus `docs/plans/SCHLANK.md` §6 und Datenschutz-Prüfung vorher.
+- 09.11.2026 **Neues Dieter-Foto** auf Über uns (Andreas, aus seinen Downloads `image00001.jpeg`,
+  ohne Urheberangabe in den Metadaten): auf 4:5 zugeschnitten, Metadaten entfernt, 1200 × 1500 WebP,
+  Medien-ID 1436 `dieter-koennes-wald.webp`, Karte zeigt es 4:5 statt 4:3. Altes Bild 1242 ist frei.
+  Offen: Fotografen-Nennung klären, falls nötig.
+- 09.11.2026 **Wartet auf Dieters Wording-Durchgang** (nichts an Texten ändern, bis Andreas Bescheid gibt):
+  - Kopfbereich Startseite: Satz mit „Energy-Sharing-Community“, „Solarstrom“, „öffentliches
+    Stromnetz“, „100 % Ökostrom“ unter die H1; „Kosten stark senken“ → „Kosten senken“ (UWG).
+  - „Was ist Energy Sharing?“: Solarstrom/öffentliches Stromnetz + Satz mit ROBIN GUT Strom ergänzen.
+  - Kasten „Wichtig zu wissen“: „virtuelles Kabel“ + „öffentliches Stromnetz“ + „Viertelstunde“.
+  - Dieter-Zitat konkreter (Vorschlag: „Der eine hat Strom übrig, der andere braucht ihn …“).
+  - SEO-Schnellfixes: Meta-Beschreibung Energy Sharing + Kontakt, og:image (Yoast-Standardbild),
+    llms.txt auf Live neu (alte URLs, Gründungsjahr Stiftung widersprüchlich). § 42c EnWG erst nach Klärung.
+- 09.11.2026 Startseite „Für Haushalte, Landwirte und Organisationen“: „Mehr für …“-Links unten bündig
+  (CSS: `.rgb-spalte` mit `.rgb-link` als letztem Kind wird Flex-Spalte, Link `margin-top: auto`).
+  Vorher bei 1024/800 px bis 52 px versetzt, jetzt bündig; sonst nirgends betroffen (alle Seiten gemessen).
+  Review FREIGABE; dessen Bedingung geprüft: Karten sind `is-layout-flow` (nicht constrained), Kinder voll breit.
+  Nebenbei gesehen: In den Vorher-nachher-Kästen bricht „Anschlussvergütung“ bei 1024 px ohne
+  Trennstrich mitten im Wort um („Anschlussvergüt|ung“), offen.
+- 09.11.2026 Privathaushalte: Zitat-Band durch die Fassung der Startseite ersetzt (Dieter-Waldfoto rund,
+  neuer Zitattext von Dieter/Guido). Kopfbild neu: Medien-ID 1449 `privathaushalte-kueche-lichtbogen.webp`
+  (Gemini-Bearbeitung des Originals 1238: grüner Lichtbogen von draußen durchs Fenster zum Laptop).
+- 09.11.2026 Unternehmen: Kopfbild neu, Medien-ID 1457 `organisationen-halle-daecher.webp`: Lichtbögen
+  vom Hallendach zu Bürogebäude, Solarfeld und Dorfdächern (Andreas: „von Dächern zu Dächern, nicht in
+  die Wiese“). Zuschnitt 1743:1126 von links direkt im Bild, die CSS-Regel für 1229/1239 greift nicht mehr.
+  Verworfene erste Fassungen (Bögen ins Feld): 1451, 1453.
+- 09.11.2026 Landwirte (nach Guidos Speichern 20:43, Seite frei): Kopfbild 1456 `landwirte-hof-daecher.webp`
+  eingesetzt (Bögen vom Scheunendach zu Dorfdächern, Zuschnitt im Bild); „Drei Wege für Ihren Strom“ jetzt
+  „Erst selbst nutzen“ · „Eigene Betriebsstätten versorgen“ · „Überschuss vermarkten“. Live geprüft.
+  Hinweis: Guido sah um 20:4x „Aktualisierung fehlgeschlagen“ im Editor; ob danach etwas von ihm fehlt, prüft er.
+- 09.11.2026 **Unternehmen, Kundenfall als Schaubild** (Vorgabe Andreas/Guido): Kacheln (dunkel → grün/weiß)
+  und alter Verbrauchsbalken ersetzt durch HTML-Block (Quelle `wordpress/kundenfall-unternehmen.html`,
+  CSS-Block „Kundenfall Unternehmen“). Karte 1 „Wohin geht der Strom der 4 eigenen Anlagen?“: Vorher 100 %
+  Netz, Nachher 25 % (3.100 MWh) Standorte + 75 % (9.300 MWh) Community. Karte 2 „Woher kommt der Strom
+  der 3 Standorte?“: 76 % (3.100) eigene Anlagen + 24 % (1.000) Netz. Drei Kennzahl-Kacheln unverändert.
+  Farben: Grau = Netz, Lime = Standorte, Dunkelgrün = Community. Bei Zahlenänderung: HTML-Block in WP
+  und die Repo-Datei gleich ändern (Breiten im style-Attribut mitziehen). Vor dem Speichern Vorschau
+  per Screenshot freigegeben; gespeichert auf Guidos Stand 20:56.
+- 09.11.2026 Unternehmen „Strom für Ihre Mitarbeitenden“: Platzhalter durch das Kopfbild der alten
+  Startseite ersetzt (`header_rgstrom_verlauf`, Gruppe im Wald mit Schildern), auf 3:2 zugeschnitten,
+  Medien-ID 1464 `robin-gut-team-wald.webp`, mit KI-Kennzeichnung (wirkt KI-generiert: Schildtexte;
+  falls echtes Foto, Absatz `rg-ki-hinweis` darunter löschen).
+- 09.11.2026 Startseite „Das sagen unsere Kunden“ (Template-Part `frost//unsere-kunden`, nur Startseite):
+  Reihenfolge jetzt Stephan Schmitz · Timo Schmitz · René Platzbäcker; Video-IDs wandern mit den Karten.
+  Voll-Review Schaubild: FREIGABE, Zahlen und Breiten nachgerechnet. Gleich umgesetzt: „bilanziell“ bei den
+  76 %, Prozente auch in der Legende, „Nachher:“ in Karte 2, geschützte Leerzeichen, Farben robust auch im
+  dunklen Band, Untertitel-Abstand; neuer Test `tests/kundenfall-unternehmen.test.mjs` (5 Prüfungen,
+  5/5 Mutanten gefangen). **Vor Go-Live klären (Kunde/Guido):** (1) Freigabe des Kundenfalls schriftlich,
+  (2) „viertelstündlich“ bestätigen (sonst streichen), (3) Vergleichsbasis der –1,29 ct / 53.000 € (netto
+  nach entgangenem Einspeiseerlös?), (4) Kachel „76 % Autarkie“ besser „76 % bilanzielle Eigenversorgung“
+  (Physik: Strom kommt über das Netz; UWG). Grau steht in Karte 1 für Einspeisung, in Karte 2 für Bezug.
+- 09.11.2026 **Rechner: Original-Strecke von WeShareEnergy statt eigenem Rechner** (Andreas). Auf Startseite,
+  Energy Sharing, Privathaushalte, Landwirte, Unternehmen ersetzt `[robingut_rechner …]` durch den HTML-Block
+  aus `wordpress/wse-rechner.html` (iframe wie alte Seite, Höhe per postMessage nur von weshareenergy.de aus
+  dem eigenen iframe, sandbox ohne Top-Navigation, Ausweg-Link). Anker `#rechner` bleibt. Auf Release bleibt
+  die Fläche grau: WSE erlaubt Einbettung nur auf robingut-strom.de/www (frame-ancestors). Nach der
+  Domain-Umstellung läuft es; vorher WSE um Freigabe von release.robingut-strom.de bitten.
+  **Vor Go-Live:** Datenschutz-Abschnitt „Preisrechner“ (Seite 66) passt nicht mehr (beschreibt den eigenen
+  Rechner über unseren Server); neu: Einbettung lädt beim Seitenaufruf Inhalte von weshareenergy.de
+  (IP-Übertragung, Cookies der Anmeldung) → Text anpassen und rechtlich prüfen (ggf. Zwei-Klick-Lösung).
+  Rechner-Plugin 1.2.0 liegt fertig im Repo (nicht ausgerollt), siehe RECHNER-PLUGIN.md.
+- 09.11.2026, 22:37–23:0x **GO-LIVE: Release ist jetzt www.robingut-strom.de** (Andreas, nachts umgestellt).
+  Ablauf: (1) Mittwald-Wiederherstellungspunkt „Vor Go-Live Relaunch 09.11.2026 …“ (22:37, 1.507 MB Dateien,
+  51 MB DB; alte und neue Seite). (2) Mittwald → Domains: Ziel `www.robingut-strom.de` von
+  `/html/wordpress-robingut-strom/` auf `/html/wordpress-release-robingut-strom/`. (3) Mittwald →
+  Verzeichnisschutz: Eintrag „rg.strom / Release“ gelöscht. (4) Inhalte per REST von release. auf www.
+  umgeschrieben (Seiten, Menüs, Fußzeile, Kundenstimmen, Startseiten-Vorlage). (5) WordPress-Adresse und
+  Website-Adresse auf https://www.robingut-strom.de. (6) Rechner-Plugin 1.1.2 deaktiviert (unbenutzt).
+  **Archiv:** Die alte Seite liegt unverändert in `/html/wordpress-robingut-strom/` (eigene DB), plus
+  Wiederherstellungspunkt. **Rückweg:** Ziel von www wieder auf den alten Ordner stellen (1 Minute); die neue
+  Seite dann wieder auf release.… umstellen (WordPress-Adresse) und Verzeichnisschutz neu anlegen.
+  Geprüft: alle Hauptseiten 200 mit www-Canonical, release. und robingut-strom.de → 301 www, alte URLs
+  /preise/ /konzept/ → 301 neue Seiten, Sitemap 200, Rechner lädt und meldet Höhe (WSE frame-ancestors
+  erlaubt www). Browser, die während der Umstellung kurz die 301 www→release gesehen haben, brauchen ggf.
+  Cache leeren.
+  **Rechner lädt direkt ohne Zwei-Klick** (Entscheidung Andreas trotz Hinweis aufs Risiko: IP-Übertragung
+  an weshareenergy.de beim Seitenaufruf, vgl. LG München Google Fonts). Datenschutz-Abschnitt „Preisrechner“
+  beschreibt das (berechtigtes Interesse, Art. 6 Abs. 1 lit. f, Widerspruch Art. 21) – rechtlich prüfen lassen.
+  **Offen nach Go-Live:** Yoast-Logo in den Strukturdaten zeigt noch auf release.… (leitet um, funktioniert,
+  in Yoast → Einstellungen → Website-Darstellung neu speichern); robots.txt/llms.txt der alten Seite lagen als
+  Dateien im alten Ordner – neue Seite nutzt Yoast-robots.txt, llms.txt fehlt (neu schreiben); WSE bitten,
+  ggf. release.… freizugeben, falls wieder eine Testumgebung gebraucht wird; Mittwald fragt nach einer
+  Projekt-E-Mail-Adresse (Andreas entscheidet); Google Search Console: Sitemap neu einreichen.
+- 10.11.2026 Mobil (Andreas): Zweier-Knopfgruppen in den Bändern nebeneinander (≤600 px, lange Texte
+  zweizeilig, gleich hoch); aufgeklapptes Hamburger-Menü dunkel #353535 mit weißer Schrift (vorher weiß auf
+  weiß), aktuelle Seite lime, Fokusring lime; Zitat-Band: Dieters Bild mittig zum Zitat (Grid, nur bei rundem
+  Bild + genau zwei Absätzen). Drei Kurz-Reviews FREIGABE, Nachträge eingearbeitet.
+- 11.11.2026 Landwirte (Dieter/Timo per Sprachnachricht über Andreas): Rechenbeispiel „100 kWp … rund 2.380 € mehr“
+  entfernt, stattdessen Flyer-Kasten Beispiel 1/2 (+7.000 €/+9.000 €) plus Fußnote wortgleich vom Flyer
+  (`wordpress/landwirte-flyer.html`, Test `tests/landwirte-flyer.test.mjs` 7/7). Kasten voll breit unter der
+  Überschrift, „Was kostet Sie das?“ wortgleich darunter (Spalten aufgelöst), CSS mit Container-Abfrage.
+  Review BLOCKIERT (nur Einbauort in halber Spalte, war schon voll breit vorbereitet) → Nachlauf FREIGABE.
+  **Hinweise an Auftraggeber (nicht geändert, Wortlaut ist Vorgabe):** „Ihr Plus“ ist vor Kosten (bei 100 kWp
+  ca. 1.140 € Grundpreis/Jahr + 0,20 ct/kWh); Flyer rechnet 5 ct/12 ct, das Band „Was Ihr Strom … wert sein
+  kann“ weiter oben 4,5 ct/7–11 ct; „50 % autark“ trotz Strom über das öffentliche Netz; „Marktwert“ vs.
+  „entgangene Einspeisevergütung“. Satz „Ihre eigenen Zahlen rechnet der Rechner unten“ ging mit dem alten
+  Beispiel weg.
+- 11.11.2026 Merge PR #13 nach main (Andreas). Scanner auf dem gesamten PR-Diff: gitleaks ohne Funde,
+  pip-audit (werkzeuge/requirements.txt) ohne Funde, semgrep (php/javascript/python/xss/secrets) 10 Funde,
+  alle akzeptiert: 9× `postMessage(..., "*")` in `tests/wse-rechner.test.mjs` und
+  `tests/plugin-oberflaeche.test.mjs` (Testattrappe simuliert das WSE-iframe, läuft nur lokal in Playwright);
+  1× echo in `wordpress/robingut-rechner/tests/harness/router.php` (lokaler Test-Harness, nicht im Plugin-ZIP,
+  ausgegeben wird die Shortcode-Ausgabe, die das Plugin selbst escapt). Alle Änderungen im PR hatten einzeln
+  Security-Review FREIGABE.

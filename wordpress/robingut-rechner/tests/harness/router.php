@@ -23,6 +23,7 @@ if (str_starts_with($pfad, '/wp-json/robingut-rechner/v1/')) {
     $antwort = match (true) {
         $route === '/robingut-rechner/v1/preis' && $_SERVER['REQUEST_METHOD'] === 'POST' => rgr_route_preis($anfrage),
         $route === '/robingut-rechner/v1/strassen' && $_SERVER['REQUEST_METHOD'] === 'POST' => rgr_route_strassen($anfrage),
+        $route === '/robingut-rechner/v1/erzeuger' && $_SERVER['REQUEST_METHOD'] === 'POST' => rgr_route_erzeuger($anfrage),
         default => new WP_REST_Response(['fehler' => 'nicht gefunden'], 404),
     };
     http_response_code($antwort->status);
@@ -34,7 +35,7 @@ if (str_starts_with($pfad, '/wp-json/robingut-rechner/v1/')) {
     return true;
 }
 
-$rechner = rgr_shortcode();
+$rechner = rgr_shortcode(['rolle' => (string) ($_GET['rolle'] ?? ''), 'anrede' => (string) ($_GET['anrede'] ?? '')]);
 ?><!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Rechner-Test</title><?php echo implode("\n", array_filter($GLOBALS['rgr_dateien'], fn($d) => str_starts_with($d, '<link'))); ?>

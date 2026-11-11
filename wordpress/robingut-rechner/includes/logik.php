@@ -21,6 +21,8 @@ const RGR_PREISFELDER = ['energy_price', 'transaction_fee', 'base_price', 'month
 // Plausible Spannen; was außerhalb liegt, deutet auf geänderte oder kaputte Felder hin.
 const RGR_ARBEITSPREIS_CT = [15.0, 80.0];
 const RGR_GEBUEHR_CT = [0.0, 10.0];
+// Netzkosten & Umlagen (Untergrenze des Community-Preises); optional, fehlt sie, zeigt der Rechner keine Preisbildung.
+const RGR_NETZKOSTEN_CT = [10.0, 40.0];   // wie NETZKOSTEN_CT in rechnung.js
 const RGR_GRUNDPREIS_JAHR = [0.0, 5000.0];
 const RGR_GRUNDPREIS_MONAT_TOLERANZ = 0.05;
 const RGR_SUMME_TOLERANZ_ANTEIL = 0.005;
@@ -61,8 +63,9 @@ function rgr_pruefe_preis_anfrage(array $body): array
     if (!rgr_ist_plz($plz)) {
         return ['ok' => false, 'fehler' => 'Bitte eine 5-stellige Postleitzahl eingeben.'];
     }
-    if (!is_int($kwh) || $kwh < RGR_VERBRAUCH_MIN || $kwh > RGR_VERBRAUCH_MAX) {
-        return ['ok' => false, 'fehler' => 'Bitte einen Jahresverbrauch zwischen 500 und 100.000 kWh eingeben.'];
+    // Ab 100.000 kWh gibt es ein individuelles Angebot statt eines Rechnerpreises.
+    if (!is_int($kwh) || $kwh < RGR_VERBRAUCH_MIN || $kwh >= RGR_VERBRAUCH_MAX) {
+        return ['ok' => false, 'fehler' => 'Der Rechner gilt für 500 bis 99.999 kWh im Jahr. Ab 100.000 kWh gibt es ein individuelles Angebot.'];
     }
     $ort = rgr_optionaler_text($body, 'ort', RGR_STADT_MAX);
     $strasse = rgr_optionaler_text($body, 'strasse', RGR_STRASSE_MAX);
@@ -134,6 +137,10 @@ function rgr_filtere_preis_antwort($daten, int $kwh): ?array
     if (($daten['annual_consumption_kwh'] ?? null) !== $kwh || !rgr_preise_plausibel($antwort, $kwh)) {
         return null;
     }
+    $netz = $daten['minimum_energy_price_gross'] ?? null;
+    if (rgr_ist_endliche_zahl($netz) && rgr_in_spanne((float) $netz, RGR_NETZKOSTEN_CT) && (float) $netz < $antwort['energy_price']) {
+        $antwort['minimum_energy_price_gross'] = (float) $netz;
+    }
     $antwort['annual_consumption_kwh'] = $kwh;
     $antwort['city'] = $stadt;
     return $antwort;
@@ -159,6 +166,101 @@ function rgr_preise_plausibel(array $p, int $kwh): bool
     $erwartet = ($p['energy_price'] + $p['transaction_fee']) / 100 * $kwh + $p['base_price'];
     $toleranz = max(RGR_SUMME_TOLERANZ_MIN, $erwartet * RGR_SUMME_TOLERANZ_ANTEIL);
     return abs($p['annual_total'] - $erwartet) <= $toleranz;
+}
+
+// Erzeuger: Anlagenart bei uns → Wert des Partners. Das öffentliche Preismodell kennt nur PV und
+// Wind (geprüft 09.11.2026); Wasserkraft und Biogas zeigt der Browser als individuelles Angebot.
+const RGR_ANLAGENARTEN = ['pv' => 'pv', 'wind' => 'wind'];
+const RGR_EINSPEISUNG = ['voll', 'teil'];
+const RGR_KWP = [1.0, 1000.0];
+const RGR_UEBERSCHUSS = [100, 10000000];
+const RGR_WSE_PREISMODELL = '77';   // öffentlicher Angebotsrechner Direktvermarktung, Stand 09.11.2026
+// Untergrenzen über 0: Ein fehlender Posten darf beim Kunden nicht als „kostet nichts“ erscheinen.
+const RGR_ERZEUGER_GRUND_MONAT = [1.0, 2000.0];
+const RGR_ERZEUGER_VERMARKTUNG_CT = [0.01, 5.0];
+const RGR_ERZEUGER_EINRICHTUNG = [1.0, 10000.0];
+// Diese Posten ergeben beim Partner zusammen den monatlichen Grundpreis (geprüft 09.11.2026).
+const RGR_ERZEUGER_GRUND_POSTEN = ['redispatch_fee', 'remote_control_fee', 'forecast_fee', 'balancing_risk_fee', 'feeder_base_price_margin'];
+const RGR_ERZEUGER_SUMME_TOLERANZ = 0.01;
+
+function rgr_pruefe_erzeuger_anfrage(array $body): array
+{
+    $fehler = fn(string $text) => ['ok' => false, 'fehler' => $text];
+    $art = $body['art'] ?? null;
+    if (!is_string($art) || !array_key_exists($art, RGR_ANLAGENARTEN)) {
+        return $fehler('Bitte eine Anlagenart auswählen.');
+    }
+    $kwp = $body['kwp'] ?? null;
+    // Eine Nachkommastelle wie im Rechner des Partners
+    if (!rgr_ist_endliche_zahl($kwp) || !rgr_in_spanne((float) $kwp, RGR_KWP) || abs(round($kwp * 10) - $kwp * 10) > 1e-9) {
+        return $fehler('Bitte eine Leistung zwischen 1 und 1.000 kWp eingeben.');
+    }
+    $kwh = $body['kwh'] ?? null;
+    if (!is_int($kwh) || $kwh < RGR_UEBERSCHUSS[0] || $kwh > RGR_UEBERSCHUSS[1]) {
+        return $fehler('Bitte den Überschuss im Jahr als ganze Zahl in kWh eingeben.');
+    }
+    $einspeisung = $body['einspeisung'] ?? null;
+    if (!is_string($einspeisung) || !in_array($einspeisung, RGR_EINSPEISUNG, true)) {
+        return $fehler('Bitte Voll- oder Teileinspeisung wählen.');
+    }
+    $foerderung = $body['foerderung'] ?? null;
+    if (!is_bool($foerderung)) {
+        return $fehler('Bitte angeben, ob die Anlage noch gefördert wird.');
+    }
+    return ['ok' => true, 'werte' => ['art' => $art, 'kwp' => (float) $kwp, 'kwh' => $kwh, 'einspeisung' => $einspeisung, 'foerderung' => $foerderung]];
+}
+
+// Nur geprüfte Werte, als Text wie im Formular des Partners
+function rgr_erzeuger_nutzlast(array $werte): array
+{
+    return [
+        'pricing_model_id' => RGR_WSE_PREISMODELL,
+        'erzeugungsart' => RGR_ANLAGENARTEN[$werte['art']],
+        'nennleistung_kwp' => (string) $werte['kwp'],
+        'einspeiseart' => $werte['einspeisung'],
+        'einspeisemenge_kwh' => (string) $werte['kwh'],
+        'foerderung' => $werte['foerderung'] ? '1' : '0',
+    ];
+}
+
+function rgr_filtere_erzeuger_antwort($daten): ?array
+{
+    if (!is_array($daten) || ($daten['success'] ?? null) !== true) {
+        return null;
+    }
+    $individuell = $daten['individual_offer'] ?? null;
+    if ($individuell === true) {
+        return ['individuell' => true];
+    }
+    if ($individuell !== false || !is_array($daten['data'] ?? null)) {
+        return null;
+    }
+    $felder = [
+        'grund_monat' => ['grundgebuehr_monatlich', RGR_ERZEUGER_GRUND_MONAT],
+        'vermarktung_ct' => ['marketing_fee_ct_kwh', RGR_ERZEUGER_VERMARKTUNG_CT],
+        'einrichtung' => ['setup_fee', RGR_ERZEUGER_EINRICHTUNG],
+    ];
+    $antwort = ['individuell' => false];
+    foreach ($felder as $name => [$quelle, $spanne]) {
+        $wert = $daten['data'][$quelle] ?? null;
+        if (!rgr_ist_endliche_zahl($wert) || !rgr_in_spanne((float) $wert, $spanne)) {
+            return null;
+        }
+        $antwort[$name] = (float) $wert;
+    }
+    // Passt die Summe nicht, hat der Partner Modell oder Felder geändert: lieber keine Zahl zeigen.
+    $summe = 0.0;
+    foreach (RGR_ERZEUGER_GRUND_POSTEN as $posten) {
+        $wert = $daten['data'][$posten] ?? null;
+        if (!rgr_ist_endliche_zahl($wert) || $wert < 0) {
+            return null;
+        }
+        $summe += (float) $wert;
+    }
+    if (abs($summe - $antwort['grund_monat']) > RGR_ERZEUGER_SUMME_TOLERANZ) {
+        return null;
+    }
+    return $antwort;
 }
 
 function rgr_filtere_strassen_antwort($daten): array

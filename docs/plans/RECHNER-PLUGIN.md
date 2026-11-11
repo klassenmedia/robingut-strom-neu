@@ -41,7 +41,7 @@ Preis die Provision schon enthält. Keine eigenen Annahmen zum Community-Anteil.
 - Ersparnis = heutiger Abschlag × 12 − Jahressumme; |Δ| < 12 € gilt als „etwa gleich“.
 - Grenzen: 500 bis 100.000 kWh, darüber individuelles Angebot.
 
-Beispiele (04.11.2026, live gegengeprüft): 41747 / 2.500 kWh → 1.221,99 € im Jahr, ca. 102 €
+Beispiele (04.11.2026, live gegengeprüft): 41747 / 2.500 kWh → 1.221,99 € im Jahr, 101,83 €
 im Monat; 41747 / 3.500 kWh → 1.615,54 €, ca. 135 €; 41812 Erkelenz (Netzgebiet über Straße)
 / 3.500 kWh → 1.615,54 € (gleiche Netzkosten wie Viersen, direkt bei der API bestätigt).
 
@@ -67,14 +67,17 @@ dem WSE-Standard (ohne Slug); Bedeutung mit Timo bestätigen.
 (b) Untrusted Inputs
 - REST `preis` (POST, JSON): `plz`, `kwh`, `ort`, `strasse`, `hausnummer`.
 - REST `strassen` (POST, JSON): `plz`, `stadt`, `suche`.
+- REST `erzeuger` (POST, JSON): `art` (nur pv|wind), `kwp`, `kwh`, `einspeisung`, `foerderung`.
 - Kopfzeilen `Origin`, `Sec-Fetch-Site`, Query `_jsonp`; `REMOTE_ADDR`.
 - Antwort der Partner-API (alle Felder, auch `cities` und `requires_*`).
-- Browser-Eingaben: Abschlag, Verbrauch.
+- Browser-Eingaben: Abschlag, Verbrauch, Anlagenart, Leistung, Überschuss, Wunschpreis.
+- Shortcode-Attribute `rolle` und `anrede` (Redakteure im WordPress).
 
 (c) Worst Case
 - Falsche Preise beim Kunden (Zusage, UWG) durch kaputte oder manipulierte Antwort.
 - XSS auf robingut-strom.de über Felder der Partner-API.
 - Sperre des Partner-Kontingents, Rechner und Anmeldung des Partners zeitweise gestört.
+- Falscher oder veralteter Erlös für Erzeuger (andere Anlage als angezeigt, falsche Posten-Summe).
 
 (d) Gegenmaßnahmen
 - Strenge Typ- und Formatprüfung (`plz` 5 Ziffern als String, `kwh` Ganzzahl 500–100.000,
@@ -87,6 +90,11 @@ dem WSE-Standard (ohne Slug); Bedeutung mit Timo bestätigen.
   Cache je Anfrage 6 h über Transients, nur gültige Antworten.
 - Ausgabe im Browser nur über `textContent` / `createElement`, nie `innerHTML`.
 - Keine Speicherung oder Protokollierung von PLZ, Straße oder Abschlag.
+- `/erzeuger`: kwp 1–1.000 (eine Nachkommastelle), kwh 100–10.000.000, nur pv|wind; Posten der
+  Antwort in festen Grenzen und Summe = Grundpreis (±0,01); eigenes IP-Limit 40/h, Partner-Takt
+  geteilt. Im Browser wird ein Erlös nur gezeigt, wenn er zu den aktuellen Eingaben gehört
+  (Anfragenummer + Vergleich der Eingaben); Anfragen brechen nach 15 s ab.
+- Shortcode-Attribute nur aus Whitelist, sonst Standard.
 
 ## Stand
 
@@ -190,3 +198,134 @@ dem WSE-Standard (ohne Slug); Bedeutung mit Timo bestätigen.
   `docs/texte/datenschutz-preisrechner.md`) rechtlich prüfen lassen; Plugin-Upload ins
   Live-WordPress und Einbau in die Entwürfe nur nach Freigabe. Der Harness-Ordner gehört nicht
   ins ZIP für WordPress.
+
+## Version 1.1.0: Klickstrecke (09.11.2026, Übergabe vom 08.11.2026)
+
+- Shortcode `[robingut_rechner rolle="beziehen|einspeisen|beides" anrede="du|sie"]`. Beide
+  Attribute laufen über eine Whitelist, Standard ist `beziehen` / `du`. Aufbau in drei Schritten:
+  Rolle → Daten → Ergebnis. Die Verbraucherfelder sind unverändert, damit der bisherige Ablauf
+  (Ort, Straße, Abschlag) bleibt.
+- **Erzeuger:** Grundpreis, Vermarktungsentgelt und Einrichtung kommen vom öffentlichen
+  Angebotsrechner Direktvermarktung des Partners: `POST /api/direktvermarktung/calculate-price`,
+  `pricing_model_id` 77, Felder `erzeugungsart` (pv|wind; water und chp lehnt Modell 77 mit 422 ab), `nennleistung_kwp`,
+  `einspeiseart` (voll|teil), `einspeisemenge_kwh`, `foerderung` (0|1). Ein CSRF-Token ist nicht
+  nötig. Eine feste Tabelle geht nicht: Der Grundpreis hängt auch von der Menge ab. Beispiel
+  30 kWp: 42,93 € bei 5.000 kWh, aber 65,48 € bei 66.500 kWh. Die Übergabe nennt 48,43 €.
+- **Antworten des Partners:** Über 1.000 kWp meldet er `individual_offer: true`. Die Förderung
+  ändert den Preis nicht, ist aber Pflichtfeld. Wasserkraft und Biogas rechnet er öffentlich nicht;
+  der Rechner zeigt dafür ein individuelles Angebot (siehe unten).
+- **Kontrolle:** 100 kWp / 66.500 kWh ergibt 95,38 €, genau wie im Rechenbeispiel der
+  Landwirte-Seite (live geprüft am 09.11.).
+- Neue Route `POST /robingut-rechner/v1/erzeuger` mit denselben Schutzmaßnahmen wie `/preis`.
+  Das IP-Limit liegt bei 40 je Stunde (eigener Schlüssel), der Partner-Takt wird geteilt, der
+  Cache hält 6 h. Fehlertexte des Partners gehen nicht an den Browser.
+- **Rechnung im Browser:** Erlös = Überschuss × Wunschpreis (7–11 ct in halben Cent,
+  vorbelegt 10). Abgezogen werden Grundpreis × 12 und das Vermarktungsentgelt. Zum Vergleich
+  dient die Anschlussvergütung mit höchstens 4,5 ct. Ab 25 kW erscheint der Hinweis auf
+  Fernwirktechnik.
+- **Bewusste Änderung:** Ab 100.000 kWh Verbrauch gibt es jetzt ein individuelles Angebot,
+  vorher galt das erst über 100.000. Die Mailadresse in dieser Meldung ist entfernt, denn
+  Kontaktdaten stehen nur im Impressum. Im Anmeldeknopf steht kein Pfeil mehr.
+- **Reviews:**
+  - Erstes Review (voll): BLOCKIERT, weil der Vergleich mit der Anschlussvergütung auch bei
+    Wind, Biogas und geförderten Anlagen erschien.
+  - Nach-Review: BLOCKIERT, weil durch eine Lücke ein veralteter Erlös in voller Deckkraft stehen
+    bleiben konnte.
+  - Beides ist behoben, siehe Commits. Behoben sind auch: Summenprüfung der Partnerposten,
+    Untergrenzen über 0, getrennte Statuszeilen, keine Doppelanfragen beim Mehrfachklick.
+- **Anlagenarten:** Wasserkraft und BHKW lehnt das öffentliche Preismodell 77 ab (422, geprüft am
+  09.11.). Der Rechner zeigt für Wasserkraft und Biogas deshalb ohne Anfrage „individuelles
+  Angebot“, der Server nimmt nur PV und Wind an.
+- **Tests:** Rechnung 34, Logik 35, Routen 45, Browser 42, Paralleltest gemischt grün. Semgrep 0
+  Funde, gitleaks sauber.
+- **Akzeptiert mit Begründung:**
+  - Erzeugerkosten bleiben 6 h im Zwischenspeicher. Sie hängen nur von Anlagendaten ab (keine
+    Person) und ändern sich beim Partner selten. Sie werden nur nach Plausibilitäts- und
+    Summenprüfung gespeichert, Fehler nur 60 s.
+  - Die Summenprüfung ist mit echten Antworten für PV (10/30/100 kWp) und Wind (250 kWp) belegt.
+- **Offen bei WSE:** Gibt es einen Parameter, mit dem die Anmeldestrecke die Rolle vorbelegt?
+  Bis das geklärt ist, führen alle drei Rollen auf dieselbe Anmelde-URL, nur der Knopftext
+  unterscheidet sich. Außerdem ist offen, wohin „individuelles Angebot“ führen soll.
+- **Restpunkte drittes Review (09.11.):** Anfragen brechen nach 15 s ab (`AbortSignal.timeout`),
+  damit eine hängende Anfrage die Sperre nicht festhält. Neue Browser-Tests: Weiter nach
+  Partnerfehler, A → B (langsam) → A → B, Rollenwechsel während der Anfrage, Förderhinweis aus.
+  Browser 45 grün.
+- **Release 09.11.2026:** 1.1.0 installiert (ersetzt 1.0.2). Platzhalter auf Landwirte und
+  Unternehmen durch den Rechner ersetzt. Live geprüft: 100 kWp / 66.500 kWh → rund 5.372 €
+  (wie Rechenbeispiel), Verbraucher 49152 → 103,00 €/Monat, Rolle „Beides“ zeigt beide Teile,
+  Handy 375 px ohne Überlauf. Datenschutz-Abschnitt auf Erzeuger erweitert.
+- **1.1.1 (09.11., viertes Review FREIGABE, Kurzumfang):** Zeitlimit über `AbortController` +
+  `setTimeout`, weil `AbortSignal.timeout` erst ab Safari/iOS 16 existiert (sonst auf iOS 14/15 kein
+  Ergebnis). Neue Tests: Browser ohne `AbortSignal.timeout`, ungültige kWp bzw. Wasserkraft
+  während der Anfrage und zurück, Personen-Knöpfe bei 320 px. Browser 49 grün; die vorher
+  überlebende Mutation (Sperre bei ungültiger Eingabe) wird jetzt erkannt. Offen (NIEDRIG):
+  kein Test, der das 15-s-Limit selbst abwartet.
+
+- **1.1.2 (09.11.):** Monatsbetrag und Vergleich auf Euro und Cent ohne „ca.“ (Andreas: gerundet sahen
+  alle PLZ gleich aus; echte Spanne bei 2.500 kWh etwa 101,83–104,32 €). Gerechnet wird in ganzen
+  Cent (`inCent`), halbe Cent werden aufgerundet (500,58 € / 12 → 41,72 €). Am Betrag steht
+  „zzgl. Lesekopf“, weil die Miete nicht im Partnerpreis steckt. Vergleichstexte und zwei
+  Servermeldungen siezen bzw. sind neutral auf Sie-Seiten. Review VOLL: FREIGABE; dessen
+  Empfehlungen (Tests Mehrkosten/Sie, Rundung, Lesekopf, Meldungen) sind umgesetzt.
+  Tests: Rechnung 35, Browser 56, Logik 35, Routen 45.
+
+## Version 1.2.0: Preiszusammensetzung, Zubehör, WSE-Strecke (09.11.2026, Andreas)
+
+Auslöser: Im alten Rechner (eingebettete WeShareEnergy-Strecke auf /preise) gibt es Schieberegler für
+die Preisbildung, und „Jetzt Community beitreten“ führt in die vorbelegte Anmeldung. Entscheidung
+Andreas: eigener Rechner bleibt, bekommt die Regler, der Knopf öffnet darunter die WSE-Strecke.
+
+Ermittelt am 09.11.2026 im Code der WSE-Seite (`/stromcommunitys/neukunde/robin-gut-strom?iframe=1`):
+- Reststrom = `energy_price` (brutto), Netzkosten & Umlagen = `minimum_energy_price_gross`.
+- Community-Preis (Regler von Netzkosten bis Reststrom, Schritt 0,01) startet bei
+  `(minimum_energy_price_gross / 1,19 + 8) × 1,19`, begrenzt auf die Spanne. Die 8 ct netto stehen fest
+  im WSE-Code, nicht in der API.
+- Community-Anteil (Regler 0–100 %, Start 50 %). Mischpreis = Anteil × Community + (1 − Anteil) × Reststrom.
+  Ist Netzkosten ≥ Reststrom, blendet WSE die Regler aus.
+- „Jetzt Community beitreten“: `POST /checkout/create-session` (Web-Route mit CSRF und Sitzungs-Cookie)
+  liefert ein Token, der Link geht auf `/checkout/verbraucher?token=…` (5 Schritte, neuer Tab).
+  Vorbelegen per Adresse geht nicht (nur `refcode`); create-session nutzen wir nicht (interne Route).
+- Zubehör-Reiter: IOmeter- und WSE-Lesekopf, je 89 € Kauf oder 3,90 €/Monat Miete, ohne Knopf.
+
+Umsetzung:
+1. Server: `minimum_energy_price_gross` zusätzlich durchlassen (optional; plausibel nur 5–80 ct und
+   kleiner als `energy_price`, sonst weglassen). Bisherige Prüfungen bleiben.
+2. rechnung.js: `communityStart(netz, rest)`, `mischpreis(anteil, community, rest)`; `berechne` nimmt
+   Anteil und Community-Preis: Jahr = annual_total − kWh × (Reststrom − Mischpreis) / 100. Bei 0 %
+   Anteil also genau der WSE-Jahresbetrag (Plattformgebühr wie dort auf alle kWh).
+3. Oberfläche: Ergebnis zeigt Grundpreis, Reststrom, Community-Preis (Energiepreis + Netzkosten),
+   beide Regler, voraussichtlichen Strompreis, Monatsbetrag. Ohne gültige Netzkosten: wie bisher ohne Regler.
+4. Rolle „beides“ entfällt, dafür „Zubehör“ (Lesekopf-Liste aus den Konstanten, keine Partner-Anfrage).
+   Unternehmen-Seite: Shortcode auf `rolle="einspeisen"`.
+5. Knopf „Jetzt Community beitreten“ / „Als Erzeuger anmelden“ blendet darunter die WSE-Strecke als iframe
+   ein (erst beim Klick geladen). Ohne JavaScript bleibt er ein normaler Link. Höhe per postMessage nur
+   von `https://weshareenergy.de` und nur vom eigenen iframe, Typ `IFRAME_HEIGHT`, auf 300–5000 px begrenzt.
+   Hinweis: PLZ und Verbrauch dort noch einmal eingeben.
+
+### Threat Model 1.2.0
+(a) Angreifer: fremde Seite/Frame schickt gefälschte postMessage; manipulierte oder kaputte Partner-Antwort
+    (z. B. Netzkosten > Reststrom, NaN, Text); Nutzer verschiebt Regler auf Extremwerte; Clickjacking/Phishing
+    über das eingebettete Formular; Datenschutz (Aufruf von weshareenergy.de im Browser).
+(b) Untrusted Inputs: Partnerfeld `minimum_energy_price_gross`; Reglerwerte (DOM, manipulierbar);
+    `message`-Ereignisse (origin, source, data); Shortcode-Attribut `rolle`.
+(c) Worst Case: falscher, zu niedriger Preis beim Kunden (Werbeversprechen); iframe auf fremde Adresse
+    umgebogen (Phishing der Anmeldedaten); beliebige iframe-Höhe zerstört das Layout.
+(d) Gegenmaßnahmen: Server- und Browserprüfung des neuen Felds (Zahl, Spanne, < Reststrom), sonst Regler aus;
+    Reglerwerte im Code auf die Spanne begrenzt und als Zahl geprüft; iframe-Adresse fest im Plugin
+    (esc_url, nur https://weshareenergy.de), kein Wert aus der Seite; postMessage nur bei exakter origin,
+    `event.source === iframe.contentWindow`, Typ und Zahl, Höhe begrenzt; Rolle nur aus Whitelist;
+    iframe erst nach Klick (keine Datenübertragung ohne Handlung), Datenschutztext ergänzen (vor Go-Live
+    rechtlich prüfen). Tests: Rechnung (Formel, Grenzen, Negativfälle), PHP-Filter, Oberfläche (Regler,
+    Zubehör, iframe nach Klick, gefälschte Nachrichten ignoriert).
+
+**Stand 1.2.0 (09.11.2026, abends): gebaut, getestet, NICHT ausgerollt.** Voll-Review FREIGABE (3 MITTEL:
+Monatsbetrag oben jetzt Partnerbetrag, Schätzung darunter; iframe mit sandbox; Hinweis vor dem Klick und
+Ausweg-Link – alles umgesetzt; Tests Rechnung 44, Oberfläche 66, Logik 36, Routen 46). Danach Entscheidung
+Andreas: vorerst **kein eigener Rechner**, sondern die Original-Strecke von WeShareEnergy als iframe wie auf
+der alten Seite (`wordpress/wse-rechner.html`). Auf Release läuft weiter Plugin 1.1.2, aber auf keiner Seite
+mehr ein Shortcode. Wichtig für später: WSE erlaubt die Einbettung nur von robingut-strom.de und
+www.robingut-strom.de (`frame-ancestors`), nicht von release.robingut-strom.de. Der Einspeiser-Checkout
+`/checkout/einspeiser?token=…` entsteht erst im WSE-Reiter „Für Einspeiser“ (Sitzungstoken, nicht fest
+verlinkbar; ohne Token Weiterleitung auf die WSE-Startseite). Offen an WSE: Freigabe der Release-Domain,
+dauerhafter Einspeiser-Link, Prefill-Parameter; Unterschied Community-Einspeiser (2,90 €/Monat) zu
+Direktvermarktung (unser Erzeuger-Rechner) klären.

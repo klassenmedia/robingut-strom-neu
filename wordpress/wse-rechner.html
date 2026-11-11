@@ -1,0 +1,24 @@
+<div class="rg-wse-rechner">
+<iframe class="rg-wse-frame" src="https://weshareenergy.de/stromcommunitys/neukunde/robin-gut-strom?iframe=1&amp;buttonColor=0e670e&amp;borderRadius=9999px&amp;fontFamily=NotoSans" title="Preisrechner und Anmeldung bei unserem Partner WeShareEnergy" width="100%" style="display:block;width:100%;height:720px;border:0" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+<script>
+/* Preisrechner von WeShareEnergy wie auf der alten Seite, lädt direkt (Entscheidung Andreas 09.11.2026,
+   Hinweis in der Datenschutzerklärung). Höhe nur von weshareenergy.de aus dem passenden iframe; einmal je
+   Seite eingerichtet, egal wo ein Optimierer das Skript ausführt. Test: tests/wse-rechner.test.mjs */
+(function () {
+  if (window.rgWseRechner) return;
+  window.rgWseRechner = true;
+  var HERKUNFT = "https://weshareenergy.de";
+  window.addEventListener("message", function (e) {
+    if (e.origin !== HERKUNFT) return;
+    var d = e.data;
+    if (!d || d.type !== "IFRAME_HEIGHT" || typeof d.height !== "number" || !isFinite(d.height)) return;
+    var frames = document.querySelectorAll(".rg-wse-frame");
+    for (var i = 0; i < frames.length; i++) {
+      if (frames[i].contentWindow === e.source) {
+        frames[i].style.height = Math.max(300, Math.min(5000, Math.round(d.height))) + "px";
+      }
+    }
+  });
+})();
+</script>
+</div>

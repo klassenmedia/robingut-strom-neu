@@ -126,7 +126,12 @@ pruefe("Verbrauch außerhalb der Grenzen", () => {
   assert.equal(R.pruefeVerbrauch(499), "zu-klein");
   assert.equal(R.pruefeVerbrauch(100001), "grossverbrauch");
   assert.equal(R.pruefeVerbrauch(500), "ok");
-  assert.equal(R.pruefeVerbrauch(100000), "ok");
+  assert.equal(R.pruefeVerbrauch(99999), "ok");
+});
+
+// Übergabe 08.11.2026: „Ab 100.000 kWh Jahresverbrauch erstellen wir ein individuelles Angebot.“
+pruefe("ab 100.000 kWh gibt es ein individuelles Angebot", () => {
+  assert.equal(R.pruefeVerbrauch(100000), "grossverbrauch");
 });
 
 pruefe("Abschlag in Euro mit Komma oder Punkt", () => {
@@ -143,11 +148,17 @@ console.log("Rechnung");
 
 const P = R.pruefePreise(VIERSEN, 2500);
 
-pruefe("Monat ist die Jahressumme des Partners geteilt durch 12", () => {
+pruefe("Monat ist die Jahressumme des Partners geteilt durch 12, kaufmännisch auf Cent", () => {
   const r = R.berechne(P, null);
   assert.equal(r.status, "ok");
-  nahe(r.monat, 1221.99225 / 12);
-  nahe(r.jahr, 1221.99225);
+  assert.equal(r.jahr, 1221.99);
+  assert.equal(r.monat, 101.83);
+});
+
+pruefe("halber Cent wird aufgerundet (500,58 € / 12 = 41,715 €)", () => {
+  const r = R.berechne({ ...P, jahr: 500.58 }, null);
+  assert.equal(r.monat, 41.72);
+  assert.equal(R.euro(r.monat, 2), "41,72 €");
 });
 
 pruefe("ohne gültige Preise keine Zahl", () => {
@@ -159,7 +170,7 @@ pruefe("ohne gültige Preise keine Zahl", () => {
 pruefe("Ersparnis rechnet die Lesekopf-Miete mit ein", () => {
   const r = R.berechne(P, 110);
   assert.equal(r.vergleich.art, "ersparnis");
-  nahe(r.vergleich.jahr, 110 * 12 - (1221.99225 + 12 * 3.9));
+  assert.equal(r.vergleich.jahr, 51.21);
 });
 
 pruefe("etwa gleich unter 12 € im Jahr Unterschied, mit Lesekopf", () => {
@@ -171,10 +182,23 @@ pruefe("etwa gleich unter 12 € im Jahr Unterschied, mit Lesekopf", () => {
   assert.equal(R.berechne(P, 102).vergleich.art, "mehrkosten");
 });
 
+pruefe("Jahressumme mit halbem Cent wird aufgerundet (1234,565 → 1234,57)", () => {
+  assert.equal(R.berechne({ ...P, jahr: 1234.565 }, null).jahr, 1234.57);
+  assert.equal(R.berechne({ ...P, jahr: 1.005 }, null).jahr, 1.01);
+});
+
+pruefe("genau 12,00 € Unterschied zählt schon als Ersparnis bzw. Mehrkosten", () => {
+  const ersparnis = R.berechne({ ...P, jahr: 1200 }, 104.9).vergleich;
+  assert.deepEqual([ersparnis.art, ersparnis.jahr], ["ersparnis", 12]);
+  const mehr = R.berechne({ ...P, jahr: 1200 }, 102.9).vergleich;
+  assert.deepEqual([mehr.art, mehr.jahr], ["mehrkosten", -12]);
+  assert.equal(R.berechne({ ...P, jahr: 1200.01 }, 104.9).vergleich.art, "gleich");
+});
+
 pruefe("Mehrkosten werden ehrlich ausgewiesen", () => {
   const r = R.berechne(P, 80);
   assert.equal(r.vergleich.art, "mehrkosten");
-  assert.ok(r.vergleich.jahr < 0);
+  assert.equal(r.vergleich.jahr, -308.79);
 });
 
 pruefe("ohne Abschlag kein Vergleich", () => {
@@ -208,6 +232,196 @@ pruefe("Rechner schickt Zugangsdaten nur an die eigene Seite (Passwortschutz per
   const quelle = readFileSync(new URL("../wordpress/robingut-rechner/assets/rechner.js", import.meta.url), "utf8");
   assert.match(quelle, /credentials: "same-origin"/);
   assert.doesNotMatch(quelle, /credentials: "(omit|include)"/);
+});
+
+console.log("Rollen und Erzeugerrechnung");
+
+pruefe("Rolle nur aus der Liste, sonst Strom beziehen", () => {
+  assert.deepEqual(R.ROLLEN, ["beziehen", "einspeisen", "zubehoer"]);
+  assert.equal(R.rolleAusWert("einspeisen"), "einspeisen");
+  assert.equal(R.rolleAusWert("zubehoer"), "zubehoer");
+  // „beides“ gibt es seit 1.2.0 nicht mehr (Andreas: durch Zubehör ersetzt)
+  assert.equal(R.rolleAusWert("beides"), "beziehen");
+  for (const roh of ["", "EINSPEISEN", "admin", null, undefined, 3, ["beides"]]) {
+    assert.equal(R.rolleAusWert(roh), "beziehen", String(roh));
+  }
+});
+
+pruefe("Anlagenleistung mit Komma oder Tausenderpunkt", () => {
+  assert.equal(R.kwpAusEingabe("100"), 100);
+  assert.equal(R.kwpAusEingabe("9,8"), 9.8);
+  assert.equal(R.kwpAusEingabe("1.000"), 1000);
+  assert.equal(R.kwpAusEingabe(" 250 "), 250);
+  for (const roh of ["", "abc", "-5", "0", "1,234", "9.8", "1e3", null, undefined]) {
+    assert.equal(R.kwpAusEingabe(roh), null, String(roh));
+  }
+});
+
+pruefe("Anlage: Grenzen für Leistung und Überschuss", () => {
+  assert.equal(R.pruefeAnlage(100, 66500), "ok");
+  assert.equal(R.pruefeAnlage(1, 100), "ok");
+  assert.equal(R.pruefeAnlage(1000, 66500), "ok");
+  assert.equal(R.pruefeAnlage(null, 66500), "kwp-ungueltig");
+  assert.equal(R.pruefeAnlage(0.5, 500), "kwp-zu-klein");
+  assert.equal(R.pruefeAnlage(1000.1, 66500), "grossanlage");
+  assert.equal(R.pruefeAnlage(100, null), "ueberschuss-ungueltig");
+  assert.equal(R.pruefeAnlage(100, 99), "ueberschuss-zu-klein");
+  assert.equal(R.pruefeAnlage(100, 10000001), "ueberschuss-zu-gross");
+});
+
+pruefe("Wunschpreis nur 7 bis 11 ct in halben Cent", () => {
+  assert.equal(R.WUNSCHPREIS_VORBELEGUNG, 10);
+  assert.equal(R.wunschpreisAusWert("10"), 10);
+  assert.equal(R.wunschpreisAusWert("7"), 7);
+  assert.equal(R.wunschpreisAusWert("11"), 11);
+  assert.equal(R.wunschpreisAusWert("8.5"), 8.5);
+  for (const roh of ["6.5", "11.5", "8.3", "", "abc", null, "NaN", "Infinity"]) {
+    assert.equal(R.wunschpreisAusWert(roh), null, String(roh));
+  }
+});
+
+// Antwort unserer REST-Route /erzeuger (Werte von WSE für 100 kWp / 66.500 kWh, abgerufen 09.11.2026)
+const ERZEUGER_100 = { individuell: false, grund_monat: 95.38, vermarktung_ct: 0.2, einrichtung: 390 };
+
+pruefe("Erzeugerkosten: nur vollständige, plausible Werte", () => {
+  assert.deepEqual(R.pruefeErzeugerKosten(ERZEUGER_100), { individuell: false, grundMonat: 95.38, vermarktungCt: 0.2, einrichtung: 390 });
+  assert.deepEqual(R.pruefeErzeugerKosten({ individuell: true }), { individuell: true });
+  for (const kaputt of [null, "x", {}, { ...ERZEUGER_100, grund_monat: "95" }, { ...ERZEUGER_100, grund_monat: -1 },
+    { ...ERZEUGER_100, grund_monat: 2001 }, { ...ERZEUGER_100, vermarktung_ct: 5.1 }, { ...ERZEUGER_100, einrichtung: NaN },
+    { ...ERZEUGER_100, einrichtung: 10001 }, { ...ERZEUGER_100, individuell: "nein" },
+    { ...ERZEUGER_100, grund_monat: 0 }, { ...ERZEUGER_100, grund_monat: 0.99 }, { ...ERZEUGER_100, einrichtung: 0 },
+    { ...ERZEUGER_100, vermarktung_ct: 0 }]) {
+    assert.equal(R.pruefeErzeugerKosten(kaputt), null, JSON.stringify(kaputt));
+  }
+});
+
+const PV_U20 = { art: "pv", foerderung: false, kwp: 100 };
+
+pruefe("Rechenbeispiel Landwirte: 100 kWp, 66.500 kWh, 10 ct", () => {
+  const e = R.berechneErzeuger(66500, 10, R.pruefeErzeugerKosten(ERZEUGER_100), PV_U20);
+  nahe(e.erloes, 6650);
+  nahe(e.grundJahr, 1144.56);
+  nahe(e.vermarktung, 133);
+  nahe(e.bleibt, 5372.44);
+  nahe(e.anschluss, 2992.5);
+  assert.equal(e.einrichtung, 390);
+  assert.equal(R.euro(e.bleibt), "5.372 €");
+  assert.equal(R.euro(e.anschluss), "2.993 €");
+});
+
+pruefe("Erzeugerrechnung ohne Kosten oder mit ungültigen Werten liefert nichts", () => {
+  assert.equal(R.berechneErzeuger(66500, 10, null, PV_U20), null);
+  assert.equal(R.berechneErzeuger(66500, null, R.pruefeErzeugerKosten(ERZEUGER_100), PV_U20), null);
+  assert.equal(R.berechneErzeuger(null, 10, R.pruefeErzeugerKosten(ERZEUGER_100), PV_U20), null);
+  assert.equal(R.berechneErzeuger(66500, 10, { individuell: true }, PV_U20), null);
+});
+
+// Anschlussvergütung gibt es nur für ausgeförderte Solaranlagen bis 100 kW (§§ 21, 23b EEG);
+// sonst wäre der „höchstens“-Vergleich falsch und schönte das Ergebnis.
+pruefe("Vergleich mit der Anschlussvergütung nur für ausgeförderte PV bis 100 kWp", () => {
+  const kosten = R.pruefeErzeugerKosten(ERZEUGER_100);
+  nahe(R.berechneErzeuger(66500, 10, kosten, PV_U20).anschluss, 2992.5);
+  nahe(R.berechneErzeuger(5000, 10, kosten, { art: "pv", foerderung: false, kwp: 9.8 }).anschluss, 225);
+  for (const anlage of [{ ...PV_U20, art: "wind" }, { ...PV_U20, art: "wasser" }, { ...PV_U20, art: "biogas" },
+    { ...PV_U20, foerderung: true }, { ...PV_U20, kwp: 100.1 }, { ...PV_U20, art: "x" }, undefined]) {
+    assert.equal(R.berechneErzeuger(66500, 10, kosten, anlage).anschluss, null, JSON.stringify(anlage));
+  }
+});
+
+pruefe("Fernwirktechnik ab 25 kW", () => {
+  assert.equal(R.brauchtFernwirktechnik(24.9), false);
+  assert.equal(R.brauchtFernwirktechnik(25), true);
+});
+
+// Das öffentliche Preismodell des Partners kennt nur PV und Wind (geprüft 09.11.2026: water/chp → 422).
+pruefe("Anlagenarten: Wasserkraft und Biogas nur mit individuellem Angebot", () => {
+  assert.deepEqual(Object.keys(R.ANLAGENARTEN), ["pv", "wind", "wasser", "biogas"]);
+  assert.equal(R.ANLAGENARTEN.pv.individuell, false);
+  assert.equal(R.ANLAGENARTEN.wind.individuell, false);
+  assert.equal(R.ANLAGENARTEN.wasser.individuell, true);
+  assert.equal(R.ANLAGENARTEN.biogas.individuell, true);
+});
+
+pruefe("Rechner zeigt keine Mailadresse von ROBIN GUT", () => {
+  const quelle = readFileSync(new URL("../wordpress/robingut-rechner/assets/rechner.js", import.meta.url), "utf8");
+  assert.doesNotMatch(quelle, /@robingut-strom\.de|@robin-gut\.org/);
+});
+
+// Antwort der Partner-API für 40225 / 2.500 kWh vom 09.11.2026 (Auszug, brutto). Der WSE-Rechner
+// zeigt dazu: Community 29,53 ct (9,52 + 20,01), bei 50 % Anteil 34,64 ct/kWh.
+const DUESSELDORF = {
+  energy_price: 39.75909,
+  minimum_energy_price_gross: 20.00509,
+  transaction_fee: 1.19,
+  base_price: 168.04,
+  monthly_base_price: 14,
+  annual_total: 1191.76725,
+  annual_consumption_kwh: 2500,
+  city: "Düsseldorf",
+};
+
+console.log("Preisbildung (Community-Anteil, wie im WSE-Rechner)");
+
+pruefe("Netzkosten werden übernommen, wenn sie plausibel und kleiner als der Reststrom sind", () => {
+  const p = R.pruefePreise(DUESSELDORF, 2500);
+  nahe(p.netzCt, 20.00509);
+  assert.equal(p.kwh, 2500);
+});
+
+pruefe("fehlende oder unplausible Netzkosten: Preis bleibt gültig, nur ohne Preisbildung", () => {
+  for (const netz of [undefined, null, "20", NaN, Infinity, 0, 9.99, 40.01, 39.75909, 45]) {
+    const p = R.pruefePreise({ ...DUESSELDORF, minimum_energy_price_gross: netz }, 2500);
+    assert.ok(p, String(netz));
+    assert.equal(p.netzCt, null, String(netz));
+    assert.equal(R.preisbildung(p, 50, null), null, String(netz));
+  }
+});
+
+pruefe("Community-Preis startet wie bei WSE: Netzkosten + 8 ct netto, brutto", () => {
+  nahe(R.communityStart(20.00509, 39.75909), 29.52509);
+  // begrenzt auf die Spanne Netzkosten bis Reststrom
+  nahe(R.communityStart(20, 25), 25);
+});
+
+pruefe("Mischpreis und Jahresbetrag bei 50 % Anteil wie im WSE-Rechner", () => {
+  const p = R.pruefePreise(DUESSELDORF, 2500);
+  const b = R.preisbildung(p, 50, null);
+  nahe(b.communityCt, 29.52509);
+  nahe(b.energieCt, 9.52);
+  assert.equal(b.anteil, 50);
+  nahe(b.mischCt, 34.64209);
+  assert.equal(R.cent(b.mischCt), "34,64 ct");
+  const r = R.berechne(p, null, b);
+  assert.equal(r.jahr, 1063.84);
+  assert.equal(r.monat, 88.65);
+});
+
+pruefe("0 % Anteil ergibt genau den WSE-Jahresbetrag, 100 % nur Community-Preis", () => {
+  const p = R.pruefePreise(DUESSELDORF, 2500);
+  assert.equal(R.berechne(p, null, R.preisbildung(p, 0, null)).jahr, 1191.77);
+  assert.equal(R.berechne(p, null).jahr, 1191.77);
+  assert.equal(R.berechne(p, null, R.preisbildung(p, 100, null)).jahr, 935.92);
+});
+
+pruefe("Reglerwerte außerhalb der Spanne oder ohne Zahl werden begrenzt bzw. auf den Start gesetzt", () => {
+  const p = R.pruefePreise(DUESSELDORF, 2500);
+  assert.equal(R.preisbildung(p, 150, null).anteil, 100);
+  assert.equal(R.preisbildung(p, -5, null).anteil, 0);
+  assert.equal(R.preisbildung(p, "abc", null).anteil, 50);
+  assert.equal(R.preisbildung(p, "", null).anteil, 50);
+  assert.equal(R.preisbildung(p, 33.6, null).anteil, 34);
+  nahe(R.preisbildung(p, 50, 5).communityCt, 20.00509);
+  nahe(R.preisbildung(p, 50, 99).communityCt, 39.75909);
+  nahe(R.preisbildung(p, 50, "x").communityCt, 29.52509);
+  nahe(R.preisbildung(p, 50, 25).energieCt, 25 - 20.00509);
+});
+
+pruefe("Vergleich mit dem Abschlag nutzt den Betrag mit Preisbildung", () => {
+  const p = R.pruefePreise(DUESSELDORF, 2500);
+  const b = R.preisbildung(p, 50, null);
+  // 1.063,84 € + 12 × 3,90 € Lesekopf = 1.110,64 € → 92,55 € im Monat ist etwa gleich
+  assert.equal(R.berechne(p, 92.55, b).vergleich.art, "gleich");
+  assert.equal(R.berechne(p, 99.31, b).vergleich.art, "ersparnis");
 });
 
 console.log("Anzeige");

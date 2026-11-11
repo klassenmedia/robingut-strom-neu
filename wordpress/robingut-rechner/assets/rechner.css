@@ -1,75 +1,94 @@
-/* Preisrechner im Stil eines Vergleichsportals; alles unter .rgr, damit das Theme unberührt bleibt. */
+/* Preisrechner als Klickstrecke in drei Schritten (Farben Variante A); alles unter .rgr, damit das Theme unberührt bleibt. */
 .rgr {
-  --rgr-gruen: #0e670e;
-  --rgr-dunkel: #003d00;
+  --rgr-gruen: #003d00;
+  --rgr-mittel: #0e670e;
   --rgr-lime: #a4d235;
   --rgr-hell: #f2f8e1;
-  --rgr-rand: #c8c8c8;
-  --rgr-text: #1f2a1f;
-  --rgr-grau: #4d5a4d;
-  max-width: 880px;
-  margin: 0 auto;
-  padding: clamp(20px, 4vw, 36px);
+  --rgr-rand: #dce3d6;
+  --rgr-linie: #e1e7dc;
+  --rgr-text: #3c3c3c;
+  --rgr-grau: #5b6b5f;
+  padding: clamp(14px, 2vw, 22px);
   background: #fff;
   border: 1px solid var(--rgr-rand);
-  border-radius: 20px;
-  box-shadow: 0 12px 40px rgba(0, 61, 0, 0.12);
+  border-radius: 16px;
   color: var(--rgr-text);
   font-size: 16px;
   line-height: 1.5;
 }
 .rgr [hidden] { display: none !important; }
-.rgr-felder { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: start; }
-.rgr-felder > .rgr-knopf { margin-top: 29px; }
-.rgr-feld { display: flex; flex-direction: column; gap: 6px; }
-.rgr-feld label { font-weight: 600; font-size: 15px; }
-.rgr-feld input, .rgr-feld select {
-  min-height: 52px;
+.rgr-schritte { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
+.rgr-schritt { min-width: 0; margin: 0; padding: 18px; border: 1px solid var(--rgr-linie); border-radius: 12px; background: #fff; display: flex; flex-direction: column; gap: 12px; }
+.rgr-schritt-titel { display: flex; align-items: center; gap: 10px; margin: 0; padding: 0; font-weight: 700; font-size: 17px; color: var(--rgr-gruen); }
+.rgr-nr { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 999px; background: var(--rgr-lime); color: var(--rgr-gruen); font-size: 15px; }
+legend.rgr-schritt-titel { float: left; width: 100%; margin-bottom: 4px; }
+legend.rgr-schritt-titel + * { clear: both; }
+
+.rgr-rolle { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1.5px solid var(--rgr-rand); border-radius: 12px; cursor: pointer; }
+.rgr-rolle:has(input:checked) { border-color: var(--rgr-gruen); background: var(--rgr-hell); box-shadow: inset 0 0 0 1px var(--rgr-gruen); }
+.rgr-rolle input { width: 20px; height: 20px; margin: 0; accent-color: var(--rgr-gruen); }
+.rgr-rolle-text { display: flex; flex-direction: column; }
+.rgr-rolle-text strong { color: var(--rgr-gruen); }
+.rgr-rolle-text span { font-size: 14px; color: var(--rgr-grau); }
+
+.rgr-teil { display: flex; flex-direction: column; gap: 12px; }
+.rgr-feld { display: flex; flex-direction: column; gap: 6px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.rgr-feld label, .rgr-feld legend { font-weight: 700; font-size: 15px; padding: 0; }
+.rgr-feld input[type="text"], .rgr-feld select {
+  min-height: 48px;
   padding: 0 14px;
   border: 1.5px solid var(--rgr-rand);
-  border-radius: 12px;
-  font-size: 18px;
+  border-radius: 10px;
+  font-size: 17px;
   color: var(--rgr-text);
   background: #fff;
+  width: 100%;
+  box-sizing: border-box;
 }
-.rgr-ort .rgr-feld { max-width: 420px; }
-.rgr-feld input:focus-visible, .rgr-feld select:focus-visible { outline: 3px solid var(--rgr-lime); outline-offset: 1px; border-color: var(--rgr-gruen); }
+.rgr-feld input[type="range"] { width: 100%; accent-color: var(--rgr-gruen); min-height: 32px; }
+.rgr-wahl { flex-direction: row; flex-wrap: wrap; gap: 6px 16px; }
+.rgr-wahl legend { width: 100%; }
+.rgr-wahl label { font-weight: 400; display: inline-flex; align-items: center; gap: 6px; min-height: 36px; }
+.rgr-wahl input { accent-color: var(--rgr-gruen); width: 18px; height: 18px; margin: 0; }
+.rgr-feld input:focus-visible, .rgr-feld select:focus-visible, .rgr-rolle:has(input:focus-visible) { outline: 3px solid var(--rgr-lime); outline-offset: 1px; border-color: var(--rgr-gruen); }
 .rgr-knopf {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-height: 52px;
-  padding: 0 26px;
+  min-height: 48px;
+  padding: 0 24px;
   border: 0;
   border-radius: 999px;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
   transition: transform 0.1s ease-out, background-color 0.15s ease;
 }
 .rgr-knopf:active { transform: scale(0.98); }
-.rgr-knopf-haupt { background: var(--rgr-lime); color: var(--rgr-dunkel); }
+.rgr-knopf-haupt { background: var(--rgr-lime); color: var(--rgr-gruen) !important; font-weight: 400; }
 .rgr-knopf-haupt:hover { background: #b5e04a; }
+.rgr-schritt-2 > .rgr-knopf, .rgr-anmelden { width: 100%; box-sizing: border-box; }
 .rgr-knopf:focus-visible, .rgr-person:focus-visible, .rgr-heute summary:focus-visible { outline: 3px solid var(--rgr-gruen); outline-offset: 2px; }
-.rgr-personen { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+/* Drei kleine Knöpfe in einer Reihe, je ein Drittel der Breite */
+.rgr-personen { display: flex; flex-wrap: nowrap; gap: 6px; margin-top: 2px; }
 .rgr-person {
-  min-height: 44px;
-  padding: 0 14px;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 36px;
+  padding: 0 6px;
   border: 1.5px solid var(--rgr-rand);
   border-radius: 999px;
   background: #fff;
   color: var(--rgr-text);
-  font-size: 15px;
+  font-size: 13px;
+  white-space: nowrap;
   cursor: pointer;
 }
 .rgr-person[aria-pressed="true"] { background: var(--rgr-gruen); border-color: var(--rgr-gruen); color: #fff; }
-.rgr-zusatz { margin-top: 16px; padding: 16px; background: var(--rgr-hell); border-radius: 14px; }
-.rgr-adresse .rgr-felder { grid-template-columns: 2fr 1fr; }
-.rgr-hinweis { margin: 0 0 10px; }
+.rgr-zusatz { display: flex; flex-direction: column; gap: 12px; padding: 14px; background: var(--rgr-hell); border-radius: 12px; }
+.rgr-hinweis { margin: 0; font-size: 15px; }
 .rgr-kombi { position: relative; }
-.rgr-kombi input { width: 100%; box-sizing: border-box; }
 .rgr-vorschlaege {
   position: absolute;
   z-index: 20;
@@ -94,8 +113,8 @@
   border-radius: 8px;
   cursor: pointer;
 }
-.rgr-vorschlaege li:hover, .rgr-vorschlaege li[aria-selected="true"] { background: var(--rgr-hell); color: var(--rgr-dunkel); }
-.rgr-feldhinweis { margin: 2px 0 0; max-width: none; }
+.rgr-vorschlaege li:hover, .rgr-vorschlaege li[aria-selected="true"] { background: var(--rgr-hell); color: var(--rgr-gruen); }
+.rgr-feldhinweis { margin: 0; }
 /* Nur für Screenreader: Anzahl der Vorschläge */
 .rgr-ansage {
   position: absolute;
@@ -108,8 +127,8 @@
   white-space: nowrap;
   border: 0;
 }
-.rgr-heute { margin-top: 18px; border-top: 1px solid var(--rgr-rand); padding-top: 14px; }
-.rgr-heute summary { min-height: 44px; display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--rgr-gruen); cursor: pointer; list-style: none; }
+.rgr-heute { border-top: 1px solid var(--rgr-linie); padding-top: 10px; }
+.rgr-heute summary { min-height: 44px; display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--rgr-gruen); cursor: pointer; list-style: none; }
 .rgr-heute summary::-webkit-details-marker { display: none; }
 .rgr-heute summary::before {
   content: "+";
@@ -117,42 +136,59 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 999px;
   background: var(--rgr-hell);
-  font-size: 20px;
+  font-size: 18px;
   line-height: 1;
 }
 .rgr-heute[open] summary::before { content: "–"; }
-.rgr-heute .rgr-feld { max-width: 280px; margin-top: 8px; }
-.rgr-status { min-height: 1.5em; margin: 14px 0 0; color: var(--rgr-grau); }
-.rgr-ergebnis {
-  margin-top: 18px;
-  padding: clamp(18px, 3vw, 28px);
-  background: var(--rgr-hell);
-  border-radius: 16px;
-  text-align: center;
-}
-.rgr-ergebnis.rgr-laedt { opacity: 0.45; transition: opacity 0.15s ease; }
-.rgr-label { margin: 0; font-weight: 600; color: var(--rgr-grau); }
-.rgr-betrag { margin: 4px 0 0; font-size: 22px; color: var(--rgr-dunkel); }
-.rgr-betrag strong { font-size: clamp(44px, 9vw, 64px); line-height: 1.05; letter-spacing: -0.02em; }
-.rgr-jahr { margin: 4px 0 0; color: var(--rgr-grau); }
-.rgr-vergleich { margin: 16px auto 0; max-width: 520px; padding: 12px 16px; border-radius: 12px; background: #fff; }
-.rgr-vergleich strong { display: block; font-size: 20px; }
-.rgr-vergleich[data-art="ersparnis"] strong { color: var(--rgr-gruen); }
-.rgr-details { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 18px 0 0; }
-.rgr-details div { padding: 10px; background: #fff; border-radius: 12px; }
-.rgr-details dt { font-size: 14px; color: var(--rgr-grau); }
-.rgr-details dd { margin: 2px 0 0; font-weight: 700; }
-.rgr-klein { margin: 12px auto 0; max-width: 620px; font-size: 14px; color: var(--rgr-grau); }
-.rgr-ergebnis .rgr-knopf { margin-top: 16px; }
-@media (max-width: 640px) {
-  .rgr-felder, .rgr-adresse .rgr-felder { grid-template-columns: 1fr; }
-  .rgr-felder > .rgr-knopf { width: 100%; margin-top: 4px; }
-  .rgr-details { grid-template-columns: 1fr; }
+.rgr-heute .rgr-feld { margin-top: 8px; }
+.rgr-status { margin: 0; color: var(--rgr-grau); }
+.rgr-status:empty { display: none; }
+.rgr-leer { margin: 0; }
+.rgr-ergebnis, .rgr-ergebnis-erzeuger { padding: 14px; background: var(--rgr-hell); border-radius: 12px; }
+.rgr-ergebnis.rgr-laedt, .rgr-ergebnis-erzeuger.rgr-laedt { opacity: 0.45; transition: opacity 0.15s ease; }
+.rgr-label { margin: 0; font-weight: 700; color: var(--rgr-gruen); }
+.rgr-betrag { margin: 4px 0 0; font-size: 20px; color: var(--rgr-gruen); }
+.rgr-betrag strong { font-size: clamp(36px, 3vw, 48px); line-height: 1.05; letter-spacing: -0.02em; }
+.rgr-zzgl { font-size: 15px; color: var(--rgr-grau); white-space: nowrap; }
+.rgr-jahr { margin: 4px 0 0; color: var(--rgr-grau); font-size: 15px; }
+.rgr-vergleich { margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; background: #fff; }
+.rgr-vergleich strong { display: block; font-size: 18px; }
+.rgr-vergleich[data-art="ersparnis"] strong { color: var(--rgr-mittel); }
+.rgr-details { margin: 10px 0 0; }
+.rgr-details div { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--rgr-linie); }
+.rgr-details dt { font-size: 15px; color: var(--rgr-text); }
+.rgr-details dt span { display: block; font-size: 13px; color: var(--rgr-grau); }
+.rgr-details dd { margin: 0; font-weight: 700; text-align: right; white-space: nowrap; }
+.rgr-details .rgr-summe dt, .rgr-details .rgr-summe dd { color: var(--rgr-gruen); font-weight: 800; font-size: 17px; }
+.rgr-klein { margin: 10px 0 0; font-size: 14px; color: var(--rgr-grau); }
+.rgr-schritt-3 p:has(> .rgr-anmelden) { margin: auto 0 0; }
+@media (max-width: 1000px) {
+  .rgr-schritte { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
   .rgr-knopf { transition: none; }
 }
+
+/* 1.2.0: Preisbildung wie im Rechner des Partners, Zubehör, eingebettete Anmeldung */
+.rgr-preisbildung { display: grid; gap: 14px; margin-top: 12px; padding: 14px; border-radius: 12px; background: var(--rgr-hell); }
+.rgr-regel label { display: flex; justify-content: space-between; gap: 10px; font-size: 15px; color: var(--rgr-gruen); }
+.rgr-regel label strong { white-space: nowrap; }
+.rgr-regel .rgr-klein { margin-top: 2px; }
+.rgr-regel input[type=range] { width: 100%; margin: 8px 0 0; accent-color: var(--rgr-gruen); }
+.rgr-skala { display: flex; justify-content: space-between; margin-top: 0; font-size: 12px; }
+.rgr-mischpreis { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin: 0; padding-top: 12px; border-top: 1px solid var(--rgr-rand); color: var(--rgr-gruen); font-weight: 700; }
+.rgr-mischpreis strong { font-size: 20px; white-space: nowrap; }
+.rgr-zubehoer-liste { width: 100%; border-collapse: collapse; font-size: 15px; }
+.rgr-zubehoer-liste th, .rgr-zubehoer-liste td { padding: 9px 6px; border-bottom: 1px solid var(--rgr-linie); text-align: left; vertical-align: top; }
+.rgr-zubehoer-liste thead th { font-size: 13px; color: var(--rgr-grau); font-weight: 600; }
+.rgr-zubehoer-liste tbody th { color: var(--rgr-gruen); }
+.rgr-wse { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--rgr-linie); scroll-margin-top: 90px; }
+.rgr-wse iframe { display: block; width: 100%; margin-top: 12px; border: 0; }
+.rgr-geschaetzt { margin: 4px 0 0; font-size: 15px; color: var(--rgr-gruen); }
+.rgr-geschaetzt strong { white-space: nowrap; }
+.rgr-mischpreis .rgr-zzgl { display: block; font-size: 13px; font-weight: 400; color: var(--rgr-grau); }
+.rgr-anmelden-hinweis { margin-top: 6px; }

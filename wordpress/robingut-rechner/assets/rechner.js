@@ -6,10 +6,46 @@
   const R = window.RGRechnung;
   const VERZOEGERUNG_MS = 450;
   const STRASSEN_VERZOEGERUNG_MS = 250;
+  const ZEITLIMIT_MS = 15000;
+  // AbortController statt AbortSignal.timeout: Das gibt es erst ab Safari/iOS 16.
+  const zeitlimit = () => {
+    const abbruch = new AbortController();
+    setTimeout(() => abbruch.abort(), ZEITLIMIT_MS);
+    return abbruch.signal;
+  };
+  const ANMELDE_TEXT = { beziehen: "Jetzt Community beitreten", einspeisen: "Als Erzeuger anmelden", zubehoer: "Jetzt Community beitreten" };
+  // Eingebettete Strecke des Partners: nur diese Herkunft, Höhe begrenzt (wie auf der alten Seite).
+  const WSE_HERKUNFT = "https://weshareenergy.de";
+  const WSE_HOEHE = [300, 5000];
+  const WSE_START_HOEHE = 720;
+  const MELDUNG_ERZEUGER = {
+    "kwp-ungueltig": "Bitte die Leistung der Anlage in kWp eingeben, zum Beispiel 100 oder 9,8.",
+    "kwp-zu-klein": "Der Rechner beginnt bei 1 kWp.",
+    grossanlage: "Über 1.000 kWp erstellen wir ein individuelles Angebot.",
+    "ueberschuss-ungueltig": "Bitte den Überschuss im Jahr als ganze Zahl in kWh eingeben, zum Beispiel 66.500.",
+    "ueberschuss-zu-klein": "Der Rechner beginnt bei 100 kWh Überschuss im Jahr.",
+    "ueberschuss-zu-gross": "Bei mehr als 10 Millionen kWh im Jahr erstellen wir ein individuelles Angebot.",
+    individuell: "Für diese Anlage erstellen wir ein individuelles Angebot.",
+    "art-individuell": "Für Wasserkraft und Biogas erstellen wir ein individuelles Angebot.",
+    laden: "Ertrag wird berechnet …",
+    fehler: "Die Kosten für Erzeuger sind gerade nicht erreichbar. Bitte gleich noch einmal versuchen.",
+  };
+  // Nur wo die Sie-Form anders lautet; alles andere ist neutral formuliert.
+  const MELDUNG_SIE = {
+    "verbrauch-ungueltig": "Bitte geben Sie Ihren Verbrauch im Jahr als ganze Zahl in kWh ein, zum Beispiel 2.500.",
+    plz: "Bitte geben Sie Ihre fünfstellige Postleitzahl ein.",
+    ort: "Bitte wählen Sie Ihren Ort, damit wir das richtige Netzgebiet finden.",
+    adresse: "Bitte geben Sie Straße und Hausnummer ein, damit wir das richtige Netzgebiet finden.",
+    strasseFehlt: "Bitte geben Sie Ihre Straße ein.",
+    hausnummerFehlt: "Bitte geben Sie Ihre Hausnummer ein.",
+    strasseListe: "Bitte wählen Sie Ihre Straße aus den Vorschlägen.",
+    fehler: "Die Preise sind gerade nicht erreichbar. Bitte versuchen Sie es gleich noch einmal.",
+    unplausibel: "Für diese Angaben konnten wir keinen verlässlichen Preis ermitteln. Bitte versuchen Sie es gleich noch einmal.",
+  };
   const MELDUNG = {
     "verbrauch-ungueltig": "Gib deinen Verbrauch im Jahr als ganze Zahl in kWh ein, zum Beispiel 2.500.",
     "zu-klein": "Der Rechner beginnt bei 500 kWh im Jahr.",
-    grossverbrauch: "Über 100.000 kWh im Jahr erstellen wir dir ein individuelles Angebot: info@robingut-strom.de.",
+    grossverbrauch: "Ab 100.000 kWh im Jahr erstellen wir ein individuelles Angebot.",
     plz: "Gib deine fünfstellige Postleitzahl ein.",
     laden: "Preis wird berechnet …",
     ort: "Bitte wähle deinen Ort, damit wir das richtige Netzgebiet finden.",
@@ -17,13 +53,18 @@
     strasseFehlt: "Bitte gib deine Straße ein.",
     hausnummerFehlt: "Bitte gib deine Hausnummer ein.",
     strasseListe: "Bitte wähle deine Straße aus den Vorschlägen.",
-    fehler: "Die Preise unseres Partners sind gerade nicht erreichbar. Bitte versuch es gleich noch einmal.",
+    fehler: "Die Preise sind gerade nicht erreichbar. Bitte versuch es gleich noch einmal.",
     unplausibel: "Für diese Angaben konnten wir keinen verlässlichen Preis ermitteln. Bitte versuch es gleich noch einmal.",
   };
   const VERGLEICH = {
-    ersparnis: ["Du sparst", (j) => `ca. ${R.euro(j)} im Jahr gegenüber deinem heutigen Abschlag, Lesekopf-Miete schon abgezogen.`],
+    ersparnis: ["Du sparst", (j) => `${R.euro(j, 2)} im Jahr gegenüber deinem heutigen Abschlag, Lesekopf-Miete schon abgezogen.`],
     gleich: ["Etwa gleich", () => "wie dein heutiger Abschlag, mit Lesekopf-Miete."],
-    mehrkosten: ["Mehrkosten", (j) => `ca. ${R.euro(-j)} im Jahr mehr als dein heutiger Abschlag, mit Lesekopf-Miete.`],
+    mehrkosten: ["Mehrkosten", (j) => `${R.euro(-j, 2)} im Jahr mehr als dein heutiger Abschlag, mit Lesekopf-Miete.`],
+  };
+  const VERGLEICH_SIE = {
+    ersparnis: ["Sie sparen", (j) => `${R.euro(j, 2)} im Jahr gegenüber Ihrem heutigen Abschlag, Lesekopf-Miete schon abgezogen.`],
+    gleich: ["Etwa gleich", () => "wie Ihr heutiger Abschlag, mit Lesekopf-Miete."],
+    mehrkosten: ["Mehrkosten", (j) => `${R.euro(-j, 2)} im Jahr mehr als Ihr heutiger Abschlag, mit Lesekopf-Miete.`],
   };
 
   function starte(wurzel) {
@@ -31,7 +72,8 @@
     const form = wurzel.querySelector(".rgr-form");
     const feld = (name) => form.elements.namedItem(name);
     const teil = (name) => wurzel.querySelector(`[data-feld="${name}"]`);
-    const status = wurzel.querySelector(".rgr-status");
+    const status = wurzel.querySelector(".rgr-status-bezug");
+    const statusErzeugung = wurzel.querySelector(".rgr-status-erzeugung");
     const ergebnis = wurzel.querySelector(".rgr-ergebnis");
     const vergleichBox = wurzel.querySelector(".rgr-vergleich");
     const ortBox = wurzel.querySelector(".rgr-ort");
@@ -59,20 +101,46 @@
       // same-origin statt omit: Hinter einem Basic-Auth-Passwortschutz (Release-Seite) käme sonst 401.
       // Ohne REST-Nonce behandelt WordPress die Anfrage trotz Cookie als nicht angemeldet.
       credentials: "same-origin",
+      // Ohne Zeitlimit bliebe eine im Netz hängende Anfrage für immer „unterwegs“ und sperrte Weiter.
+      signal: zeitlimit(),
     });
-    const melde = (text) => { status.textContent = text || ""; };
+    const sie = wurzel.dataset.anrede === "sie";
+    const text = (schluessel) => (sie && MELDUNG_SIE[schluessel]) || MELDUNG[schluessel];
+    const vergleichTexte = sie ? VERGLEICH_SIE : VERGLEICH;
+    const leer = wurzel.querySelector(".rgr-leer");
+    const erzeugerBox = wurzel.querySelector(".rgr-ergebnis-erzeuger");
+    const teilBezug = wurzel.querySelector(".rgr-teil-bezug");
+    const teilErzeugung = wurzel.querySelector(".rgr-teil-erzeugung");
+    const anmelden = wurzel.querySelector(".rgr-anmelden");
+    const preisbildungBox = wurzel.querySelector(".rgr-preisbildung");
+    const geschaetztBox = wurzel.querySelector(".rgr-geschaetzt");
+    const zubehoer = wurzel.querySelector(".rgr-zubehoer");
+    const weiter = wurzel.querySelector(".rgr-weiter");
+    const wse = wurzel.querySelector(".rgr-wse");
+    const aktualisiereLeer = () => { leer.hidden = !ergebnis.hidden || !erzeugerBox.hidden || !zubehoer.hidden; };
+    const melde = (inhalt) => { status.textContent = inhalt || ""; };
     const laedt = (ja) => { ergebnis.classList.toggle("rgr-laedt", ja); ergebnis.setAttribute("aria-busy", String(ja)); };
-    const versteckeErgebnis = () => { ergebnis.hidden = true; preise = null; laedt(false); };
+    const versteckeErgebnis = () => { ergebnis.hidden = true; preise = null; laedt(false); aktualisiereLeer(); };
 
     // frisch: Die Zahlen kommen gerade vom Server. Sonst (Abschlag getippt) bleiben Abblendung und
     // Status, wie sie sind, denn das Ergebnis kann zu einer schon geänderten Adresse gehören.
     function zeige(frisch = false) {
+      if (frisch) stelleRegler();
+      const bildung = R.preisbildung(preise, feld("anteil").value, feld("community").value);
+      zeigePreisbildung(bildung);
+      // Oben der Betrag des Partners (belegt), die Schätzung mit Community-Anteil nur darunter.
       const r = R.berechne(preise, R.betragAusEingabe(feld("abschlag").value));
+      const geschaetzt = bildung ? R.berechne(preise, null, bildung) : null;
+      geschaetztBox.hidden = !geschaetzt || geschaetzt.status !== "ok";
+      if (!geschaetztBox.hidden) {
+        teil("anteil-kurz").textContent = `${bildung.anteil} %`;
+        teil("monat-community").textContent = R.euro(geschaetzt.monat, 2);
+      }
       if (r.status !== "ok") return versteckeErgebnis();
-      teil("monat").textContent = R.euro(r.monat);
+      teil("monat").textContent = R.euro(r.monat, 2);
       teil("jahr").textContent = R.euro(r.jahr, 2);
       teil("ort").textContent = preise.stadt ? ` · Netzgebiet ${preise.stadt}` : "";
-      teil("arbeitspreis").textContent = `${R.cent(preise.arbeitspreisCt)} pro kWh`;
+      teil("reststrom").textContent = `${R.cent(preise.arbeitspreisCt)}/kWh`;
       teil("gebuehr").textContent = `${R.cent(preise.gebuehrCt)} pro kWh`;
       teil("grundpreis").textContent = R.euro(preise.grundMonat, 2);
       teil("lesekopf").textContent = `${R.euro(R.LESEKOPF_MIETE_MONAT, 2)} im Monat Miete oder einmalig ${R.euro(R.LESEKOPF_KAUF)} Kauf`;
@@ -80,14 +148,38 @@
       vergleichBox.hidden = !v;
       if (v) {
         vergleichBox.dataset.art = v.art;
-        teil("vergleich-titel").textContent = VERGLEICH[v.art][0];
-        teil("vergleich-text").textContent = VERGLEICH[v.art][1](v.jahr);
+        teil("vergleich-titel").textContent = vergleichTexte[v.art][0];
+        teil("vergleich-text").textContent = vergleichTexte[v.art][1](v.jahr);
       }
       ergebnis.hidden = false;
+      aktualisiereLeer();
       if (frisch) {
         laedt(false);
         melde("");
       }
+    }
+
+    // Neue Partnerpreise: Spanne und Startwert des Community-Preises wie im Rechner des Partners.
+    // Den Anteil behält der Regler, er hängt nicht vom Netzgebiet ab.
+    function stelleRegler() {
+      const community = feld("community");
+      if (!preise || preise.netzCt === null) return;
+      community.min = String(preise.netzCt);
+      community.max = String(preise.arbeitspreisCt);
+      community.value = String(R.communityStart(preise.netzCt, preise.arbeitspreisCt));
+      teil("community-min").textContent = `${R.cent(preise.netzCt)}/kWh`;
+      teil("community-max").textContent = `${R.cent(preise.arbeitspreisCt)}/kWh`;
+    }
+
+    function zeigePreisbildung(bildung) {
+      preisbildungBox.hidden = !bildung;
+      if (!bildung) return;
+      teil("community").textContent = `${R.cent(bildung.communityCt)}/kWh`;
+      teil("community-teile").textContent = `${R.cent(bildung.energieCt)} Energie + ${R.cent(bildung.netzCt)} Netzkosten und Umlagen`;
+      teil("anteil").textContent = `${bildung.anteil} %`;
+      feld("anteil").setAttribute("aria-valuetext", `${bildung.anteil} %`);
+      feld("community").setAttribute("aria-valuetext", `${R.cent(bildung.communityCt)}/kWh`);
+      teil("mischpreis").textContent = `${R.cent(bildung.mischCt)}/kWh`;
     }
 
     function fuelleOrte(orte) {
@@ -192,27 +284,28 @@
     }
 
     async function rechne() {
+      if (teilBezug.hidden) return;
       const plz = feld("plz").value.trim();
       const kwh = R.kwhAusEingabe(feld("kwh").value);
       markierePersonen(kwh);
       const verbrauch = R.pruefeVerbrauch(kwh);
-      if (!/^\d{5}$/.test(plz)) return abbruch(plz ? MELDUNG.plz : "");
-      if (verbrauch !== "ok") return abbruch(MELDUNG[verbrauch]);
+      if (!/^\d{5}$/.test(plz)) return abbruch(plz ? text("plz") : "");
+      if (verbrauch !== "ok") return abbruch(text(verbrauch));
 
       const body = { plz, kwh };
       if (!ortBox.hidden) {
         const ort = feld("ort").value;
-        if (!ort) return abbruch(MELDUNG.ort);
+        if (!ort) return abbruch(text("ort"));
         body.ort = ort;
       }
       if (!adresse.hidden) {
         const strasse = feld("strasse").value.trim();
         const hausnummer = feld("hausnummer").value.trim();
-        if (!strasse && !hausnummer) return abbruch(MELDUNG.adresse);
-        if (!strasse) return abbruch(MELDUNG.strasseFehlt);
-        if (!hausnummer) return abbruch(MELDUNG.hausnummerFehlt);
+        if (!strasse && !hausnummer) return abbruch(text("adresse"));
+        if (!strasse) return abbruch(text("strasseFehlt"));
+        if (!hausnummer) return abbruch(text("hausnummerFehlt"));
         // Unbekannte Straßen beantwortet der Partner mit einem Fehler; also nur Vorschläge schicken.
-        if (strassen.length && !strassen.includes(strasse)) return abbruch(MELDUNG.strasseListe);
+        if (strassen.length && !strassen.includes(strasse)) return abbruch(text("strasseListe"));
         Object.assign(body, { strasse, hausnummer });
       }
       // Gleiche Anfrage wie die laufende oder die angezeigte: kein zweiter Aufruf beim Partner.
@@ -225,31 +318,31 @@
       }
       const nr = ++anfrageNr;
       laeuftFuer = schluessel;
-      melde(MELDUNG.laden);
+      melde(text("laden"));
       laedt(true);
       try {
         const { ok, daten } = await frage(body);
         if (nr !== anfrageNr) return;
-        if (!ok) { versteckeErgebnis(); return melde((daten && typeof daten.fehler === "string") ? daten.fehler : MELDUNG.fehler); }
+        if (!ok) { versteckeErgebnis(); return melde((daten && typeof daten.fehler === "string") ? daten.fehler : text("fehler")); }
         if (daten && daten.requires_city_selection === true) {
           fuelleOrte(Array.isArray(daten.orte) ? daten.orte : []);
           ortBox.hidden = false;
           adresse.hidden = true;
           versteckeErgebnis();
-          return melde(MELDUNG.ort);
+          return melde(text("ort"));
         }
         if (daten && daten.requires_district_selection === true) {
           stadt = typeof daten.city === "string" ? daten.city : "";
           adresse.hidden = false;
           versteckeErgebnis();
-          return melde(MELDUNG.adresse);
+          return melde(text("adresse"));
         }
         preise = R.pruefePreise(daten, kwh);
-        if (!preise) { versteckeErgebnis(); return melde(MELDUNG.unplausibel); }
+        if (!preise) { versteckeErgebnis(); return melde(text("unplausibel")); }
         gezeigtFuer = schluessel;
         zeige(true);
       } catch {
-        if (nr === anfrageNr) { versteckeErgebnis(); melde(MELDUNG.fehler); }
+        if (nr === anfrageNr) { versteckeErgebnis(); melde(text("fehler")); }
       } finally {
         if (nr === anfrageNr) laeuftFuer = "";
       }
@@ -302,9 +395,124 @@
       if (li) waehle(Number(li.dataset.index));
     });
 
-    form.addEventListener("submit", (e) => { e.preventDefault(); clearTimeout(warten); rechne(); });
+    // Erzeuger: Kosten kommen vom Plugin (Partnerwerte), der Erlös wird hier gerechnet.
+    // Angezeigt wird nur, was zu den Eingaben der letzten Antwort gehört (erzeugerFuer).
+    let kosten = null;
+    let erzeugerNr = 0;
+    let erzeugerWarten = null;
+    let erzeugerFuer = "";
+    let erzeugerLaeuft = "";   // Anfrage, die gerade unterwegs ist; gleiche nicht doppelt schicken
+    const zahl1 = (wert) => wert.toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const teilE = (name) => erzeugerBox.querySelector(`[data-feld="${name}"]`);
+    const meldeE = (inhalt) => { statusErzeugung.textContent = inhalt || ""; };
+    const blendeAb = (ja) => { erzeugerBox.classList.toggle("rgr-laedt", ja); erzeugerBox.setAttribute("aria-busy", String(ja)); };
+    const versteckeErzeuger = () => { erzeugerBox.hidden = true; blendeAb(false); aktualisiereLeer(); };
+    const wunsch = () => R.wunschpreisAusWert(feld("wunschpreis").value) ?? R.WUNSCHPREIS_VORBELEGUNG;
+    const meldeErzeuger = (schluessel) => { kosten = null; erzeugerFuer = ""; versteckeErzeuger(); meldeE(MELDUNG_ERZEUGER[schluessel]); };
+
+    function anlageAusFormular() {
+      return {
+        art: feld("art").value,
+        kwp: R.kwpAusEingabe(feld("kwp").value),
+        kwh: R.kwhAusEingabe(feld("ueberschuss").value),
+        einspeisung: form.querySelector("[name=einspeisung]:checked")?.value === "voll" ? "voll" : "teil",
+        foerderung: form.querySelector("[name=foerderung]:checked")?.value === "ja",
+      };
+    }
+
+    function zeigeErzeuger() {
+      const ct = wunsch();
+      wurzel.querySelector(".rgr-wunschpreis-wert").textContent = `${zahl1(ct)} ct/kWh`;
+      if (!kosten) return;
+      // Geänderte Eingaben ohne neue Antwort: altes Ergebnis nur abgeblendet stehen lassen.
+      if (JSON.stringify(anlageAusFormular()) !== erzeugerFuer) return blendeAb(true);
+      const anlage = JSON.parse(erzeugerFuer);
+      const e = R.berechneErzeuger(anlage.kwh, ct, kosten, anlage);
+      if (!e) return versteckeErzeuger();
+      teilE("erloes-rechnung").textContent = `${anlage.kwh.toLocaleString("de-DE")} kWh × ${zahl1(ct)} ct`;
+      teilE("erloes").textContent = R.euro(e.erloes);
+      teilE("grund-rechnung").textContent = `12 × ${R.euro(kosten.grundMonat, 2)}`;
+      teilE("grund").textContent = `− ${R.euro(e.grundJahr)}`;
+      teilE("vermarktung-rechnung").textContent = `${R.cent(kosten.vermarktungCt)}/kWh`;
+      teilE("vermarktung").textContent = `− ${R.euro(e.vermarktung)}`;
+      teilE("bleibt").textContent = `rund ${R.euro(e.bleibt)}`;
+      erzeugerBox.querySelector(".rgr-anschluss").hidden = e.anschluss === null;
+      teilE("anschluss").textContent = e.anschluss === null ? "" : `höchstens ${R.euro(e.anschluss)}`;
+      erzeugerBox.querySelector(".rgr-hinweis-foerderung").hidden = !anlage.foerderung;
+      teilE("einrichtung").textContent = R.euro(e.einrichtung);
+      erzeugerBox.querySelector(".rgr-fernwirk").hidden = !R.brauchtFernwirktechnik(anlage.kwp);
+      blendeAb(false);
+      erzeugerBox.hidden = false;
+      aktualisiereLeer();
+    }
+
+    async function rechneErzeuger() {
+      if (teilErzeugung.hidden) return;
+      const body = anlageAusFormular();
+      const pruefung = R.pruefeAnlage(body.kwp, body.kwh);
+      if (pruefung !== "ok") { erzeugerNr++; erzeugerLaeuft = ""; return meldeErzeuger(pruefung); }
+      if (R.ANLAGENARTEN[body.art]?.individuell !== false) { erzeugerNr++; erzeugerLaeuft = ""; return meldeErzeuger("art-individuell"); }
+      const schluessel = JSON.stringify(body);
+      if (schluessel === erzeugerLaeuft) return;
+      // Zurück auf die Eingaben der letzten Antwort: eine noch laufende andere Anfrage verfällt.
+      if (kosten && schluessel === erzeugerFuer) { erzeugerNr++; erzeugerLaeuft = ""; meldeE(""); return zeigeErzeuger(); }
+      const nr = ++erzeugerNr;
+      erzeugerLaeuft = schluessel;
+      blendeAb(true);
+      meldeE(MELDUNG_ERZEUGER.laden);
+      try {
+        const antwort = await sende("erzeuger", body);
+        const daten = await antwort.json().catch(() => null);
+        if (nr !== erzeugerNr || teilErzeugung.hidden) return;
+        const geprueft = antwort.ok ? R.pruefeErzeugerKosten(daten) : null;
+        if (!geprueft) return meldeErzeuger("fehler");
+        if (geprueft.individuell) return meldeErzeuger("individuell");
+        kosten = geprueft;
+        erzeugerFuer = schluessel;
+        meldeE("");
+        zeigeErzeuger();
+      } catch {
+        if (nr === erzeugerNr) meldeErzeuger("fehler");
+      } finally {
+        if (nr === erzeugerNr) erzeugerLaeuft = "";
+      }
+    }
+
+    function setzeRolle(rolle) {
+      teilBezug.hidden = rolle !== "beziehen";
+      teilErzeugung.hidden = rolle !== "einspeisen";
+      zubehoer.hidden = rolle !== "zubehoer";
+      weiter.hidden = rolle === "zubehoer";
+      aktualisiereLeer();
+      anmelden.textContent = ANMELDE_TEXT[rolle];
+      zeigeWseHinweis();
+      if (teilBezug.hidden) { verwerfeLaufende(); versteckeErgebnis(); }
+      if (teilErzeugung.hidden) { erzeugerNr++; erzeugerLaeuft = ""; versteckeErzeuger(); meldeE(""); }
+      melde("");
+    }
+
+    const ERZEUGER_FELDER = ["art", "kwp", "ueberschuss", "einspeisung", "foerderung"];
+    form.addEventListener("change", (e) => {
+      if (e.target.name === "rolle") setzeRolle(R.rolleAusWert(e.target.value));
+    });
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      clearTimeout(warten);
+      clearTimeout(erzeugerWarten);
+      rechne();
+      rechneErzeuger();
+    });
     form.addEventListener("input", (e) => {
       const name = e.target.name;
+      if (name === "rolle") return;
+      if (name === "wunschpreis") return zeigeErzeuger();
+      if (name === "anteil" || name === "community") return preise && zeige();
+      if (ERZEUGER_FELDER.includes(name)) {
+        if (kosten && !erzeugerBox.hidden) blendeAb(true);
+        clearTimeout(erzeugerWarten);
+        erzeugerWarten = setTimeout(rechneErzeuger, VERZOEGERUNG_MS);
+        return;
+      }
       if (name === "abschlag") return preise && zeige();
       if (name === "kwh") markierePersonen(R.kwhAusEingabe(feld("kwh").value));
       if (name === "plz") setzeZusatzZurueck(false);
@@ -329,6 +537,42 @@
     form.addEventListener("focusout", (e) => {
       if (e.target.name === "strasse" || e.target.name === "hausnummer") { clearTimeout(warten); rechne(); }
     });
+    // Anmelden: Strecke des Partners erst beim Klick laden (vorher geht nichts an weshareenergy.de).
+    // Ohne JavaScript bleibt der Knopf ein normaler Link auf die Seite des Partners.
+    let wseFrame = null;
+    function zeigeWseHinweis() {
+      const erzeuger = form.querySelector("[name=rolle]:checked")?.value === "einspeisen";
+      wse.querySelector(".rgr-wse-bezug").hidden = erzeuger;
+      wse.querySelector(".rgr-wse-erzeuger").hidden = !erzeuger;
+    }
+    anmelden.addEventListener("click", (e) => {
+      const adresse = anmelden.dataset.wse || "";
+      if (!adresse.startsWith(`${WSE_HERKUNFT}/`)) return;
+      e.preventDefault();
+      if (!wseFrame) {
+        wseFrame = document.createElement("iframe");
+        wseFrame.src = adresse;
+        wseFrame.title = "Anmeldung bei WeShareEnergy";
+        // Ohne allow-top-navigation: Die fremde Seite darf unsere Seite nicht umleiten.
+        // Der Checkout des Partners öffnet in einem neuen Tab, dafür die Popup-Rechte.
+        wseFrame.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox");
+        wseFrame.referrerPolicy = "strict-origin-when-cross-origin";
+        wseFrame.style.height = `${WSE_START_HOEHE}px`;
+        wse.appendChild(wseFrame);
+      }
+      zeigeWseHinweis();
+      wse.hidden = false;
+      wse.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    window.addEventListener("message", (e) => {
+      if (!wseFrame || e.origin !== WSE_HERKUNFT || e.source !== wseFrame.contentWindow) return;
+      const daten = e.data;
+      if (!daten || typeof daten !== "object" || daten.type !== "IFRAME_HEIGHT") return;
+      const hoehe = Number(daten.height);
+      if (typeof daten.height !== "number" || !Number.isFinite(hoehe)) return;
+      wseFrame.style.height = `${Math.min(Math.max(Math.round(hoehe), WSE_HOEHE[0]), WSE_HOEHE[1])}px`;
+    });
+
     form.addEventListener("click", (e) => {
       const knopf = e.target.closest(".rgr-person");
       if (!knopf) return;

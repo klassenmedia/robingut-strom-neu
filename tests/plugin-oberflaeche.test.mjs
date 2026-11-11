@@ -330,4 +330,597 @@ await pruefe("getippter Verbrauch markiert die Personen-Knöpfe sofort", async (
   assert.deepEqual(gedrueckt, ["false", "true", "false"]);
 });
 
+console.log("Klickstrecke mit Rollen");
+
+const ERZEUGER = { individuell: false, grund_monat: 95.38, vermarktung_ct: 0.2, einrichtung: 390 };
+const PREIS_VIERSEN = { ...PREIS, city: "Viersen" };
+
+async function pruefeRolle(name, atts, fn, { altBrowser = false, breite = 0 } = {}) {
+  const html = execFileSync("php", ["-r", `
+    require '${PLUGIN}/tests/harness/wp-attrappe.php';
+    require '${PLUGIN}/robingut-rechner.php';
+    echo rgr_shortcode(json_decode('${JSON.stringify(atts)}', true));
+  `], { encoding: "utf8" });
+  const rollenSeite = seite.replace(shortcode, html);
+  const browser = await chromium.launch({ channel: process.env.RGR_BROWSER_CHANNEL || "chrome" });
+  const page = await browser.newPage(breite ? { viewport: { width: breite, height: 800 } } : {});
+  // Safari/iOS bis 15 kennt AbortSignal.timeout nicht.
+  if (altBrowser) await page.addInitScript(() => { AbortSignal.timeout = undefined; });
+  const z = { preis: 0, erzeuger: 0, erzeugerBodies: [] };
+  await page.route(`${BASIS}/**`, async (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname === "/") return route.fulfill({ contentType: "text/html", body: rollenSeite });
+    // Fremde Herkunft im selben iframe: schickt eine Höhe, die nicht übernommen werden darf
+    if (url.pathname === "/fremd") return route.fulfill({ contentType: "text/html", body: '<body><script>parent.postMessage({ type: "IFRAME_HEIGHT", height: 444 }, "*");</script></body>' });
+    if (url.pathname.startsWith("/assets/")) {
+      const datei = url.pathname.slice("/assets/".length);
+      return route.fulfill({ contentType: datei.endsWith(".css") ? "text/css" : "text/javascript", body: readFileSync(join(PLUGIN, "assets", datei)) });
+    }
+    const body = JSON.parse(route.request().postData() || "{}");
+    if (url.pathname.endsWith("/erzeuger")) {
+      z.erzeuger++;
+      z.erzeugerBodies.push(body);
+      const verzoegerung = z.verzoegerung ? z.verzoegerung(body) : 0;
+      if (verzoegerung) await new Promise((r) => setTimeout(r, verzoegerung));
+      const { status = 200, daten = ERZEUGER } = z.antwort ? z.antwort(body) : {};
+      return route.fulfill({ status, contentType: "application/json", body: JSON.stringify(daten) }).catch(() => {});
+    }
+    if (url.pathname.endsWith("/preis")) {
+      z.preis++;
+      if (z.preisAntwort) return route.fulfill({ contentType: "application/json", body: JSON.stringify(z.preisAntwort) });
+      const antwort = { ...PREIS_VIERSEN, annual_consumption_kwh: body.kwh, annual_total: (PREIS.energy_price + PREIS.transaction_fee) / 100 * body.kwh + PREIS.base_price };
+      return route.fulfill({ contentType: "application/json", body: JSON.stringify(antwort) });
+    }
+    return route.fulfill({ status: 404, body: "" });
+  });
+  // Zählt jede Anfrage an den Partner, die vor dem Klick auf „Anmelden“ entstünde.
+  z.wseFrueh = 0;
+  await page.route("https://weshareenergy.de/**", (route) => { z.wseFrueh++; return route.abort(); });
+  await page.goto(`${BASIS}/`);
+  try {
+    await fn(page, z);
+    bestanden += 1;
+    console.log(`  ok  ${name}`);
+  } catch (fehler) {
+    console.error(`  FEHLER  ${name}\n        ${fehler.message.split("\n")[0]}`);
+    process.exitCode = 1;
+  } finally {
+    await browser.close();
+  }
+}
+
+const zuSehen = (page, sel) => page.$eval(sel, (el) => !el.hidden && el.offsetParent !== null);
+const feldText = (page, name) => page.textContent(`.rgr-ergebnis-erzeuger [data-feld="${name}"]`);
+const anlageEingeben = async (page, kwp = "100", kwh = "66.500") => {
+  await page.fill("[name=kwp]", kwp);
+  await page.fill("[name=ueberschuss]", kwh);
+  await page.click(".rgr-schritt-2 button[type=submit]");
+};
+
+await pruefeRolle("Startseite: Strom beziehen vorgewählt, Erzeugerfelder versteckt", {}, async (page) => {
+  assert.equal(await page.$eval("[name=rolle][value=beziehen]", (r) => r.checked), true);
+  assert.equal(await zuSehen(page, ".rgr-teil-bezug"), true);
+  assert.equal(await zuSehen(page, ".rgr-teil-erzeugung"), false);
+  assert.equal((await page.textContent(".rgr-anmelden")).trim(), "Jetzt Community beitreten");
+});
+
+await pruefeRolle("Landwirte: Strom einspeisen vorgewählt, Ergebnis wie im Rechenbeispiel", { rolle: "einspeisen", anrede: "sie" }, async (page, z) => {
+  assert.equal(await page.$eval("[name=rolle][value=einspeisen]", (r) => r.checked), true);
+  assert.equal(await zuSehen(page, ".rgr-teil-bezug"), false);
+  await anlageEingeben(page);
+  await page.waitForSelector(".rgr-ergebnis-erzeuger:not([hidden])");
+  assert.equal(await feldText(page, "erloes"), "6.650 €");
+  assert.equal(await feldText(page, "grund"), "− 1.145 €");
+  assert.equal(await feldText(page, "vermarktung"), "− 133 €");
+  assert.equal(await feldText(page, "bleibt"), "rund 5.372 €");
+  assert.equal(await feldText(page, "anschluss"), "höchstens 2.993 €");
+  assert.deepEqual(z.erzeugerBodies[0], { art: "pv", kwp: 100, kwh: 66500, einspeisung: "teil", foerderung: false });
+  assert.equal((await page.textContent(".rgr-anmelden")).trim(), "Als Erzeuger anmelden");
+  assert.match(await page.textContent(".rgr-schritt-1"), /Was möchten Sie\?/);
+  assert.match(await page.textContent(".rgr-ergebnis-erzeuger"), /Fernwirktechnik/);
+});
+
+await pruefeRolle("Wunschpreis rechnet ohne neue Anfrage beim Partner", { rolle: "einspeisen" }, async (page, z) => {
+  await anlageEingeben(page);
+  await page.waitForSelector(".rgr-ergebnis-erzeuger:not([hidden])");
+  await page.$eval("[name=wunschpreis]", (r) => { r.value = "8"; r.dispatchEvent(new Event("input", { bubbles: true })); });
+  await page.waitForTimeout(600);
+  assert.equal(await feldText(page, "erloes"), "5.320 €");
+  assert.match(await page.textContent(".rgr-wunschpreis-wert"), /8,0 ct/);
+  assert.equal(z.erzeuger, 1);
+});
+
+await pruefeRolle("Zubehör: Lesekopf-Liste wie im alten Rechner, keine Anfrage beim Partner", { rolle: "zubehoer", anrede: "sie" }, async (page, z) => {
+  assert.equal(await page.$$eval("[name=rolle][value=beides]", (l) => l.length), 0);
+  assert.equal(await page.$eval("[name=rolle][value=zubehoer]", (r) => r.checked), true);
+  assert.equal(await zuSehen(page, ".rgr-teil-bezug"), false);
+  assert.equal(await zuSehen(page, ".rgr-teil-erzeugung"), false);
+  assert.equal(await zuSehen(page, ".rgr-zubehoer"), true);
+  const liste = await page.textContent(".rgr-zubehoer");
+  for (const teil of ["IOmeter-Lesekopf", "WSE-Lesekopf", "89,00 €", "3,90 € im Monat"]) assert.match(liste, new RegExp(teil));
+  assert.equal(await zuSehen(page, ".rgr-schritt-2 button[type=submit]"), false);
+  assert.equal(z.preis + z.erzeuger, 0);
+  assert.equal((await page.textContent(".rgr-anmelden")).trim(), "Jetzt Community beitreten");
+});
+
+await pruefeRolle("Rollenwechsel blendet die passenden Felder ein", {}, async (page) => {
+  await page.click("label:has([name=rolle][value=einspeisen])");
+  assert.equal(await zuSehen(page, ".rgr-teil-bezug"), false);
+  assert.equal(await zuSehen(page, ".rgr-teil-erzeugung"), true);
+  assert.equal(await zuSehen(page, ".rgr-ergebnis"), false);
+  assert.equal((await page.textContent(".rgr-anmelden")).trim(), "Als Erzeuger anmelden");
+});
+
+await pruefeRolle("über 1.000 kWp: individuelles Angebot ohne Anfrage", { rolle: "einspeisen" }, async (page, z) => {
+  await anlageEingeben(page, "1.200", "900.000");
+  await page.waitForFunction(() => /individuelles Angebot/.test(document.querySelector(".rgr-status-erzeugung").textContent));
+  assert.equal(z.erzeuger, 0);
+  assert.equal(await zuSehen(page, ".rgr-ergebnis-erzeuger"), false);
+});
+
+await pruefeRolle("ab 100.000 kWh Verbrauch: individuelles Angebot ohne Mailadresse", {}, async (page, z) => {
+  await page.fill("[name=plz]", "41747");
+  await page.fill("[name=kwh]", "100.000");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await page.waitForFunction(() => /individuelles Angebot/.test(document.querySelector(".rgr-status").textContent));
+  assert.doesNotMatch(await page.textContent(".rgr"), /@/);
+  assert.equal(z.preis, 0);
+});
+
+await pruefeRolle("unbekannte Rolle im Shortcode fällt auf Strom beziehen zurück", { rolle: "x\" onfocus=\"alert(1)" }, async (page) => {
+  assert.equal(await page.$eval("[name=rolle][value=beziehen]", (r) => r.checked), true);
+  assert.equal(await page.$$eval("[onfocus]", (l) => l.length), 0);
+});
+
+// Antwort des Partners für 40225 / 2.500 kWh (09.11.2026); WSE zeigt dazu 29,53 ct und bei 50 % 34,64 ct.
+const DUESSELDORF = { requires_district_selection: false, energy_price: 39.75909, minimum_energy_price_gross: 20.00509,
+  transaction_fee: 1.19, base_price: 168.04, monthly_base_price: 14, annual_total: 1191.76725,
+  annual_consumption_kwh: 2500, city: "Düsseldorf" };
+const bezugRechnen = async (page) => {
+  await page.fill("[name=plz]", "40225");
+  await page.fill("[name=kwh]", "2.500");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await page.waitForSelector(".rgr-ergebnis:not([hidden]):not(.rgr-laedt)");
+};
+const bezugFeld = (page, name) => page.textContent(`.rgr-ergebnis [data-feld="${name}"]`);
+const regler = (page, name, wert) => page.$eval(`[name=${name}]`, (r, w) => { r.value = w; r.dispatchEvent(new Event("input", { bubbles: true })); }, wert);
+
+console.log("Preisbildung und Anmeldung");
+
+await pruefeRolle("Preiszusammensetzung wie im WSE-Rechner: 50 % Community-Anteil", {}, async (page, z) => {
+  z.preisAntwort = DUESSELDORF;
+  await bezugRechnen(page);
+  assert.equal(await zuSehen(page, ".rgr-preisbildung"), true);
+  assert.equal(await bezugFeld(page, "reststrom"), "39,76 ct/kWh");
+  assert.equal(await bezugFeld(page, "community"), "29,53 ct/kWh");
+  assert.equal(await bezugFeld(page, "community-teile"), "9,52 ct Energie + 20,01 ct Netzkosten und Umlagen");
+  assert.equal(await bezugFeld(page, "anteil"), "50 %");
+  assert.equal(await bezugFeld(page, "mischpreis"), "34,64 ct/kWh");
+  // Oben steht der Betrag des Partners, die Schätzung mit Community-Anteil darunter
+  assert.equal(await bezugFeld(page, "monat"), "99,31 €");
+  assert.equal(await bezugFeld(page, "monat-community"), "88,65 €");
+  assert.match(await page.textContent(".rgr-geschaetzt"), /50 % Community-Anteil/);
+  assert.equal(await bezugFeld(page, "grundpreis"), "14,00 €");
+  assert.equal(await page.getAttribute("[name=anteil]", "aria-valuetext"), "50 %");
+  assert.equal(await page.getAttribute("[name=community]", "aria-valuetext"), "29,53 ct/kWh");
+  assert.match(await page.textContent(".rgr-mischpreis"), /Plattformgebühr/);
+});
+
+await pruefeRolle("Regler rechnen ohne neue Anfrage; 0 % ergibt den Partnerbetrag", {}, async (page, z) => {
+  z.preisAntwort = DUESSELDORF;
+  await bezugRechnen(page);
+  await regler(page, "anteil", "0");
+  assert.equal(await bezugFeld(page, "monat-community"), "99,31 €");
+  await regler(page, "anteil", "100");
+  assert.equal(await bezugFeld(page, "monat-community"), "77,99 €");
+  assert.equal(await bezugFeld(page, "monat"), "99,31 €");
+  assert.equal(await bezugFeld(page, "mischpreis"), "29,53 ct/kWh");
+  await regler(page, "community", "25");
+  assert.equal(await bezugFeld(page, "community"), "25,00 ct/kWh");
+  assert.equal(z.preis, 1);
+});
+
+await pruefeRolle("manipulierte Reglerwerte werden auf die Spanne begrenzt", {}, async (page, z) => {
+  z.preisAntwort = DUESSELDORF;
+  await bezugRechnen(page);
+  await page.$eval("[name=anteil]", (r) => { r.max = "1000"; });
+  await regler(page, "anteil", "1000");
+  assert.equal(await bezugFeld(page, "anteil"), "100 %");
+  await page.$eval("[name=community]", (r) => { r.min = "0"; });
+  await regler(page, "community", "1");
+  assert.equal(await bezugFeld(page, "community"), "20,01 ct/kWh");
+});
+
+await pruefeRolle("ohne Netzkosten vom Partner: Ergebnis ohne Regler, Betrag wie beim Partner", {}, async (page, z) => {
+  const { minimum_energy_price_gross: _netz, ...ohne } = DUESSELDORF;
+  z.preisAntwort = ohne;
+  await bezugRechnen(page);
+  assert.equal(await zuSehen(page, ".rgr-preisbildung"), false);
+  assert.equal(await zuSehen(page, ".rgr-geschaetzt"), false);
+  assert.equal(await bezugFeld(page, "monat"), "99,31 €");
+});
+
+await pruefeRolle("neues Netzgebiet setzt Spanne und Startwert des Community-Preises neu", {}, async (page, z) => {
+  z.preisAntwort = DUESSELDORF;
+  await bezugRechnen(page);
+  await regler(page, "community", "25");
+  z.preisAntwort = { ...DUESSELDORF, energy_price: 41, minimum_energy_price_gross: 22, annual_total: (41 + 1.19) / 100 * 2500 + 168.04, city: "Anderswo" };
+  await page.fill("[name=plz]", "50667");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await page.waitForFunction(() => /Anderswo/.test(document.querySelector(".rgr-ergebnis [data-feld=ort]").textContent));
+  assert.equal(await bezugFeld(page, "community"), "31,52 ct/kWh");
+  assert.equal(await bezugFeld(page, "community-max"), "41,00 ct/kWh");
+  assert.equal(await bezugFeld(page, "community-min"), "22,00 ct/kWh");
+});
+
+await pruefeRolle("Wechsel zu Zubehör und zurück: Weiter und Leertext passen sich an", {}, async (page) => {
+  await page.click("label:has([name=rolle][value=zubehoer])");
+  assert.equal(await zuSehen(page, ".rgr-weiter"), false);
+  assert.equal(await zuSehen(page, ".rgr-leer"), false);
+  assert.equal(await zuSehen(page, ".rgr-zubehoer"), true);
+  await page.click("label:has([name=rolle][value=beziehen])");
+  assert.equal(await zuSehen(page, ".rgr-weiter"), true);
+  assert.equal(await zuSehen(page, ".rgr-leer"), true);
+  assert.equal(await zuSehen(page, ".rgr-zubehoer"), false);
+});
+
+const WSE_URL = "https://weshareenergy.de/stromcommunitys/neukunde/robin-gut-strom?iframe=1&buttonColor=0e670e&borderRadius=9999px&fontFamily=NotoSans";
+
+async function wseAttrappe(page, z) {
+  z.wse = 0;
+  await page.route("https://weshareenergy.de/**", (route) => {
+    z.wse++;
+    return route.fulfill({ contentType: "text/html", body: `<!doctype html><body>WSE<script>
+      window.addEventListener("message", (e) => {
+        if (e.data && e.data.sende) parent.postMessage(e.data.sende, "*");
+        if (e.data && e.data.navigiere) location.href = e.data.navigiere;
+      });
+      parent.postMessage({ type: "IFRAME_HEIGHT", height: 1234 }, "*");</script></body>` });
+  });
+}
+
+await pruefeRolle("Anmeldeknopf lädt die WSE-Strecke erst beim Klick und passt die Höhe an", {}, async (page, z) => {
+  assert.equal(z.wseFrueh, 0);
+  assert.match(await page.textContent(".rgr-anmelden-hinweis"), /WeShareEnergy/);
+  await wseAttrappe(page, z);
+  // Ohne JavaScript bleibt es ein normaler Link auf die Seite des Partners
+  assert.equal(await page.getAttribute(".rgr-anmelden", "href"), "https://weshareenergy.de/stromcommunitys/neukunde/robin-gut-strom");
+  assert.equal(await page.$$eval(".rgr iframe", (l) => l.length), 0);
+  await page.click(".rgr-anmelden");
+  await page.waitForSelector(".rgr-wse iframe");
+  assert.equal(await page.getAttribute(".rgr-wse iframe", "src"), WSE_URL);
+  assert.match(await page.getAttribute(".rgr-wse iframe", "title"), /WeShareEnergy/);
+  const sandbox = await page.getAttribute(".rgr-wse iframe", "sandbox");
+  assert.match(sandbox, /allow-popups-to-escape-sandbox/);
+  assert.doesNotMatch(sandbox, /allow-top-navigation/);
+  assert.equal(await page.getAttribute(".rgr-wse iframe", "referrerpolicy"), "strict-origin-when-cross-origin");
+  assert.equal(await page.getAttribute(".rgr-wse a.rgr-wse-tab", "href"), "https://weshareenergy.de/stromcommunitys/neukunde/robin-gut-strom");
+  assert.equal(await page.getAttribute(".rgr-wse a.rgr-wse-tab", "target"), "_blank");
+  await page.waitForFunction(() => document.querySelector(".rgr-wse iframe").style.height === "1234px");
+  assert.equal(z.wse, 1);
+  assert.match(await page.textContent(".rgr-wse"), /noch einmal/);
+  assert.equal(page.url(), "http://rgr.test/");
+});
+
+await pruefeRolle("Erzeuger: Hinweis auf den Reiter „Für Einspeiser“ statt „Verbrauch noch einmal“", { rolle: "einspeisen" }, async (page, z) => {
+  await wseAttrappe(page, z);
+  await page.click(".rgr-anmelden");
+  await page.waitForSelector(".rgr-wse iframe");
+  assert.match(await page.textContent(".rgr-wse"), /Für Einspeiser/);
+  assert.doesNotMatch(await page.textContent(".rgr-wse"), /Verbrauch noch einmal/);
+});
+
+await pruefeRolle("Höhe nicht von einem anderen iframe derselben Herkunft (Absender geprüft)", {}, async (page, z) => {
+  await wseAttrappe(page, z);
+  await page.click(".rgr-anmelden");
+  await page.waitForFunction(() => document.querySelector(".rgr-wse iframe").style.height === "1234px");
+  await page.evaluate(() => {
+    const fremd = document.createElement("iframe");
+    fremd.id = "fremd";
+    fremd.src = "https://weshareenergy.de/andere-seite";
+    document.body.appendChild(fremd);
+  });
+  await page.waitForFunction(() => document.getElementById("fremd").contentDocument === null);
+  await page.$eval("#fremd", (f) => f.contentWindow.postMessage({ sende: { type: "IFRAME_HEIGHT", height: 600 } }, "*"));
+  await page.waitForTimeout(300);
+  assert.equal(await page.$eval(".rgr-wse iframe", (f) => f.style.height), "1234px");
+});
+
+await pruefeRolle("Höhe nicht, wenn unser iframe auf eine andere Herkunft wechselt (Herkunft geprüft)", {}, async (page, z) => {
+  await wseAttrappe(page, z);
+  await page.click(".rgr-anmelden");
+  await page.waitForFunction(() => document.querySelector(".rgr-wse iframe").style.height === "1234px");
+  await page.$eval(".rgr-wse iframe", (f) => f.contentWindow.postMessage({ navigiere: "http://rgr.test/fremd" }, "*"));
+  await page.waitForFunction(() => { try { return document.querySelector(".rgr-wse iframe").contentDocument?.URL.endsWith("/fremd"); } catch { return false; } });
+  await page.waitForTimeout(300);
+  assert.equal(await page.$eval(".rgr-wse iframe", (f) => f.style.height), "1234px");
+});
+
+await pruefeRolle("Höhe nur aus dem WSE-iframe, Typ und Zahl geprüft, begrenzt", {}, async (page, z) => {
+  await wseAttrappe(page, z);
+  await page.click(".rgr-anmelden");
+  await page.waitForFunction(() => document.querySelector(".rgr-wse iframe").style.height === "1234px");
+  const hoehe = () => page.$eval(".rgr-wse iframe", (f) => f.style.height);
+  await page.evaluate(() => window.postMessage({ type: "IFRAME_HEIGHT", height: 200 }, "*"));
+  await page.waitForTimeout(150);
+  assert.equal(await hoehe(), "1234px");
+  const sende = async (daten) => {
+    await page.$eval(".rgr-wse iframe", (f, d) => f.contentWindow.postMessage({ sende: d }, "*"), daten);
+    await page.waitForTimeout(150);
+  };
+  await sende({ type: "ANDERS", height: 300 });
+  assert.equal(await hoehe(), "1234px");
+  await sende({ type: "IFRAME_HEIGHT", height: "abc" });
+  assert.equal(await hoehe(), "1234px");
+  await sende({ type: "IFRAME_HEIGHT", height: "600" });
+  assert.equal(await hoehe(), "1234px");
+  await sende({ type: "IFRAME_HEIGHT", height: 99999 });
+  assert.equal(await hoehe(), "5000px");
+  await sende({ type: "IFRAME_HEIGHT", height: 10 });
+  assert.equal(await hoehe(), "300px");
+});
+
+const ergebnisDa = (page) => page.waitForSelector(".rgr-ergebnis-erzeuger:not([hidden]):not(.rgr-laedt)");
+const statusErzeugung = (page) => page.textContent(".rgr-status-erzeugung");
+
+await pruefeRolle("Anlagenart, Einspeisung und Förderung gehen mit in die Anfrage", { rolle: "einspeisen" }, async (page, z) => {
+  await page.selectOption("[name=art]", "wind");
+  await page.check("[name=einspeisung][value=voll]");
+  await page.check("[name=foerderung][value=ja]");
+  await anlageEingeben(page, "80", "300.000");
+  await ergebnisDa(page);
+  assert.deepEqual(z.erzeugerBodies.at(-1), { art: "wind", kwp: 80, kwh: 300000, einspeisung: "voll", foerderung: true });
+});
+
+await pruefeRolle("Wasserkraft und Biogas: individuelles Angebot ohne Anfrage", { rolle: "einspeisen" }, async (page, z) => {
+  for (const art of ["wasser", "biogas"]) {
+    await page.selectOption("[name=art]", art);
+    await anlageEingeben(page, "80", "300.000");
+    await page.waitForFunction(() => /individuelles Angebot/.test(document.querySelector(".rgr-status-erzeugung").textContent));
+    assert.equal(await page.$eval(".rgr-ergebnis-erzeuger", (e) => e.hidden), true);
+  }
+  assert.equal(z.erzeuger, 0);
+});
+
+await pruefeRolle("keine Vergleichszeile bei Wind, Förderung oder über 100 kWp", { rolle: "einspeisen" }, async (page) => {
+  const zeile = () => page.$eval('[data-feld="anschluss"]', (dd) => !dd.closest("div").hidden);
+  await anlageEingeben(page);
+  await ergebnisDa(page);
+  assert.equal(await zeile(), true);
+  await page.selectOption("[name=art]", "wind");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await ergebnisDa(page);
+  assert.equal(await zeile(), false);
+  await page.selectOption("[name=art]", "pv");
+  await page.check("[name=foerderung][value=ja]");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await ergebnisDa(page);
+  assert.equal(await zeile(), false);
+  assert.equal(await zuSehen(page, ".rgr-hinweis-foerderung"), true);
+  await page.check("[name=foerderung][value=nein]");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await ergebnisDa(page);
+  assert.equal(await zuSehen(page, ".rgr-hinweis-foerderung"), false);
+  await page.fill("[name=kwp]", "150");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await ergebnisDa(page);
+  assert.equal(await zeile(), false);
+});
+
+await pruefeRolle("neue Leistung fragt neu und zeigt die neuen Kosten", { rolle: "einspeisen" }, async (page, z) => {
+  z.antwort = (b) => ({ daten: b.kwp === 10 ? { individuell: false, grund_monat: 31, vermarktung_ct: 0.2, einrichtung: 390 } : ERZEUGER });
+  await anlageEingeben(page);
+  await ergebnisDa(page);
+  await anlageEingeben(page, "10", "5.000");
+  await page.waitForFunction(() => /12 × 31,00 €/.test(document.querySelector('[data-feld="grund-rechnung"]').textContent));
+  assert.equal(await feldText(page, "grund"), "− 372 €");
+  assert.equal(z.erzeuger, 2);
+});
+
+await pruefeRolle("veraltete Antwort überschreibt das neue Ergebnis nicht", { rolle: "einspeisen" }, async (page, z) => {
+  z.verzoegerung = (b) => (b.kwp === 100 ? 1500 : 0);
+  z.antwort = (b) => ({ daten: b.kwp === 10 ? { individuell: false, grund_monat: 31, vermarktung_ct: 0.2, einrichtung: 390 } : ERZEUGER });
+  await anlageEingeben(page);
+  await anlageEingeben(page, "10", "5.000");
+  await ergebnisDa(page);
+  await page.waitForTimeout(1800);
+  assert.equal(await feldText(page, "grund"), "− 372 €");
+});
+
+await pruefeRolle("während einer laufenden Anfrage ist das alte Ergebnis abgeblendet", { rolle: "einspeisen" }, async (page, z) => {
+  await anlageEingeben(page);
+  await ergebnisDa(page);
+  z.verzoegerung = () => 1500;
+  await page.fill("[name=kwp]", "10");
+  await page.fill("[name=ueberschuss]", "5.000");
+  await page.$eval("[name=wunschpreis]", (r) => { r.value = "8"; r.dispatchEvent(new Event("input", { bubbles: true })); });
+  // Sichtbar abgeblendet, nicht nur per Klasse: die Deckkraft muss sinken (nach der Überblendung).
+  await page.waitForTimeout(300);
+  assert.equal(await page.$eval(".rgr-ergebnis-erzeuger", (e) => e.hidden || Number(getComputedStyle(e).opacity) < 1), true);
+});
+
+await pruefeRolle("A → B (langsam) → zurück auf A: Regler rechnet weiter mit den richtigen Kosten", { rolle: "einspeisen" }, async (page, z) => {
+  z.antwort = (b) => ({ daten: b.kwp === 10 ? { individuell: false, grund_monat: 31, vermarktung_ct: 0.2, einrichtung: 390 } : ERZEUGER });
+  await anlageEingeben(page);
+  await ergebnisDa(page);
+  z.verzoegerung = (b) => (b.kwp === 10 ? 1200 : 0);
+  await page.fill("[name=kwp]", "10");
+  await page.waitForTimeout(700);           // Anfrage B läuft
+  await page.fill("[name=kwp]", "100");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await page.waitForTimeout(1500);          // B kommt zu spät an
+  await page.$eval("[name=wunschpreis]", (r) => { r.value = "7"; r.dispatchEvent(new Event("input", { bubbles: true })); });
+  await page.waitForTimeout(300);
+  assert.equal(await feldText(page, "bleibt"), "rund 3.377 €");
+  assert.equal(await page.$eval(".rgr-ergebnis-erzeuger", (e) => Number(getComputedStyle(e).opacity)), 1);
+});
+
+await pruefeRolle("Mehrfachklick auf Weiter schickt nur eine Anfrage", { rolle: "einspeisen" }, async (page, z) => {
+  z.verzoegerung = () => 600;
+  await page.fill("[name=kwp]", "100");
+  await page.fill("[name=ueberschuss]", "66.500");
+  for (let i = 0; i < 3; i++) await page.click(".rgr-schritt-2 button[type=submit]");
+  await ergebnisDa(page);
+  assert.equal(z.erzeuger, 1);
+});
+
+await pruefeRolle("Rollenwechsel hin und zurück während der Anfrage: kein Ergebnis ohne neues Weiter", { rolle: "einspeisen" }, async (page, z) => {
+  z.verzoegerung = () => 1000;
+  await page.fill("[name=kwp]", "100");
+  await page.fill("[name=ueberschuss]", "66.500");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await page.click("label:has([name=rolle][value=beziehen])");
+  await page.click("label:has([name=rolle][value=einspeisen])");
+  await page.waitForTimeout(1400);
+  assert.equal(await page.$eval(".rgr-ergebnis-erzeuger", (e) => e.hidden), true);
+  assert.equal(await statusErzeugung(page), "");
+});
+
+await pruefeRolle("Partnerfehler: Meldung, kein altes Ergebnis", { rolle: "einspeisen" }, async (page, z) => {
+  await anlageEingeben(page);
+  await ergebnisDa(page);
+  z.antwort = () => ({ status: 502, daten: { fehler: "x" } });
+  await anlageEingeben(page, "50", "40.000");
+  await page.waitForFunction(() => /nicht erreichbar/.test(document.querySelector(".rgr-status-erzeugung").textContent));
+  assert.equal(await page.$eval(".rgr-ergebnis-erzeuger", (e) => e.hidden), true);
+});
+
+await pruefeRolle("individuelles Angebot vom Server wird als Hinweis gezeigt", { rolle: "einspeisen" }, async (page, z) => {
+  z.antwort = () => ({ daten: { individuell: true } });
+  await anlageEingeben(page, "900", "800.000");
+  await page.waitForFunction(() => /individuelles Angebot/.test(document.querySelector(".rgr-status-erzeugung").textContent));
+  assert.equal(await page.$eval(".rgr-ergebnis-erzeuger", (e) => e.hidden), true);
+});
+
+await pruefeRolle("Rollenwechsel während der Anfrage zeigt kein Erzeuger-Ergebnis", { rolle: "einspeisen" }, async (page, z) => {
+  z.verzoegerung = () => 1200;
+  await page.fill("[name=kwp]", "100");
+  await page.fill("[name=ueberschuss]", "66.500");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await page.click("label:has([name=rolle][value=beziehen])");
+  await page.waitForTimeout(1600);
+  assert.equal(await page.$eval(".rgr-ergebnis-erzeuger", (e) => e.hidden), true);
+});
+
+await pruefeRolle("nach einem Partnerfehler fragt Weiter mit gleichen Eingaben neu", { rolle: "einspeisen" }, async (page, z) => {
+  let erst = true;
+  z.antwort = () => { if (erst) { erst = false; return { status: 502, daten: { fehler: "x" } }; } return {}; };
+  await anlageEingeben(page);
+  await page.waitForFunction(() => /nicht erreichbar/.test(document.querySelector(".rgr-status-erzeugung").textContent));
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await ergebnisDa(page);
+  assert.equal(z.erzeuger, 2);
+});
+
+await pruefeRolle("A → B (langsam) → A → B: B wird neu gefragt und gezeigt", { rolle: "einspeisen" }, async (page, z) => {
+  z.antwort = (b) => ({ daten: b.kwp === 10 ? { individuell: false, grund_monat: 31, vermarktung_ct: 0.2, einrichtung: 390 } : ERZEUGER });
+  await anlageEingeben(page);
+  await ergebnisDa(page);
+  z.verzoegerung = (b) => (b.kwp === 10 && z.erzeuger <= 2 ? 1200 : 0);
+  await page.fill("[name=kwp]", "10");
+  await page.waitForTimeout(700);
+  await page.fill("[name=kwp]", "100");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await page.fill("[name=kwp]", "10");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await page.waitForFunction(() => /12 × 31,00 €/.test(document.querySelector('[data-feld="grund-rechnung"]').textContent), null, { timeout: 5000 });
+  await ergebnisDa(page);
+});
+
+await pruefeRolle("Rollenwechsel weg und zurück, dann Weiter mit gleichen Eingaben: Ergebnis kommt", { rolle: "einspeisen" }, async (page, z) => {
+  z.verzoegerung = () => 800;
+  await page.fill("[name=kwp]", "100");
+  await page.fill("[name=ueberschuss]", "66.500");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await page.click("label:has([name=rolle][value=beziehen])");
+  await page.click("label:has([name=rolle][value=einspeisen])");
+  await page.click(".rgr-schritt-2 button[type=submit]");
+  await ergebnisDa(page);
+  assert.equal(await feldText(page, "bleibt"), "rund 5.372 €");
+});
+
+await pruefeRolle("Browser ohne AbortSignal.timeout (iOS 15): Erlös kommt trotzdem", { rolle: "einspeisen" }, async (page, z) => {
+  await anlageEingeben(page);
+  await ergebnisDa(page);
+  assert.equal(await feldText(page, "bleibt"), "rund 5.372 €");
+}, { altBrowser: true });
+
+for (const [was, weg, zurueck] of [
+  ["kWp kurz ungültig", (p) => p.fill("[name=kwp]", "0"), (p) => p.fill("[name=kwp]", "100")],
+  ["Art kurz Wasserkraft", (p) => p.selectOption("[name=art]", "wasser"), (p) => p.selectOption("[name=art]", "pv")],
+]) {
+  await pruefeRolle(`${was} während der Anfrage, dann gleiche Eingaben: Ergebnis kommt`, { rolle: "einspeisen" }, async (page, z) => {
+    z.verzoegerung = () => 800;
+    await page.fill("[name=kwp]", "100");
+    await page.fill("[name=ueberschuss]", "66.500");
+    await page.click(".rgr-schritt-2 button[type=submit]");
+    await weg(page);
+    await page.click(".rgr-schritt-2 button[type=submit]");
+    await zurueck(page);
+    await page.click(".rgr-schritt-2 button[type=submit]");
+    await ergebnisDa(page);
+    assert.equal(await feldText(page, "bleibt"), "rund 5.372 €");
+  });
+}
+
+await pruefeRolle("320 px: Personen-Knöpfe in einer Reihe, Text nicht abgeschnitten", {}, async (page) => {
+  const knoepfe = await page.$$eval(".rgr-person", (alle) => alle.map((k) => ({ oben: Math.round(k.getBoundingClientRect().top), passt: k.scrollWidth <= k.clientWidth })));
+  assert.equal(new Set(knoepfe.map((k) => k.oben)).size, 1);
+  assert.ok(knoepfe.every((k) => k.passt), JSON.stringify(knoepfe));
+}, { breite: 320 });
+
+await pruefe("Monatsbetrag genau auf Euro und Cent, ohne „ca.“", async (page) => {
+  await mitErgebnis(page);
+  assert.equal(await page.textContent('.rgr-ergebnis [data-feld="monat"]'), "101,83 €");
+  assert.doesNotMatch(await page.textContent(".rgr-betrag"), /ca\./);
+});
+
+await pruefe("Ersparnis gegenüber dem Abschlag genau auf Euro und Cent", async (page) => {
+  await mitErgebnis(page);
+  await page.evaluate(() => { document.querySelector(".rgr-heute").open = true; });
+  await page.fill("[name=abschlag]", "110");
+  await page.waitForFunction(() => /51,21 €/.test(document.querySelector('[data-feld="vergleich-text"]').textContent));
+  assert.doesNotMatch(await page.textContent('[data-feld="vergleich-text"]'), /ca\./);
+});
+
+await pruefeRolle("Sie-Seite: Vergleich mit dem Abschlag siezt", { anrede: "sie" }, async (page) => {
+  await page.fill("[name=plz]", "41747");
+  await page.waitForSelector(".rgr-ergebnis:not([hidden])");
+  await page.evaluate(() => { document.querySelector(".rgr-heute").open = true; });
+  await page.fill("[name=abschlag]", "110");
+  await page.waitForFunction(() => /51,21 €/.test(document.querySelector('[data-feld="vergleich-text"]').textContent));
+  const titel = await page.textContent('[data-feld="vergleich-titel"]');
+  const satz = await page.textContent('[data-feld="vergleich-text"]');
+  assert.equal(titel, "Sie sparen");
+  assert.match(satz, /Ihrem heutigen Abschlag/);
+  assert.doesNotMatch(titel + satz, /\b(du|dein\w*)\b/i);
+});
+
+await pruefe("Lesekopf steht direkt am Monatsbetrag", async (page) => {
+  await mitErgebnis(page);
+  assert.match(await page.textContent(".rgr-betrag"), /zzgl\. Lesekopf/);
+});
+
+await pruefe("Mehrkosten ohne Minuszeichen, auf Euro und Cent", async (page) => {
+  await mitErgebnis(page);
+  await page.evaluate(() => { document.querySelector(".rgr-heute").open = true; });
+  await page.fill("[name=abschlag]", "100");
+  await page.waitForFunction(() => /68,79 €/.test(document.querySelector('[data-feld="vergleich-text"]').textContent));
+  assert.equal(await page.textContent('[data-feld="vergleich-titel"]'), "Mehrkosten");
+  assert.doesNotMatch(await page.textContent('[data-feld="vergleich-text"]'), /[-−]\d|ca\./);
+});
+
+for (const [abschlag, titel, betrag] of [["100", "Mehrkosten", /68,79 €/], ["105,73", "Etwa gleich", /Ihr heutiger Abschlag/]]) {
+  await pruefeRolle(`Sie-Seite: ${titel} siezt`, { anrede: "sie" }, async (page) => {
+    await page.fill("[name=plz]", "41747");
+    await page.waitForSelector(".rgr-ergebnis:not([hidden])");
+    await page.evaluate(() => { document.querySelector(".rgr-heute").open = true; });
+    await page.fill("[name=abschlag]", abschlag);
+    await page.waitForFunction((t) => document.querySelector('[data-feld="vergleich-titel"]').textContent === t, titel);
+    const satz = await page.textContent('[data-feld="vergleich-text"]');
+    assert.match(satz, betrag);
+    assert.doesNotMatch(satz, /\b(du|dein\w*)\b|ca\.|[-−]\d/i);
+  });
+}
+
 console.log(`\n${bestanden} Prüfungen bestanden`);

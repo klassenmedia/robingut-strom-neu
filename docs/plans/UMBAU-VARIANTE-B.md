@@ -398,3 +398,13 @@ steht die README. Andreas hat am 09.11. Variante B (Karten-Layout) zum Umsetzen 
   zweizeilig, gleich hoch); aufgeklapptes Hamburger-Menü dunkel #353535 mit weißer Schrift (vorher weiß auf
   weiß), aktuelle Seite lime, Fokusring lime; Zitat-Band: Dieters Bild mittig zum Zitat (Grid, nur bei rundem
   Bild + genau zwei Absätzen). Drei Kurz-Reviews FREIGABE, Nachträge eingearbeitet.
+- 11.11.2026 Landwirte (Dieter/Timo per Sprachnachricht über Andreas): Rechenbeispiel „100 kWp … rund 2.380 € mehr“
+  entfernt, stattdessen Flyer-Kasten Beispiel 1/2 (+7.000 €/+9.000 €) plus Fußnote wortgleich vom Flyer
+  (`wordpress/landwirte-flyer.html`, Test `tests/landwirte-flyer.test.mjs` 7/7). Kasten voll breit unter der
+  Überschrift, „Was kostet Sie das?“ wortgleich darunter (Spalten aufgelöst), CSS mit Container-Abfrage.
+  Review BLOCKIERT (nur Einbauort in halber Spalte, war schon voll breit vorbereitet) → Nachlauf FREIGABE.
+  **Hinweise an Auftraggeber (nicht geändert, Wortlaut ist Vorgabe):** „Ihr Plus“ ist vor Kosten (bei 100 kWp
+  ca. 1.140 € Grundpreis/Jahr + 0,20 ct/kWh); Flyer rechnet 5 ct/12 ct, das Band „Was Ihr Strom … wert sein
+  kann“ weiter oben 4,5 ct/7–11 ct; „50 % autark“ trotz Strom über das öffentliche Netz; „Marktwert“ vs.
+  „entgangene Einspeisevergütung“. Satz „Ihre eigenen Zahlen rechnet der Rechner unten“ ging mit dem alten
+  Beispiel weg.
